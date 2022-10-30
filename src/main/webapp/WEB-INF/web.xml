@@ -1,0 +1,11 @@
+<web-app>
+    <display-name>OwlreadyDoneWebapp</display-name>
+    <context-param>
+        <param-name>upload-dir</param-name> <!-- Where should files be stored? (Path relative to root.) -->
+        <param-value>uploads</param-value>
+    </context-param>
+    <context-param>
+        <param-name>stored-upload-limit</param-name> <!-- How many files can, at most, be in the upload directory? -->
+        <param-value>20</param-value>
+    </context-param>
+</web-app>

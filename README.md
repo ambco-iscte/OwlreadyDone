@@ -18,7 +18,7 @@ This project was developed as part of our **Software Design and Architecture** c
 The aim of **owl**ready.done is to provide a simple, intuitive way for end users to interact with
 web ontologies, namely those compliant with the Web Ontology Language framework, OWL.
 
-Our simple and intuitive interface prioritises user experience and the facilitation of interaction with ontologies,
+Our simple and intuitive interface prioritises user experience and the facilitation of simple interaction with ontologies,
 even for users who lack explicit knowledge about the structure of OWL knowledge bases and the SQWRL query language.
 
 \
@@ -35,6 +35,7 @@ rules defined in your ontology.)
 This project is written in Java, and compiled using OpenJDK version 18.
 
 The project uses the following libraries:
+- OWLAPI (https://github.com/owlcs/owlapi)
 - SWRLAPI  (https://github.com/protegeproject/swrlapi)
 - OWL2VOWL (https://github.com/VisualDataWeb/OWL2VOWL)
 

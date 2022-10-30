@@ -1,0 +1,93 @@
+.owl-bg {
+    background-color: #0c112d;
+}
+
+.oxanium {
+    font-family: 'Oxanium', cursive;
+}
+
+.oxanium-white {
+    color: white;
+    font-family: 'Oxanium', cursive;
+}
+
+.solid-purple-bg {
+    background-color: #673AB7;
+}
+
+.owl-btn {
+    background-color: #673AB7;
+    border-color: #321C57;
+    font-family: 'Oxanium', cursive;
+}
+
+.owl-btn:hover {
+    background-color: #321C57;
+    border-color: #321C57;
+}
+
+.top-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.no-bottom-margin {
+    margin-bottom: 0;
+}
+
+.no-top-margin {
+    margin-top: 0;
+}
+
+.no-right-margin {
+    margin-right: 0;
+}
+
+.margin-top-3 {
+    margin-top: 3rem !important;
+}
+
+.index-bottom-flex {
+    display: flex;
+    align-items: flex-end;
+}
+
+.absolute-center {
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+.text-divider {
+    width: 25%;
+    text-align: center;
+    background-color: #673AB7;
+    line-height: 0.1em;
+    margin: 10px auto 20px;
+    border-radius: 10px
+}
+
+.text-divider b {
+    background-color: #0c112d;
+    padding:0 10px;
+}
+
+.margin-left-1rem {
+    margin-left: 1rem;
+}
+
+.margin-top-1rem {
+    margin-top: 1rem;
+}
+
+.onto-signature {
+    max-width: 40rem;
+    text-align: center;
+    border: 3px solid #673AB7;
+    border-radius: 5px;
+    max-height: 20rem;
+    overflow: auto;
+    background-color: #090c21;
+    margin: auto auto 1rem;
+}
