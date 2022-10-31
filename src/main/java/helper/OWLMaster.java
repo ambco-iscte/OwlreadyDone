@@ -4,6 +4,11 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.swrlapi.factory.SWRLAPIFactory;
+import org.swrlapi.parser.SWRLParseException;
+import org.swrlapi.sqwrl.SQWRLQueryEngine;
+import org.swrlapi.sqwrl.SQWRLResult;
+import org.swrlapi.sqwrl.exceptions.SQWRLException;
 
 import java.io.File;
 import java.util.HashSet;
@@ -52,5 +57,35 @@ public class OWLMaster {
         if (ontology != null)
             return getOntologySignature(ontology);
         return new HashSet<>();
+    }
+
+    /**
+     * Queries an ontology using the given SQWRL query string.
+     * @param ontology The ontology to query.
+     * @param query The SQWRL query to execute.
+     * @return The result (SQWRLResult instance) of the query execution.
+     */
+    public static SQWRLResult query(OWLOntology ontology, String query) {
+        if (ontology == null || query == null)
+            return null;
+
+        try {
+            SQWRLQueryEngine queryEngine = SWRLAPIFactory.createSQWRLQueryEngine(ontology);
+            return queryEngine.runSQWRLQuery("q1", query);
+        } catch (SWRLParseException | SQWRLException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Queries an ontology from a given knowledge base file using the given SQWRL query string.
+     * @param kbPath The path to the desired ontology's knowledge base file.
+     * @param query The SQWRL query to execute.
+     * @return The result (SQWRLResult instance) of the query execution.
+     */
+    public static SQWRLResult query(String kbPath, String query) {
+        return query(getOntologyFromFile(kbPath), query);
     }
 }

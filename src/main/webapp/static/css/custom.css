@@ -83,7 +83,7 @@
 
 .onto-signature {
     max-width: 40rem;
-    text-align: center;
+    text-align: left;
     border: 3px solid #673AB7;
     border-radius: 5px;
     max-height: 20rem;
