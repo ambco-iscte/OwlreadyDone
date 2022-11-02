@@ -27,7 +27,7 @@
                     <% session.removeAttribute("errorMessage"); }%>
                 </div>
                 <br><br>
-
+                <!-- Content Start --->
                 <%if (session.getAttribute("uploadedFilePath") != null && session.getAttribute("uploadFileOriginalName") != null) {%>
                     <h1 class="oxanium-white">You provided this knowledge base:
                         <%= session.getAttribute("uploadFileOriginalName").toString()%></h1><br>
@@ -50,7 +50,7 @@
                     <h3 class="oxanium-white">Seems like we're missing something here...</h3>
                     <h3 class="oxanium-white">Are you sure you accessed this page the way you're supposed to?</h3>
                 <%}%>
-
+                <!-- Content End --->
             </section>
 
             <footer class="footer">

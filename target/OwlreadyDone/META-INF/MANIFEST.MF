@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
 Created-By: IntelliJ IDEA
-Built-By: Afonso
-Build-Jdk: Oracle OpenJDK version 18
+Built-By: Samuel
+Build-Jdk: Oracle OpenJDK version 19.0.1
 
