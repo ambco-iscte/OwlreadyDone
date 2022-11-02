@@ -21,7 +21,7 @@
             <section>
                 <div class="col-lg-6 mx-auto">
                     <% if (session.getAttribute("errorMessage") != null) {%>
-                    <p><b><%= session.getAttribute("errorMessage") %></b></p>
+                    <p class="oxanium-white"><b><%= session.getAttribute("errorMessage") %></b></p>
                     <% session.removeAttribute("errorMessage"); }%>
                 </div>
                 <br><br>

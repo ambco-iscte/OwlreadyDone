@@ -1,6 +1,5 @@
 <%@ page import="org.semanticweb.owlapi.model.OWLEntity" %>
 <%@ page import="helper.OWLMaster" %>
-<%@ page import="helper.DirectoryHelper" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <html lang="en">
@@ -24,12 +23,12 @@
     <section>
         <div class="col-lg-6 mx-auto">
             <% if (session.getAttribute("errorMessage") != null) {%>
-            <p><b><%= session.getAttribute("errorMessage") %></b></p>
+            <p class="oxanium-white"><b><%= session.getAttribute("errorMessage") %></b></p>
             <% session.removeAttribute("errorMessage"); }%>
         </div>
         <br><br>
 
-        <%if (session.getAttribute("uploadedFilePath") != null) {%>
+        <%if (session.getAttribute("uploadedFilePath") != null && session.getAttribute("uploadFileOriginalName") != null) {%>
             <h1 class="oxanium-white">You provided this knowledge base:
                 <%= session.getAttribute("uploadFileOriginalName").toString()%></h1><br>
             <h3 class="oxanium-white">Here's an overview of what's in this knowledge base:</h3>

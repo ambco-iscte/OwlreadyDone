@@ -1,1 +1,4 @@
+helper\DirectoryHelper.class
+helper\OWLMaster.class
 SubmitFileServlet.class
+QueryDatabaseServlet.class

@@ -58,8 +58,10 @@ public class DirectoryHelper {
     private static void purgeUploadDirectory(ServletContext context) {
         File oldest = getOldestStoredFile(context);
         if (oldest != null) {
-            if (oldest.delete())
-                System.out.println("Successfuly deleted oldest file in upload directory.");
+            if (oldest.delete()) {
+                OWLMaster.purgeOntologyMap(oldest.getAbsolutePath());
+                System.out.println("Successfuly deleted oldest file in upload directory and cleared ontology map.");
+            }
         }
     }
 

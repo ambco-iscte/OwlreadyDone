@@ -1,9 +1,7 @@
 package helper;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.*;
 import org.swrlapi.factory.SWRLAPIFactory;
 import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLQueryEngine;
@@ -11,7 +9,9 @@ import org.swrlapi.sqwrl.SQWRLResult;
 import org.swrlapi.sqwrl.exceptions.SQWRLException;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -19,7 +19,15 @@ import java.util.Set;
  */
 public class OWLMaster {
 
-    private static final OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
+    private static final Map<String, OWLOntology> ontologies = new HashMap<>();
+
+    /**
+     * Deletes a mapping from the stored ontology map.
+     * @param kbPath The knowledge base location of the ontology to be removed.
+     */
+    public static void purgeOntologyMap(String kbPath) {
+        ontologies.remove(kbPath);
+    }
 
     /**
      * Loads an OWL knowledge base from the file at the given path.
@@ -27,12 +35,18 @@ public class OWLMaster {
      * @return The ontology present in the specified knowledge base.
      */
     public static OWLOntology getOntologyFromFile(String kbPath) {
+        if (ontologies.containsKey(kbPath)) // Optimisation - only load each file once, store the ontology.
+            return ontologies.get(kbPath);
+
         File file = new File(kbPath);
         try {
-            if (file.exists())
-                return ontologyManager.loadOntologyFromOntologyDocument(file);
+            if (file.exists()) {
+                OWLOntology onto = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(file);
+                ontologies.putIfAbsent(kbPath, onto);
+                return onto;
+            }
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            System.err.println("Couldn't load ontology from file: " + ex.getMessage());
         }
         return null;
     }

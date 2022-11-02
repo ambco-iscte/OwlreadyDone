@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>edu.stanford.swrl</groupId>
+    <artifactId>swrlapi-parent</artifactId>
+    <version>2.0.10</version>
+  </parent>
 
   <groupId>org.iscte.ads</groupId>
   <artifactId>OwlreadyDone</artifactId>
@@ -17,55 +23,48 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
+    <swrlapi.version>2.0.11</swrlapi.version>
+    <swrlapi.drools.version>2.0.11</swrlapi.drools.version>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>jitpack.io</id>
-      <url>https://jitpack.io</url>
-    </repository>
-  </repositories>
 
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.apache.maven.doxia</groupId>
       <artifactId>doxia-site-renderer</artifactId>
       <version>1.11.1</version>
     </dependency>
-    <dependency>
-      <groupId>com.github.VisualDataWeb</groupId>
-      <artifactId>OWL2VOWL</artifactId>
-      <version>0.3.7</version>
-    </dependency>
+
     <dependency>
       <groupId>edu.stanford.swrl</groupId>
       <artifactId>swrlapi</artifactId>
-      <version>2.0.11</version>
+      <version>${swrlapi.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.stanford.swrl</groupId>
+      <artifactId>swrlapi-drools-engine</artifactId>
+      <version>${swrlapi.drools.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-osgidistribution</artifactId>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>2.0.3</version>
     </dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>2.0.3</version>
-    </dependency>
-
-    <!-- DO NOT REMOVE THIS UNDER ANY CIRCUMSTANCES! -->
-    <!-- https://mvnrepository.com/artifact/net.sourceforge.owlapi/owlapi-distribution -->
-    <dependency>
-      <groupId>net.sourceforge.owlapi</groupId>
-      <artifactId>owlapi-distribution</artifactId>
-      <version>5.1.20</version>
     </dependency>
 
 
