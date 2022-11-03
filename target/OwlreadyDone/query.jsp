@@ -69,7 +69,7 @@
     <!-- Content End --->
     </section>
 
-    <%@ include file="footer.jsp" %>
+    <%@ include file="templates/footer.jsp" %>
 
 </section>
 </body>
