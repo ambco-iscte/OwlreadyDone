@@ -34,9 +34,29 @@
                             <p class="oxanium text-muted">Seems like the result is empty.</p>
                     <%  }
                         while (result.next()) {%>
-                            <p class="oxanium-white">x: <%= result.getLiteral("x").toString() %></p> <!--FIXME: literal types-->
-                    <%  }
-                    } catch (SQWRLException ex) { ex.printStackTrace(); } %>
+                            <!-- Para aceitar qualquer tipo de query e apresentar resultados -->
+                            <% if (result.hasLiteralValue("x")) {%>
+                                <p class="oxanium-white">Literal x: <%= result.getLiteral("x") %>
+                            <% } %></p>
+                            <% if (result.hasNamedIndividualValue("x")) {%>
+                                <p class="oxanium-white">Named Individual x: <%= result.getNamedIndividual("x") %></p>
+                            <% } %></p>
+                            <% if (result.hasClassValue("x")) {%>
+                                <p class="oxanium-white">Class x: <%= result.getClass("x") %></p>
+                            <% } %></p>
+                        <%  } %>
+                        <br><br>
+                        <form class="no-right-margin margin-top-1rem row g-3" action="resultToVowlServlet" enctype="multipart/form-data" method="post">
+                            <section class="container mb-3">
+                                <h3><label for="visualizeButton" class="form-url-label oxanium-white">Visualize these results in VOWL</label></h3>
+                                <section class="d-inline-flex">
+                                    <div class="margin-left-1rem">
+                                        <button name="visualizeButton" id="visualizeButton" class="owl-btn btn btn-primary" type="submit">Visualize</button>
+                                    </div>
+                                </section>
+                            </section>
+                        </form>
+                    <% } catch (SQWRLException ex) { ex.printStackTrace(); } %>
                 <%} else {%>
                     <h3 class="oxanium-white">Seems like we're missing something here...</h3>
                     <h3 class="oxanium-white">Are you sure you accessed this page the way you're supposed to?</h3>
