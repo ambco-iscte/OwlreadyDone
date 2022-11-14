@@ -105,6 +105,26 @@ public class OWLMaster {
 
     public static OWLOntology resultToOntology(SQWRLResult result, OWLOntology originalOntology) throws OWLOntologyCreationException {
         //TODO
+
+        try {
+            if (result.isEmpty()) {
+
+            }
+
+            while (result.next()){
+                if (result.hasLiteralValue("x"))
+                    result.getLiteral("x");
+
+                if (result.hasNamedIndividualValue("x"))
+                    result.getNamedIndividual("x");
+
+                if (result.hasClassValue("x"))
+                    result.getClass("x");
+            }
+        }
+        catch(SQWRLException ex) { ex.printStackTrace(); }
+
+
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = manager.getOWLDataFactory();
 
