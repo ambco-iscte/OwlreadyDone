@@ -1,7 +1,10 @@
 package helper;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.util.DefaultPrefixManager;
+import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 import org.swrlapi.factory.SWRLAPIFactory;
 import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLQueryEngine;
@@ -9,10 +12,7 @@ import org.swrlapi.sqwrl.SQWRLResult;
 import org.swrlapi.sqwrl.exceptions.SQWRLException;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Contains helper methods for interacting with OWL knowledge bases.
@@ -101,5 +101,58 @@ public class OWLMaster {
      */
     public static SQWRLResult query(String kbPath, String query) {
         return query(getOntologyFromFile(kbPath), query);
+    }
+
+    public static OWLOntology resultToOntology(SQWRLResult result, OWLOntology originalOntology) throws OWLOntologyCreationException {
+        //TODO
+        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+        OWLDataFactory factory = manager.getOWLDataFactory();
+
+        OWLOntology ontology = manager.createOntology();
+        DefaultPrefixManager pm = new DefaultPrefixManager();
+
+        //for each relevant class
+        String className = "";
+        OWLClass xClass = factory.getOWLClass(className, pm);
+        manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xClass));
+
+        //for each individual
+        String name = "";
+        OWLNamedIndividual xIndividual = factory.getOWLNamedIndividual(name, pm);
+        manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xIndividual));
+
+
+        //for relevant subclass axions
+        String xAxiomIdentifier = "";
+        OWLAnnotationProperty annotationProperty = factory.getOWLAnnotationProperty(OWLRDFVocabulary.RDFS_COMMENT.getIRI());
+        OWLAnnotationValue value = factory.getOWLLiteral(xAxiomIdentifier);
+        OWLAnnotation annotation = factory.getOWLAnnotation(annotationProperty, value);
+        //being that 1st is subclass and 2nd is superclass
+        OWLSubClassOfAxiom subClassOfAxiom = factory.getOWLSubClassOfAxiom(xClass, xClass, Collections.singleton(annotation));
+        manager.addAxiom(ontology, subClassOfAxiom);
+
+
+        //associate individuals
+        manager.addAxiom(ontology, factory.getOWLClassAssertionAxiom(xClass, xIndividual));
+
+        //for each object property
+        String propertyName = "";
+        OWLObjectProperty xProperty = factory.getOWLObjectProperty(propertyName, pm);
+        manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xProperty));
+        //property, individual with property, to what the property relates.
+        manager.addAxiom(ontology, factory.getOWLObjectPropertyAssertionAxiom(xProperty, xIndividual, xIndividual));
+
+
+        //save to a file
+        //como especificar o destino?
+        try {
+            FunctionalSyntaxDocumentFormat ontologyFormat = new FunctionalSyntaxDocumentFormat();
+            ontologyFormat.copyPrefixesFrom(pm);
+            manager.saveOntology(ontology, ontologyFormat, IRI.create(new File("target/OwlreadyDone/example.owl").toURI()));
+        } catch (OWLOntologyStorageException e) {
+            throw new RuntimeException(e);
+        }
+
+        return ontology;
     }
 }
