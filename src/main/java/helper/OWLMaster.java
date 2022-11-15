@@ -10,6 +10,7 @@ import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLQueryEngine;
 import org.swrlapi.sqwrl.SQWRLResult;
 import org.swrlapi.sqwrl.exceptions.SQWRLException;
+import org.swrlapi.sqwrl.values.SQWRLNamedIndividualResultValue;
 
 import java.io.File;
 import java.util.*;
@@ -105,21 +106,23 @@ public class OWLMaster {
 
     public static OWLOntology resultToOntology(SQWRLResult result, OWLOntology originalOntology) throws OWLOntologyCreationException {
         //TODO
-
+        String document_iri = "http://www.semanticweb.org/owlreadyDone/ontologies/2022/10/result_template.owl";
         try {
             if (result.isEmpty()) {
-
+                return null;
             }
 
             while (result.next()){
-                if (result.hasLiteralValue("x"))
-                    result.getLiteral("x");
-
                 if (result.hasNamedIndividualValue("x"))
                     result.getNamedIndividual("x");
 
+                /*
+                if (result.hasLiteralValue("x"))
+                    result.getLiteral("x");
+
                 if (result.hasClassValue("x"))
                     result.getClass("x");
+                */
             }
         }
         catch(SQWRLException ex) { ex.printStackTrace(); }
@@ -128,8 +131,10 @@ public class OWLMaster {
         OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
         OWLDataFactory factory = manager.getOWLDataFactory();
 
-        OWLOntology ontology = manager.createOntology();
+        OWLOntology ontology = manager.createOntology(IRI.create(document_iri));
         DefaultPrefixManager pm = new DefaultPrefixManager();
+        pm.setDefaultPrefix(document_iri + "#");
+        pm.setPrefix("var:", "urn:swrl#");
 
         //for each relevant class
         String className = "";
