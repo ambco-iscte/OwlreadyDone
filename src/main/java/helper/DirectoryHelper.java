@@ -22,10 +22,17 @@ public class DirectoryHelper {
      * @return The number of files in the context's upload directory, if applicable; 0 otherwise.
      */
     public static int getUploadedFileCount(ServletContext context) {
+        File[] files = getUploadedFiles(context);
+        if (files != null)
+            return files.length;
+        return 0;
+    }
+
+    public static File[] getUploadedFiles(ServletContext context) {
         File dir = getUploadDirectory(context);
         if (dir.exists() && dir.isDirectory())
-            return Objects.requireNonNull(dir.listFiles()).length;
-        return 0;
+            return Objects.requireNonNull(dir.listFiles());
+        return null;
     }
 
     /**

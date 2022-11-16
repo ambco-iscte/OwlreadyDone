@@ -22,6 +22,7 @@ public class SubmitFileServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Part filePart = req.getPart("formFile");
         String url = req.getParameter("formUrl");
+        String recentFile = req.getParameter("formRecentFile");
 
         String fileName = null;
         String filePath = null;
