@@ -1,4 +1,5 @@
 import helper.OWLMaster;
+import helper.OWLOntologyCreator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,7 +13,7 @@ import org.swrlapi.sqwrl.SQWRLResult;
 import java.io.IOException;
 
 import static helper.OWLMaster.getOntologyFromFile;
-import static helper.OWLMaster.resultToOntology;
+import static helper.OWLOntologyCreator.resultToOntology;
 
 @WebServlet("/resultToVowlServlet")
 @MultipartConfig
@@ -29,16 +30,15 @@ public class ResultToVowlServlet extends HttpServlet {
         String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
         OWLOntology originalOntology = getOntologyFromFile(ontoKbPath);
         try {
-            OWLOntology resultOntology = resultToOntology(result, originalOntology);
-
+            resultToOntology(result, originalOntology, true);
             //Fazer o upload da ontologia para algum lado para depois enviar para o vowl
 
 
             //Código temporário
             //idealmente neste redirect é usada uma nova janela.
             //para tal parece que a melhor opção é tentar colocar a parte do redirect no html em si, n sei como
-            resp.sendRedirect("https://service.tib.eu/webvowl/#iri=http://paul.staroch.name/thesis/SmartHomeWeather.owl");
-            return;
+            //resp.sendRedirect("https://service.tib.eu/webvowl/#iri=http://paul.staroch.name/thesis/SmartHomeWeather.owl");
+
         } catch (OWLOntologyCreationException e) {
             req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
             resp.sendRedirect(req.getContextPath() + "/result.jsp");

@@ -38,13 +38,14 @@
                             <% if (result.hasLiteralValue("x")) {%>
                                 <p class="oxanium-white">Literal x: <%= result.getLiteral("x") %>
                             <% } %></p>
-                            <% if (result.hasNamedIndividualValue("x")) {%>
-                                <p class="oxanium-white">Named Individual x: <%= result.getNamedIndividual("x") %></p>
+                            <% if (result.hasNamedIndividualValue("x")) { %>
+                                <p class="oxanium-white">Named Individual x: <%= result.getNamedIndividual("x") %>
+
                             <% } %></p>
                             <% if (result.hasClassValue("x")) {%>
-                                <p class="oxanium-white">Class x: <%= result.getClass("x") %></p>
+                                <p class="oxanium-white">Class x: <%= result.getClass("x") %>
                             <% } %></p>
-                        <%  } %>
+                        <% } %>
                         <br><br>
                         <form class="no-right-margin margin-top-1rem row g-3" action="resultToVowlServlet" enctype="multipart/form-data" method="post">
                             <section class="container mb-3">
