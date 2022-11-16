@@ -1,5 +1,6 @@
 package helper;
 
+import jakarta.servlet.ServletContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat;
 import org.semanticweb.owlapi.model.*;
@@ -16,7 +17,7 @@ import java.io.File;
 public class OWLOntologyCreator {
 
 
-    public static OWLOntology resultToOntology(SQWRLResult result, OWLOntology originalOntology, Boolean saveFile) throws OWLOntologyCreationException {
+    public static OWLOntology resultToOntology(SQWRLResult result, OWLOntology originalOntology, ServletContext context, Boolean saveFile) throws OWLOntologyCreationException {
         //TODO
         String document_iri = "http://www.semanticweb.org/owlreadyDone/ontologies/2022/10/result_template.owl";
 
@@ -42,7 +43,10 @@ public class OWLOntologyCreator {
                 try {
                     FunctionalSyntaxDocumentFormat ontologyFormat = new FunctionalSyntaxDocumentFormat();
                     ontologyFormat.copyPrefixesFrom(pm);
-                    manager.saveOntology(ontology, ontologyFormat, IRI.create(new File("target/OwlreadyDone/example.owl").toURI()));
+                    //doesn't save ontologies yet, fix but do so the proper way.
+                    manager.saveOntology(ontology, ontologyFormat, IRI.create(context.getInitParameter("upload-dir")
+                            + File.separator + "example.owl"));
+
                 } catch (OWLOntologyStorageException e) {
                     throw new RuntimeException(e);
                 }

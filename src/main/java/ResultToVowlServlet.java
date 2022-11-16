@@ -30,14 +30,19 @@ public class ResultToVowlServlet extends HttpServlet {
         String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
         OWLOntology originalOntology = getOntologyFromFile(ontoKbPath);
         try {
-            resultToOntology(result, originalOntology, true);
-            //Fazer o upload da ontologia para algum lado para depois enviar para o vowl
-
-
-            //Código temporário
-            //idealmente neste redirect é usada uma nova janela.
-            //para tal parece que a melhor opção é tentar colocar a parte do redirect no html em si, n sei como
-            //resp.sendRedirect("https://service.tib.eu/webvowl/#iri=http://paul.staroch.name/thesis/SmartHomeWeather.owl");
+            if(resultToOntology(result, originalOntology, getServletContext(), true) == null) {
+                req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
+                resp.sendRedirect(req.getContextPath() + "/result.jsp");
+            }
+            else {
+                //Fazer o upload da ontologia para algum lado para depois enviar para o vowl
+                //Código temporário
+                //idealmente neste redirect é usada uma nova janela.
+                //para tal parece que a melhor opção é tentar colocar a parte do redirect no html em si, n sei como
+                //resp.sendRedirect("https://service.tib.eu/webvowl/#iri=http://paul.staroch.name/thesis/SmartHomeWeather.owl");
+                req.getSession().setAttribute("errorMessage", "It worked!");
+                resp.sendRedirect(req.getContextPath() + "/result.jsp");
+            }
 
         } catch (OWLOntologyCreationException e) {
             req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
