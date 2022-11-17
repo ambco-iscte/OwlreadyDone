@@ -11,12 +11,18 @@ import org.swrlapi.sqwrl.SQWRLResult;
 
 import java.io.IOException;
 
+/**
+ * @author Afonso Caniço
+ * @author Afonso Sampaio
+ * @author Gustavo Ferreira
+ * @author Samuel Correia
+ */
 @WebServlet("/queryDatabaseServlet")
 @MultipartConfig
 public class QueryDatabaseServlet extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String query = req.getParameter("queryString");
         if (query != null) {
             String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();

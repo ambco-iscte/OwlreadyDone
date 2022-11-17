@@ -16,6 +16,10 @@ import java.util.Set;
 
 /**
  * Contains helper methods for interacting with OWL knowledge bases.
+ * @author Afonso Caniço
+ * @author Afonso Sampaio
+ * @author Gustavo Ferreira
+ * @author Samuel Correia
  */
 public class OWLMaster {
 
@@ -74,6 +78,106 @@ public class OWLMaster {
     }
 
     /**
+     * @return The readable name of the OWL entity.
+     */
+    private static String getEntityReadableName(OWLEntity entity) {
+        if (entity == null)
+            return null;
+        return entity.toStringID().split("#")[1];
+    }
+
+    /**
+     * @param kbPath The path to the ontology's knowledge base.
+     * @return A set of strings corresponding to the names of every OWLClass in the given ontology's signature.
+     */
+    public static Set<String> getOntologyClassNames(String kbPath) {
+        return getOntologyClassNames(getOntologyFromFile(kbPath));
+    }
+
+    /**
+     * @param kbPath The path to the ontology's knowledge base.
+     * @return A set of strings corresponding to the names of every OWL Object Property in the given ontology's signature.
+     */
+    public static Set<String> getOntologyObjectPropertyNames(String kbPath) {
+        return getOntologyObjectPropertyNames(getOntologyFromFile(kbPath));
+    }
+
+    /**
+     * @param kbPath The path to the ontology's knowledge base.
+     * @return A set of strings corresponding to the names of every OWL Data Property in the given ontology's signature.
+     */
+    public static Set<String> getOntologyDataPropertyNames(String kbPath) {
+        return getOntologyDataPropertyNames(getOntologyFromFile(kbPath));
+    }
+
+    /**
+     * @param kbPath The path to the ontology's knowledge base.
+     * @return A set of strings corresponding to the names of every relation (object/data property, built-in, etc.)
+     * in the given ontology.
+     */
+    public static Set<String> getAllRelationNames(String kbPath) {
+        return getAllRelationNames(getOntologyFromFile(kbPath));
+    }
+
+    /**
+     * @param kbPath The path to the ontology's knowledge base.
+     * @return A set of strings corresponding to the names of every OWL Individual in the given ontology's signature.
+     */
+    public static Set<String> getOntologyIndividualNames(String kbPath) {
+        return getOntologyIndividualNames(getOntologyFromFile(kbPath));
+    }
+
+    /**
+     * @return A set of strings corresponding to the names of every OWLClass in the given ontology's signature.
+     */
+    private static Set<String> getOntologyClassNames(OWLOntology ontology) {
+        if (ontology == null)
+            return null;
+        return Helper.map(ontology.getClassesInSignature(), OWLMaster::getEntityReadableName);
+    }
+
+    /**
+     * @return A set of strings corresponding to the names of every OWL Data Property in the given ontology's signature.
+     */
+    private static Set<String> getOntologyDataPropertyNames(OWLOntology ontology) {
+        if (ontology == null)
+            return null;
+        return Helper.map(ontology.getDataPropertiesInSignature(), OWLMaster::getEntityReadableName);
+    }
+
+    /**
+     * @return A set of strings corresponding to the names of every OWL Object Property in the given ontology's signature.
+     */
+    private static Set<String> getOntologyObjectPropertyNames(OWLOntology ontology) {
+        if (ontology == null)
+            return null;
+        return Helper.map(ontology.getObjectPropertiesInSignature(), OWLMaster::getEntityReadableName);
+    }
+
+    /**
+     * @return A set of strings corresponding to the names of every OWL Individual in the given ontology's signature.
+     */
+    private static Set<String> getOntologyIndividualNames(OWLOntology ontology) {
+        if (ontology == null)
+            return null;
+        return Helper.map(ontology.getIndividualsInSignature(), OWLMaster::getEntityReadableName);
+    }
+
+    /**
+     * @return A set of strings corresponding to the names of every relation (object/data property, built-in, etc.)
+     * in the given ontology.
+     */
+    private static Set<String> getAllRelationNames(OWLOntology ontology) {
+        Set<String> relations = new HashSet<>();
+        relations.add("is a");
+        relations.add("is the same as");
+        relations.add("is different from");
+        relations.addAll(getOntologyObjectPropertyNames(ontology));
+        relations.addAll(getOntologyDataPropertyNames(ontology));
+        return relations;
+    }
+
+    /**
      * Queries an ontology using the given SQWRL query string.
      * @param ontology The ontology to query.
      * @param query The SQWRL query to execute.
@@ -85,6 +189,8 @@ public class OWLMaster {
 
         try {
             SQWRLQueryEngine queryEngine = SWRLAPIFactory.createSQWRLQueryEngine(ontology);
+            for (IRI iri : queryEngine.getSWRLRuleEngine().getSWRLBuiltInIRIs())
+                System.out.println(iri);
             return queryEngine.runSQWRLQuery("q1", query);
         } catch (SWRLParseException | SQWRLException ex) {
             System.out.println(ex.getMessage());

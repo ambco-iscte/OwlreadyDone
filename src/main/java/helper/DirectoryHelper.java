@@ -6,6 +6,10 @@ import java.util.Objects;
 
 /**
  * Contains helper methods for managing the upload directory of a ServletContext.
+ * @author Afonso Caniço
+ * @author Afonso Sampaio
+ * @author Gustavo Ferreira
+ * @author Samuel Correia
  */
 public class DirectoryHelper {
 

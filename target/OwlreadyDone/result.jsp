@@ -43,7 +43,7 @@
                             <p class="oxanium text-muted">Seems like the result is empty.</p>
                     <%  }
                         while (result.next()) {%>
-                            <p class="oxanium-white">x: <%= result.getLiteral("x").toString() %></p>
+                            <p class="oxanium-white">x: <%= result.getLiteral("x").toString() %></p> <!--FIXME: literal types-->
                     <%  }
                     } catch (SQWRLException ex) { ex.printStackTrace(); } %>
                 <%} else {%>

@@ -29,7 +29,7 @@
                     <section class="container mb-3">
                         <h3><label for="formFile" class="form-file-label oxanium-white">Upload an OWL knowledge base from your computer</label></h3>
                         <section class="d-inline-flex">
-                            <input class="form-control w-auto mx-auto" type="file" id="formFile" name="formFile"
+                            <input class="form-control wide-30rem mx-auto" type="file" id="formFile" name="formFile"
                                    accept=".owx, .owl, .rdf" required>
                             <div class="margin-left-1rem">
                                 <button class="owl-btn btn btn-primary" type="submit">Upload</button>
@@ -48,7 +48,7 @@
                     <section class="container mb-3">
                         <h3><label for="formUrl" class="form-url-label oxanium-white">Submit a link to an OWL knowledge base</label></h3>
                         <section class="d-inline-flex">
-                            <input class="form-control w-auto mx-auto" type="url"
+                            <input class="form-control wide-30rem mx-auto" type="url"
                                    id="formUrl" name="formUrl" placeholder="OWL file url" required>
                             <div class="margin-left-1rem">
                                 <button class="owl-btn btn btn-primary" type="submit">Submit</button>
