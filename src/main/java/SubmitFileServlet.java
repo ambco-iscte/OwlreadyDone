@@ -22,7 +22,7 @@ public class SubmitFileServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Part filePart = req.getPart("formFile");
         String url = req.getParameter("formUrl");
-        String recentFile = req.getParameter("formRecentFile");
+        String recentFile = req.getParameter("recentFile");
 
         String fileName = null;
         String filePath = null;
@@ -45,6 +45,22 @@ public class SubmitFileServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/index.jsp");
         }
     }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        File[] files = DirectoryHelper.getUploadedFiles(getServletContext());
+        /*
+        //do this the right way,
+        //maybe make getUploadedFiles return list straight away?
+
+        if (filePath != null)
+            req.getSession().setAttribute("uploadedFilePath", filePath);
+            req.getSession().setAttribute("uploadFileOriginalName", fileName);
+            resp.sendRedirect(req.getContextPath() + "/query.jsp");
+
+        */
+    }
+
 
     /**
      * @return The full path of the upload directory of the application, as defined in web.xml

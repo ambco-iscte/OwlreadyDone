@@ -29,7 +29,7 @@
                 <div class="list-group list-group-flush border-bottom scrollarea overflow-auto" style="max-height: 320px;">
 
                     <% for (File file : DirectoryHelper.getUploadedFiles(request.getSession().getServletContext())) {%>
-                        <a href="#" class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+                        <a href="submitFileServlet?recentFile=<%=file.getName()%>" class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
                             <div class="d-flex w-100 align-items-center justify-content-between">
                                 <strong class="mb-1"><%=file.getName()%>
                                 </strong>
