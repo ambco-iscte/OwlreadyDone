@@ -3,6 +3,8 @@ package helper;
 import jakarta.servlet.ServletContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat;
+import org.semanticweb.owlapi.io.FileDocumentTarget;
+import org.semanticweb.owlapi.io.OWLOntologyDocumentTarget;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import org.swrlapi.sqwrl.SQWRLResult;
@@ -43,9 +45,11 @@ public class OWLOntologyCreator {
                 try {
                     FunctionalSyntaxDocumentFormat ontologyFormat = new FunctionalSyntaxDocumentFormat();
                     ontologyFormat.copyPrefixesFrom(pm);
+                    File file = new File(context.getInitParameter("upload-dir")
+                            + File.separator + "example.owl");
+                    FileDocumentTarget target = new FileDocumentTarget(file);
                     //doesn't save ontologies yet, fix but do so the proper way.
-                    manager.saveOntology(ontology, ontologyFormat, IRI.create(context.getInitParameter("upload-dir")
-                            + File.separator + "example.owl"));
+                    manager.saveOntology(ontology, ontologyFormat, target);
 
                 } catch (OWLOntologyStorageException e) {
                     throw new RuntimeException(e);
