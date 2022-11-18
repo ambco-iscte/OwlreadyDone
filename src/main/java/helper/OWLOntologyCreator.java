@@ -19,10 +19,9 @@ import java.io.File;
 public class OWLOntologyCreator {
 
 
-    public static OWLOntology resultToOntology(SQWRLResult result, OWLOntology originalOntology, ServletContext context, Boolean saveFile) throws OWLOntologyCreationException {
+    public static OWLOntology resultToOntology(SQWRLResult result, ServletContext context, Boolean saveFile) throws OWLOntologyCreationException {
         //TODO
         String document_iri = "http://www.semanticweb.org/owlreadyDone/ontologies/2022/10/result_template.owl";
-
 
         try {
             if (result.isEmpty()) {
@@ -35,9 +34,30 @@ public class OWLOntologyCreator {
             OWLOntology ontology = manager.createOntology(IRI.create(document_iri));
             DefaultPrefixManager pm = new DefaultPrefixManager();
             pm.setDefaultPrefix(document_iri + "#");
-            pm.setPrefix("var:", "urn:swrl#");
+            pm.setPrefix("pizza:", "urn:swrl#");
 
-            addAxiomsToManager(result, manager, factory, ontology, pm);
+            while (result.next()){
+                System.out.printf("nothing");
+                if (result.hasNamedIndividualValue("x")) {
+                    //a partir do iri do resultado pode ser mais fácil obter info
+                    //SQWRLNamedIndividualResultValue res = result.getNamedIndividual("x");
+                    //originalOntology.
+                    //res.getIRI();
+                    System.out.println("Added named individual to query result ontology");
+                    OWLNamedIndividual xIndividual = factory.getOWLNamedIndividual(result.getNamedIndividual("x").toString(), pm);
+                    manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xIndividual));
+                }
+
+                /*
+                if (result.hasLiteralValue("x"))
+                    result.getLiteral("x");
+
+                if (result.hasClassValue("x"))
+                    result.getClass("x");
+                */
+            }
+            //Reset to first result row
+            result.reset();
 
             if(saveFile){
                 //save to a file
@@ -45,11 +65,10 @@ public class OWLOntologyCreator {
                 try {
                     FunctionalSyntaxDocumentFormat ontologyFormat = new FunctionalSyntaxDocumentFormat();
                     ontologyFormat.copyPrefixesFrom(pm);
-                    File file = new File(context.getInitParameter("upload-dir")
+                    File file = new File(context.getRealPath("") + File.separator + context.getInitParameter("result-dir")
                             + File.separator + "example.owl");
-                    FileDocumentTarget target = new FileDocumentTarget(file);
                     //doesn't save ontologies yet, fix but do so the proper way.
-                    manager.saveOntology(ontology, ontologyFormat, target);
+                    manager.saveOntology(ontology, ontologyFormat, IRI.create(file.toURI()));
 
                 } catch (OWLOntologyStorageException e) {
                     throw new RuntimeException(e);
@@ -94,24 +113,4 @@ public class OWLOntologyCreator {
          */
     }
 
-    private static void addAxiomsToManager(SQWRLResult result, OWLOntologyManager manager, OWLDataFactory factory, OWLOntology ontology, DefaultPrefixManager pm) throws SQWRLException {
-        while (result.next()){
-            if (result.hasNamedIndividualValue("x")) {
-                //a partir do iri do resultado pode ser mais fácil obter info
-                //SQWRLNamedIndividualResultValue res = result.getNamedIndividual("x");
-                //originalOntology.
-                //res.getIRI();
-                OWLNamedIndividual xIndividual = factory.getOWLNamedIndividual(result.getNamedIndividual("x").toString(), pm);
-                manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xIndividual));
-            }
-
-            /*
-            if (result.hasLiteralValue("x"))
-                result.getLiteral("x");
-
-            if (result.hasClassValue("x"))
-                result.getClass("x");
-            */
-        }
-    }
 }

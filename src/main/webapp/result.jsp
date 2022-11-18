@@ -45,7 +45,9 @@
                             <% if (result.hasClassValue("x")) {%>
                                 <p class="oxanium-white">Class x: <%= result.getClass("x") %>
                             <% } %></p>
-                        <% } %>
+                        <% }
+                            //Reset to first result row
+                            result.reset();%>
                         <br><br>
                         <form class="no-right-margin margin-top-1rem row g-3" action="resultToVowlServlet" enctype="multipart/form-data" method="post">
                             <section class="container mb-3">
