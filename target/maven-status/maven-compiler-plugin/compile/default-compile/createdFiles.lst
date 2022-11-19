@@ -1,6 +1,0 @@
-helper\DirectoryHelper.class
-ResultToVowlServlet.class
-helper\OWLMaster.class
-helper\OWLOntologyCreator.class
-SubmitFileServlet.class
-QueryDatabaseServlet.class

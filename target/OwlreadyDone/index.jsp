@@ -27,29 +27,26 @@
                     <span class="fs-5 fw-semibold">Recent Ontologies</span>
                 </div>
                 <div class="list-group list-group-flush border-bottom scrollarea overflow-auto" style="max-height: 320px;">
-
-                    <% for (File file : DirectoryHelper.getUploadedFiles(request.getSession().getServletContext())) {%>
-                        <a href="submitFileServlet?recentFile=<%=file.getName()%>" class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+                    <%if(DirectoryHelper.getUploadedFiles(request.getSession().getServletContext()) == null){%>
+                        <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
                             <div class="d-flex w-100 align-items-center justify-content-between">
-                                <strong class="mb-1"><%=file.getName()%>
-                                </strong>
-                                <small>Small item</small>
-                            </div>
-                            <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and
-                                date.
+                                <strong class="mb-1">There are no recent files to display</strong>
                             </div>
                         </a>
-                    <%}%>
-
-                    <!--
-                    <% for (File file : DirectoryHelper.getUploadedFiles(request.getSession().getServletContext())) {%>
-                        <form class="no-right-margin margin-top-1rem row g-3" action="submitFileServlet"
-                              enctype="multipart/form-data" method="post">
-                            <label for="<%=file.getName()%>"><%=file.getName()%></label>
-                            <input type="submit" name="recentFile" id="<%=file.getName()%>" value="<%=file.getName()%>">
-                        </form>
-                    <%}%>
-                    -->
+                    <%} else {%>
+                        <% for (File file : DirectoryHelper.getUploadedFiles(request.getSession().getServletContext())) {%>
+                            <a href="submitFileServlet?recentFile=<%=file.getName()%>" class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+                                <div class="d-flex w-100 align-items-center justify-content-between">
+                                    <strong class="mb-1"><%=file.getName()%>
+                                    </strong>
+                                    <small>Small item</small>
+                                </div>
+                                <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and
+                                    date.
+                                </div>
+                            </a>
+                        <%}%>
+                    <% } %>
                 </div>
             </div>
         </aside>
