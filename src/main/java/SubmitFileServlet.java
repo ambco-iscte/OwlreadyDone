@@ -22,7 +22,7 @@ public class SubmitFileServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Part filePart = req.getPart("formFile");
         String url = req.getParameter("formUrl");
-        String recentFile = req.getParameter("recentFile");
+
 
         String fileName = null;
         String filePath = null;
@@ -36,31 +36,42 @@ public class SubmitFileServlet extends HttpServlet {
             filePath = getFileFromURL(url).getAbsolutePath();
         }
 
+        showQueryPage(req, resp, fileName, filePath,"Couldn't find uploaded file or given URL.");
+    }
+
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        File[] files = DirectoryHelper.getUploadedFiles(getServletContext());
+        if(files == null){
+            req.getSession().setAttribute("errorMessage", "There are no recent files!");
+            resp.sendRedirect(req.getContextPath() + "/index.jsp");
+            return;
+        }
+
+        String recentFileName = req.getParameter("recentFile");
+        String filePath = null;
+
+        for (File file : files)
+            if (file.getName().equals(recentFileName)) {
+                filePath = file.getAbsolutePath();
+                break;
+            }
+
+        showQueryPage(req, resp, recentFileName, filePath, "Couldn't find recent file.");
+    }
+
+    private void showQueryPage(HttpServletRequest req, HttpServletResponse resp, String fileName, String filePath,
+                               String errorMessage) throws IOException {
         if (filePath != null) {
             req.getSession().setAttribute("uploadedFilePath", filePath);
             req.getSession().setAttribute("uploadFileOriginalName", fileName);
             resp.sendRedirect(req.getContextPath() + "/query.jsp");
         } else {
-            req.getSession().setAttribute("errorMessage", "Couldn't find uploaded file or given URL.");
+            req.getSession().setAttribute("errorMessage", errorMessage);
             resp.sendRedirect(req.getContextPath() + "/index.jsp");
         }
     }
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        File[] files = DirectoryHelper.getUploadedFiles(getServletContext());
-        /*
-        //do this the right way,
-        //maybe make getUploadedFiles return list straight away?
-
-        if (filePath != null)
-            req.getSession().setAttribute("uploadedFilePath", filePath);
-            req.getSession().setAttribute("uploadFileOriginalName", fileName);
-            resp.sendRedirect(req.getContextPath() + "/query.jsp");
-
-        */
-    }
-
 
     /**
      * @return The full path of the upload directory of the application, as defined in web.xml
