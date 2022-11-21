@@ -12,12 +12,14 @@ import org.swrlapi.sqwrl.exceptions.SQWRLException;
 import org.swrlapi.sqwrl.values.SQWRLNamedIndividualResultValue;
 
 import java.io.File;
+import java.io.IOException;
+
+import static helper.SubmitToGitHub.createFile;
 
 /**
  * Contains helper methods for the creation of a new ontology.
  */
 public class OWLOntologyCreator {
-
 
     public static OWLOntology resultToOntology(SQWRLResult result, ServletContext context, Boolean saveFile) throws OWLOntologyCreationException {
         //TODO
@@ -37,7 +39,7 @@ public class OWLOntologyCreator {
             pm.setPrefix("pizza:", "urn:swrl#");
 
             while (result.next()){
-                System.out.printf("nothing");
+                System.out.printf("nothissng");
                 if (result.hasNamedIndividualValue("x")) {
                     //a partir do iri do resultado pode ser mais fácil obter info
                     //SQWRLNamedIndividualResultValue res = result.getNamedIndividual("x");
@@ -69,8 +71,15 @@ public class OWLOntologyCreator {
                             + File.separator + "example.owl");
                     //doesn't save ontologies yet, fix but do so the proper way.
                     manager.saveOntology(ontology, ontologyFormat, IRI.create(file.toURI()));
+                    System.out.println("meti");
+                    createFile(file.getPath());
+                    // guardar no rep
 
                 } catch (OWLOntologyStorageException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
