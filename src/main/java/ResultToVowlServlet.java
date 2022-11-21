@@ -1,6 +1,3 @@
-import helper.OWLMaster;
-import helper.OWLOntologyCreator;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -9,7 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.swrlapi.sqwrl.SQWRLResult;
-import org.swrlapi.sqwrl.exceptions.SQWRLException;
 
 import java.io.IOException;
 
@@ -32,7 +28,7 @@ public class ResultToVowlServlet extends HttpServlet {
         String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
         OWLOntology originalOntology = getOntologyFromFile(ontoKbPath);
         try {
-            if(resultToOntology(result, getServletContext(), true) == null) {
+            if(resultToOntology(result, originalOntology, getServletContext(), true) == null) {
                 req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
                 resp.sendRedirect(req.getContextPath() + "/result.jsp");
             }

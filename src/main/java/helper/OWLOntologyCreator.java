@@ -3,8 +3,6 @@ package helper;
 import jakarta.servlet.ServletContext;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat;
-import org.semanticweb.owlapi.io.FileDocumentTarget;
-import org.semanticweb.owlapi.io.OWLOntologyDocumentTarget;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import org.swrlapi.sqwrl.SQWRLResult;
@@ -19,9 +17,19 @@ import java.io.File;
 public class OWLOntologyCreator {
 
 
-    public static OWLOntology resultToOntology(SQWRLResult result, ServletContext context, Boolean saveFile) throws OWLOntologyCreationException {
+    public static OWLOntology resultToOntology(SQWRLResult result, OWLOntology originalOntology, ServletContext context, Boolean saveFile) throws OWLOntologyCreationException {
         //TODO
-        String document_iri = "http://www.semanticweb.org/owlreadyDone/ontologies/2022/10/result_template.owl";
+        //String document_iri = "http://www.semanticweb.org/owlreadyDone/ontologies/2022/10/result.owl";
+
+        //get if present
+        IRI document_iri = originalOntology.getOntologyID().getOntologyIRI().get();
+        //originalOntology. obtain the IRI?
+        //obtain prefixes from ontology
+        System.out.println(originalOntology.getOntologyID().getOntologyIRI());
+
+        OWLDocumentFormat format =  originalOntology.getOWLOntologyManager().getOntologyFormat(originalOntology);
+        //format.asPrefixOWLOntologyFormat().getpre
+        //originalOntology.getOntologyID().
 
         try {
             if (result.isEmpty()) {
@@ -31,7 +39,7 @@ public class OWLOntologyCreator {
             OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
             OWLDataFactory factory = manager.getOWLDataFactory();
 
-            OWLOntology ontology = manager.createOntology(IRI.create(document_iri));
+            OWLOntology ontology = manager.createOntology(document_iri);
             DefaultPrefixManager pm = new DefaultPrefixManager();
             pm.setDefaultPrefix(document_iri + "#");
             pm.setPrefix("pizza:", "urn:swrl#");
@@ -45,8 +53,7 @@ public class OWLOntologyCreator {
                     OWLNamedIndividual xIndividual = factory.getOWLNamedIndividual(individual.toString(), pm);
                     manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xIndividual));
 
-                    individual.getIRI();
-
+                    //System.out.println(xIndividual.asOWLClass().toString());
                 }
 
                 /*
@@ -65,8 +72,7 @@ public class OWLOntologyCreator {
                     FunctionalSyntaxDocumentFormat ontologyFormat = new FunctionalSyntaxDocumentFormat();
                     ontologyFormat.copyPrefixesFrom(pm);
                     File file = new File(DirectoryHelper.getDirectory(context, "result-dir")
-                            + File.separator + "example.owl");
-                    //doesn't save ontologies yet, fix but do so the proper way.
+                            + File.separator + "result.owl");
                     manager.saveOntology(ontology, ontologyFormat, IRI.create(file.toURI()));
 
                 } catch (OWLOntologyStorageException e) {
