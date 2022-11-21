@@ -29,14 +29,14 @@
                                     <span class="fs-5 fw-semibold">Recent Ontologies</span>
                                 </div>
                                 <div class="list-group list-group-flush border-bottom scrollarea overflow-auto" style="max-height: 320px;">
-                                    <%if(DirectoryHelper.getUploadedFiles(request.getSession().getServletContext()) == null){%>
+                                    <%if(DirectoryHelper.getFiles(request.getSession().getServletContext(), "upload-dir") == null){%>
                                         <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
                                             <div class="d-flex w-100 align-items-center justify-content-between">
                                                 <strong class="mb-1">There are no recent files to display</strong>
                                             </div>
                                         </a>
                                     <%} else {%>
-                                        <% for (File file : DirectoryHelper.getUploadedFiles(request.getSession().getServletContext())) {%>
+                                        <% for (File file : DirectoryHelper.getFiles(request.getSession().getServletContext(), "upload-dir")) {%>
                                             <a href="submitFileServlet?recentFile=<%=file.getName()%>" class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
                                                 <div class="d-flex w-100 align-items-center justify-content-between">
                                                     <strong class="mb-1"><%=file.getName()%>

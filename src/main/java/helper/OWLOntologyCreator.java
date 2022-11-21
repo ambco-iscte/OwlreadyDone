@@ -37,15 +37,16 @@ public class OWLOntologyCreator {
             pm.setPrefix("pizza:", "urn:swrl#");
 
             while (result.next()){
-                System.out.printf("nothing");
                 if (result.hasNamedIndividualValue("x")) {
                     //a partir do iri do resultado pode ser mais fácil obter info
-                    //SQWRLNamedIndividualResultValue res = result.getNamedIndividual("x");
+                    SQWRLNamedIndividualResultValue individual = result.getNamedIndividual("x");
                     //originalOntology.
-                    //res.getIRI();
                     System.out.println("Added named individual to query result ontology");
-                    OWLNamedIndividual xIndividual = factory.getOWLNamedIndividual(result.getNamedIndividual("x").toString(), pm);
+                    OWLNamedIndividual xIndividual = factory.getOWLNamedIndividual(individual.toString(), pm);
                     manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xIndividual));
+
+                    individual.getIRI();
+
                 }
 
                 /*
@@ -60,12 +61,10 @@ public class OWLOntologyCreator {
             result.reset();
 
             if(saveFile){
-                //save to a file
-                //como especificar o destino?
                 try {
                     FunctionalSyntaxDocumentFormat ontologyFormat = new FunctionalSyntaxDocumentFormat();
                     ontologyFormat.copyPrefixesFrom(pm);
-                    File file = new File(context.getRealPath("") + File.separator + context.getInitParameter("result-dir")
+                    File file = new File(DirectoryHelper.getDirectory(context, "result-dir")
                             + File.separator + "example.owl");
                     //doesn't save ontologies yet, fix but do so the proper way.
                     manager.saveOntology(ontology, ontologyFormat, IRI.create(file.toURI()));
