@@ -43,7 +43,7 @@ public class SubmitFileServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        File[] files = DirectoryHelper.getFiles(getServletContext(), "result-dir");
+        File[] files = DirectoryHelper.getFiles(getServletContext(), "upload-dir");
         if(files == null){
             req.getSession().setAttribute("errorMessage", "There are no recent files!");
             resp.sendRedirect(req.getContextPath() + "/index.jsp");
@@ -53,12 +53,12 @@ public class SubmitFileServlet extends HttpServlet {
         String recentFileName = req.getParameter("recentFile");
         String filePath = null;
 
-        for (File file : files)
+        for (File file : files) {
             if (file.getName().equals(recentFileName)) {
                 filePath = file.getAbsolutePath();
                 break;
             }
-
+        }
         showQueryPage(req, resp, recentFileName, filePath, "Couldn't find the specified file.");
     }
 
