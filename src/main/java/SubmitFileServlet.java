@@ -1,5 +1,4 @@
 import helper.DirectoryHelper;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -42,7 +41,7 @@ public class SubmitFileServlet extends HttpServlet {
 
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         File[] files = DirectoryHelper.getFiles(getServletContext(), "upload-dir");
         if(files == null){
             req.getSession().setAttribute("errorMessage", "There are no recent files!");
