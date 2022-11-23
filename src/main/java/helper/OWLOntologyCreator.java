@@ -72,6 +72,7 @@ public class OWLOntologyCreator {
                     OWLNamedIndividual xIndividual = factory.getOWLNamedIndividual(individual.toString(), pm);
                     manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xIndividual));
 
+                    individual.getIRI();
                     //System.out.println(xIndividual.asOWLClass().toString());
                 }
 

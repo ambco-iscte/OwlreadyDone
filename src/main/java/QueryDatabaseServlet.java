@@ -16,12 +16,13 @@ import java.io.IOException;
 public class QueryDatabaseServlet extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String query = req.getParameter("queryString");
         if (query != null) {
             String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
             SQWRLResult result = OWLMaster.query(ontoKbPath, query);
             if (result != null) {
+                req.getSession().removeAttribute("queryResultObject");
                 req.getSession().setAttribute("queryString", query);
                 req.getSession().setAttribute("queryResultObject", result);
                 resp.sendRedirect(req.getContextPath() + "/result.jsp");
