@@ -82,8 +82,8 @@
                             <!-- Button to add new term -->
                             <h3 class="oxanium-purple no-bottom-margin" style="display: none">and</h3>
 
-                            <!-- FIXME: UncaughtSyntaxException when button is pressed-->
-                            <h3 class="oxanium-purple no-bottom-margin highlight-on-hover unselectable"
+                            <!-- FIXME: UncaughtSyntaxException when button is pressed, added id, since when using alert it came up as nothing, fields classname etc arent accessible like this-->
+                            <h3 class="oxanium-purple no-bottom-margin highlight-on-hover unselectable" id="queryBuilderAddTermButton"
                                 onclick="onClick(this.id, <%=classNames%>,<%=individualNames%>, <%=relationNames%>)"><b>+</b></h3>
                         </section>
                     </section>

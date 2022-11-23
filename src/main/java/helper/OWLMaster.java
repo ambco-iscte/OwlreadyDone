@@ -169,9 +169,9 @@ public class OWLMaster {
      */
     private static Set<String> getAllRelationNames(OWLOntology ontology) {
         Set<String> relations = new HashSet<>();
-        relations.add("is a");
-        relations.add("is the same as");
-        relations.add("is different from");
+        relations.add("isA");
+        relations.add("isTheSameAs");
+        relations.add("isDifferentFrom");
         relations.addAll(getOntologyObjectPropertyNames(ontology));
         relations.addAll(getOntologyDataPropertyNames(ontology));
         return relations;
