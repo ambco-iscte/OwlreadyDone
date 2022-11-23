@@ -1,5 +1,5 @@
 function onClick(clickedElementID, ontoClasses, ontoIndividuals, ontoRelations) { // FIXME: UncaughtSyntaxException
-    alert("hu")
+    console.log("In")
     if (clickedElementID.toString().startsWith("queryBuilderAddTermButton")) {
         let elem = document.getElementById(clickedElementID);
         let term = elem.parentElement;

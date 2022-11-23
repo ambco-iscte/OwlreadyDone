@@ -39,24 +39,25 @@
             Set<String> individualNames = OWLMaster.getOntologyIndividualNames(kbPath);
             Set<String> relationNames = OWLMaster.getAllRelationNames(kbPath);
         %>
-            <h1 class="oxanium-white">You provided this knowledge base:
-                <%= session.getAttribute("uploadFileOriginalName").toString()%></h1><br>
-            <h3 class="oxanium-white">Here's an overview of what's in this knowledge base:</h3>
-            <section class="onto-signature">
-                <ul>
-                    <% for (OWLEntity entity : OWLMaster.getOntologySignature(kbPath)) {%>
-                    <li class="oxanium text-muted"><%= entity.toStringID()%></li>
-                    <%}%>
-                </ul>
-            </section>
-            <p class="oxanium text-muted">Too technical? No worries!
-                You don't need to know all of this to interact with your knowledge base.</p>
+        <h1 class="oxanium-white">You provided this knowledge base:
+            <%= session.getAttribute("uploadFileOriginalName").toString()%></h1><br>
+        <h3 class="oxanium-white">Here's an overview of what's in this knowledge base:</h3>
+        <section class="onto-signature">
+            <ul>
+                <% for (OWLEntity entity : OWLMaster.getOntologySignature(kbPath)) {%>
+                <li class="oxanium text-muted"><%= entity.toStringID()%></li>
+                <%}%>
+            </ul>
+        </section>
+        <p class="oxanium text-muted">Too technical? No worries!
+            You don't need to know all of this to interact with your knowledge base.</p>
 
-            <br><br>
-            <h3 class="oxanium-white">Build a query to your knowledge base using our interface:</h3>
+        <br><br>
+        <h3 class="oxanium-white">Build a query to your knowledge base using our interface:</h3>
 
-            <section class="query-builder">
-                <section class="query-builder-line">
+        <section class="query-builder">
+            <section class="query-builder-line">
+                <form class="no-right-margin margin-top-1rem row g-3" action="queryFormServlet" enctype="multipart/form-data" method="post">
                     <h3 class="oxanium-purple">If</h3>
                     <section class="query-builder-section"> <!-- Left side of query -->
                         <section class="query-builder-term"> <!-- Term proper -->
@@ -72,9 +73,10 @@
 
                                 <input class="query-builder-input-text" type="text" list="antecedentTerm1-var2-datalist"
                                        id="antecedentTerm1-var2" name="antecedentTerm1-var2" placeholder="?var2" required>
+
                                 <datalist id="antecedentTerm1-var2-datalist">
                                     <% for (String className : classNames) {%>
-                                        <option class="query-builder-input-select-option" value="<%=className%>"><%=className%></option>
+                                    <option class="query-builder-input-select-option" value="<%=className%>"><%=className%></option>
                                     <%}%>
                                 </datalist>
                             </section>
@@ -85,49 +87,56 @@
                             <!-- FIXME: UncaughtSyntaxException when button is pressed, added id, since when using alert it came up as nothing, fields classname etc arent accessible like this-->
                             <h3 class="oxanium-purple no-bottom-margin highlight-on-hover unselectable" id="queryBuilderAddTermButton"
                                 onclick="onClick(this.id, <%=classNames%>,<%=individualNames%>, <%=relationNames%>)"><b>+</b></h3>
-                        </section>
-                    </section>
-                </section>
-                <section class="query-builder-line">
-                    <h3 class="oxanium-purple">Then</h3>
-                    <section class="query-builder-section"> <!-- Right side of query (SELECT) -->
-
-                    </section>
-                </section>
-
-                <!-- Query preview and submit buttom -->
-                <form class="no-right-margin margin-top-1rem row g-3" action="queryDatabaseServlet" enctype="multipart/form-data" method="post">
-                    <section class="container mb-3">
-                        <section class="d-inline-flex">
-                            <input class="form-control wide-30rem mx-auto" type="text" readonly
-                                   id="queryBuilderString" name="queryBuilderString" placeholder="Your query will show up here!" required>
                             <div class="margin-left-1rem">
-                                <button class="owl-btn btn btn-primary" type="submit">Query</button>
+                                <button class="owl-btn btn btn-primary" type="submit"><b>+</b></button>
                             </div>
                         </section>
                     </section>
                 </form>
             </section>
+            <section class="query-builder-line">
+                <h3 class="oxanium-purple">Then</h3>
+                <section class="query-builder-section"> <!-- Right side of query (SELECT) -->
 
-            <br><br>
-            <h2 class="text-divider oxanium-white"><b>Or</b></h2>
-            <br><br>
+                </section>
+                <% if (session.getAttribute("builtQueryTerm") != null) {%>
+                <p class="oxanium-white"><b><%= session.getAttribute("builtQueryTerm") %></b></p>
+                <% }%>
+            </section>
 
+            <!-- Query preview and submit buttom -->
             <form class="no-right-margin margin-top-1rem row g-3" action="queryDatabaseServlet" enctype="multipart/form-data" method="post">
                 <section class="container mb-3">
-                    <h3><label for="queryString" class="form-url-label oxanium-white">Query your knowledge base directly using SQWRL</label></h3>
                     <section class="d-inline-flex">
-                        <input class="form-control wide-30rem mx-auto" type="text"
-                               id="queryString" name="queryString" placeholder="SQWRL query" required>
+                        <input class="form-control wide-30rem mx-auto" type="text" readonly
+                               id="queryBuilderString" name="queryBuilderString" placeholder="Your query will show up here!" required>
                         <div class="margin-left-1rem">
                             <button class="owl-btn btn btn-primary" type="submit">Query</button>
                         </div>
                     </section>
                 </section>
             </form>
+        </section>
+
+        <br><br>
+        <h2 class="text-divider oxanium-white"><b>Or</b></h2>
+        <br><br>
+
+        <form class="no-right-margin margin-top-1rem row g-3" action="queryDatabaseServlet" enctype="multipart/form-data" method="post">
+            <section class="container mb-3">
+                <h3><label for="queryString" class="form-url-label oxanium-white">Query your knowledge base directly using SQWRL</label></h3>
+                <section class="d-inline-flex">
+                    <input class="form-control wide-30rem mx-auto" type="text"
+                           id="queryString" name="queryString" placeholder="SQWRL query" required>
+                    <div class="margin-left-1rem">
+                        <button class="owl-btn btn btn-primary" type="submit">Query</button>
+                    </div>
+                </section>
+            </section>
+        </form>
         <%} else {%>
-            <h3 class="oxanium-white">Seems like we're missing something here...</h3>
-            <h3 class="oxanium-white">Are you sure you accessed this page the way you're supposed to?</h3>
+        <h3 class="oxanium-white">Seems like we're missing something here...</h3>
+        <h3 class="oxanium-white">Are you sure you accessed this page the way you're supposed to?</h3>
         <%}%>
 
     </section>
