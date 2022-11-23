@@ -37,7 +37,7 @@ public class OWLOntologyCreator {
 
         //obtain prefixes from ontology
         OWLOntologyManager manager = originalOntology.getOWLOntologyManager();
-        OWLDocumentFormat format =  manager.getOntologyFormat(originalOntology);
+        OWLDocumentFormat format = manager.getOntologyFormat(originalOntology);
 
         if(format == null) {
             System.out.println("format is null");
@@ -99,6 +99,7 @@ public class OWLOntologyCreator {
                 }
             }
 
+            manager.removeOntology(ontology);
             return ontology;
 
         }
