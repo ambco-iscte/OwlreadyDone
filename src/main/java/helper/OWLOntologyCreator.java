@@ -1,7 +1,7 @@
 package helper;
 
+import com.google.common.base.Optional;
 import jakarta.servlet.ServletContext;
-import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
@@ -10,6 +10,7 @@ import org.swrlapi.sqwrl.exceptions.SQWRLException;
 import org.swrlapi.sqwrl.values.SQWRLNamedIndividualResultValue;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * Contains helper methods for the creation of a new ontology.
@@ -21,13 +22,20 @@ public class OWLOntologyCreator {
         //TODO
         //String document_iri = "http://www.semanticweb.org/owlreadyDone/ontologies/2022/10/result.owl";
 
-        //get if present
-        IRI document_iri = originalOntology.getOntologyID().getOntologyIRI().get();
-        //originalOntology. obtain the IRI?
-        //obtain prefixes from ontology
-        System.out.println(originalOntology.getOntologyID().getOntologyIRI());
+        //get IRI if present
+        Optional<IRI> document_iri_optional = originalOntology.getOntologyID().getOntologyIRI();
+        IRI document_iri = null;
+        if(document_iri_optional.isPresent())
+             document_iri = document_iri_optional.get();
 
+        if(document_iri == null)
+            return null;
+
+        //obtain prefixes from ontology
         OWLDocumentFormat format =  originalOntology.getOWLOntologyManager().getOntologyFormat(originalOntology);
+
+        if(format == null)
+            return null;
         //format.asPrefixOWLOntologyFormat().getpre
         //originalOntology.getOntologyID().
 
@@ -36,17 +44,20 @@ public class OWLOntologyCreator {
                 return null;
             }
 
-            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+            OWLOntologyManager manager = originalOntology.getOWLOntologyManager();
             OWLDataFactory factory = manager.getOWLDataFactory();
 
             OWLOntology ontology = manager.createOntology(document_iri);
             DefaultPrefixManager pm = new DefaultPrefixManager();
             pm.setDefaultPrefix(document_iri + "#");
-            pm.setPrefix("pizza:", "urn:swrl#");
+            for (Map.Entry<String,String> entry : format.asPrefixOWLOntologyFormat().getPrefixName2PrefixMap().entrySet())
+                pm.setPrefix(entry.getKey(), entry.getValue());
 
             while (result.next()){
                 if (result.hasNamedIndividualValue("x")) {
                     //a partir do iri do resultado pode ser mais fácil obter info
+
+                    //x deve depender do target da query
                     SQWRLNamedIndividualResultValue individual = result.getNamedIndividual("x");
                     //originalOntology.
                     System.out.println("Added named individual to query result ontology");
