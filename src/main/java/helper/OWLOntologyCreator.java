@@ -97,7 +97,7 @@ public class OWLOntologyCreator {
                     File file = new File(DirectoryHelper.getDirectory(context, "result-dir")
                             + File.separator + "result_" + fileName);
                     manager.saveOntology(ontology, ontologyFormat, IRI.create(file.toURI()));
-                    createFile(file.getPath());
+                    createFile(file.getAbsolutePath());
                     // guardar no rep
 
                 } catch (OWLOntologyStorageException e) {
