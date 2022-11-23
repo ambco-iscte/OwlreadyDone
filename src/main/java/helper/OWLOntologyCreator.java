@@ -39,7 +39,7 @@ public class OWLOntologyCreator {
             pm.setPrefix("pizza:", "urn:swrl#");
 
             while (result.next()){
-                System.out.printf("nothissng");
+                //System.out.printf("nothissng");
                 if (result.hasNamedIndividualValue("x")) {
                     //a partir do iri do resultado pode ser mais fácil obter info
                     //SQWRLNamedIndividualResultValue res = result.getNamedIndividual("x");
@@ -71,8 +71,7 @@ public class OWLOntologyCreator {
                             + File.separator + "example.owl");
                     //doesn't save ontologies yet, fix but do so the proper way.
                     manager.saveOntology(ontology, ontologyFormat, IRI.create(file.toURI()));
-                    System.out.println("meti");
-                    createFile(file.getPath());
+                    createFile(file.getAbsolutePath());
                     // guardar no rep
 
                 } catch (OWLOntologyStorageException e) {
