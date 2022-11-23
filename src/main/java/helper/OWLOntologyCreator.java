@@ -11,6 +11,9 @@ import org.swrlapi.sqwrl.values.SQWRLNamedIndividualResultValue;
 
 import java.io.File;
 import java.util.Map;
+import java.io.IOException;
+
+import static helper.SubmitToGitHub.createFile;
 
 /**
  * Contains helper methods for the creation of a new ontology.
@@ -94,8 +97,14 @@ public class OWLOntologyCreator {
                     File file = new File(DirectoryHelper.getDirectory(context, "result-dir")
                             + File.separator + "result_" + fileName);
                     manager.saveOntology(ontology, ontologyFormat, IRI.create(file.toURI()));
+                    createFile(file.getPath());
+                    // guardar no rep
 
                 } catch (OWLOntologyStorageException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
