@@ -1,9 +1,11 @@
+import helper.DirectoryHelper;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.swrlapi.sqwrl.SQWRLResult;
 
@@ -28,7 +30,7 @@ public class ResultToVowlServlet extends HttpServlet {
         String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
         OWLOntology originalOntology = getOntologyFromFile(ontoKbPath);
         try {
-            if(resultToOntology(result, originalOntology, getServletContext(), true) == null) {
+            if(resultToOntology(result, originalOntology, getServletContext(), true, DirectoryHelper.getFileName(ontoKbPath)) == null) {
                 req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
                 resp.sendRedirect(req.getContextPath() + "/result.jsp");
             }
@@ -42,9 +44,15 @@ public class ResultToVowlServlet extends HttpServlet {
                 resp.sendRedirect(req.getContextPath() + "/result.jsp");
             }
 
-        } catch (OWLOntologyCreationException e) {
+        } catch (OWLOntologyAlreadyExistsException e) {
+            req.getSession().setAttribute("errorMessage", "Ontology result has already been created!");
+            resp.sendRedirect(req.getContextPath() + "/result.jsp");
+            e.printStackTrace();
+        }
+        catch (OWLOntologyCreationException e) {
             req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
             resp.sendRedirect(req.getContextPath() + "/result.jsp");
+            e.printStackTrace();
         }
     }
 }

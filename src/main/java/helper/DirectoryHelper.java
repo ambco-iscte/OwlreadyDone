@@ -24,6 +24,11 @@ public class DirectoryHelper {
         return dir;
     }
 
+    public static String getFileName(String path) {
+        File file = new File(path);
+        return file.getName();
+    }
+
     /**
      * How many files are currently stored in the given context's upload directory?
      * @return The number of files in the context's upload directory, if applicable; 0 otherwise.

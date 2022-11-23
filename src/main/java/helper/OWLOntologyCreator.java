@@ -18,7 +18,7 @@ import java.util.Map;
 public class OWLOntologyCreator {
 
 
-    public static OWLOntology resultToOntology(SQWRLResult result, OWLOntology originalOntology, ServletContext context, Boolean saveFile) throws OWLOntologyCreationException {
+    public static OWLOntology resultToOntology(SQWRLResult result, OWLOntology originalOntology, ServletContext context, Boolean saveFile, String fileName) throws OWLOntologyCreationException {
         //TODO
         //String document_iri = "http://www.semanticweb.org/owlreadyDone/ontologies/2022/10/result.owl";
 
@@ -27,24 +27,32 @@ public class OWLOntologyCreator {
         IRI document_iri = null;
         if(document_iri_optional.isPresent())
              document_iri = document_iri_optional.get();
-
-        if(document_iri == null)
+        if(document_iri == null) {
+            //throw exceptions
+            System.out.println("document_iri is null");
             return null;
+        }
+
+        document_iri = IRI.create(document_iri + "_result");
 
         //obtain prefixes from ontology
-        OWLDocumentFormat format =  originalOntology.getOWLOntologyManager().getOntologyFormat(originalOntology);
+        OWLOntologyManager manager = originalOntology.getOWLOntologyManager();
+        OWLDocumentFormat format =  manager.getOntologyFormat(originalOntology);
 
-        if(format == null)
+        if(format == null) {
+            System.out.println("format is null");
             return null;
+        }
         //format.asPrefixOWLOntologyFormat().getpre
         //originalOntology.getOntologyID().
 
         try {
             if (result.isEmpty()) {
+                System.out.println("result is null");
                 return null;
             }
 
-            OWLOntologyManager manager = originalOntology.getOWLOntologyManager();
+
             OWLDataFactory factory = manager.getOWLDataFactory();
 
             OWLOntology ontology = manager.createOntology(document_iri);
@@ -83,7 +91,7 @@ public class OWLOntologyCreator {
                     FunctionalSyntaxDocumentFormat ontologyFormat = new FunctionalSyntaxDocumentFormat();
                     ontologyFormat.copyPrefixesFrom(pm);
                     File file = new File(DirectoryHelper.getDirectory(context, "result-dir")
-                            + File.separator + "result.owl");
+                            + File.separator + "result_" + fileName);
                     manager.saveOntology(ontology, ontologyFormat, IRI.create(file.toURI()));
 
                 } catch (OWLOntologyStorageException e) {
