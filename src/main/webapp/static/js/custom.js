@@ -1,23 +1,72 @@
-function onClick(clickedElementID, ontoClasses, ontoIndividuals, ontoRelations) { // FIXME: UncaughtSyntaxException
-    if (clickedElementID.toString().startsWith("queryBuilderAddTermButton")) {
+function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividuals, ontoRelations) {
+    if (clickedElementID.toString().startsWith("queryBuilderAntecedentAddTermButton")) {
         let elem = document.getElementById(clickedElementID);
         let term = elem.parentElement;
         let section = term.parentElement;
 
         let andText = elem.previousElementSibling;
         switch (andText.style.display) {
-            case "box": {   // AND is visible, disable the current term.
+            case "block": {   // AND is visible, disable the current term.
                 term.remove();
                 break;
             }
             case "none": {  // AND is not visible, make visible and add new term.
                 elem.innerText = "-";
                 andText.style.display = "block";
-                section.appendChild(createBlankTerm(section.childElementCount + 1, ontoClasses, ontoIndividuals, ontoRelations));
+                section.appendChild(createBlankAntecedentTerm(section.childElementCount + 1, ontoClasses, ontoIndividuals, ontoRelations));
                 break;
             }
         }
     }
+}
+
+function consequentAddNewTermClicked(clickedElementID, builtInNames) {
+    if (clickedElementID.toString().startsWith("queryBuilderConsequentAddTermButton")) {
+        let elem = document.getElementById(clickedElementID);
+        let term = elem.parentElement;
+        let section = term.parentElement;
+
+        let andText = elem.previousElementSibling;
+        switch (andText.style.display) {
+            case "block": {   // AND is visible, disable the current term.
+                term.remove();
+                break;
+            }
+            case "none": {  // AND is not visible, make visible and add new term.
+                elem.innerText = "-";
+                andText.style.display = "block";
+                section.appendChild(createBlankConsequentTerm(section.childElementCount + 1, builtInNames));
+                break;
+            }
+        }
+    }
+}
+
+function createBlankConsequentTerm(index, builtInNames) {
+    let term = document.createElement("section");
+    term.classList.add("query-builder-term");
+
+    let inputFieldSection = document.createElement("section");
+    inputFieldSection.classList.add("query-builder-term-input-fields");
+    term.appendChild(inputFieldSection);
+
+    inputFieldSection.appendChild(createSelectWithOptions("consequentTerm" + index + "rel", "query-builder-input-select",
+        "query-builder-input-select-option", builtInNames));
+
+    inputFieldSection.appendChild(createTextInput("consequentTerm" + index + "-var1", "?var1, ?var2, ...", true, "query-builder-input-text"));
+
+    term.appendChild(createAndText());
+
+    let addIcon = document.createElement("h3");
+    addIcon.id = "queryBuilderConsequentAddTermButton-" + index;
+    addIcon.classList.add("oxanium-purple", "no-bottom-margin", "highlight-on-hover", "unselectable");
+    addIcon.innerText = "+";
+    addIcon.onclick = function () {
+        consequentAddNewTermClicked(addIcon.id, builtInNames);
+    };
+    term.appendChild(addIcon);
+
+    return term;
 }
 
 /**
@@ -28,33 +77,48 @@ function onClick(clickedElementID, ontoClasses, ontoIndividuals, ontoRelations) 
  * @param ontoRelations The list of all relations (data properties, object properties, etc.) present in the ontology.
  * @returns {HTMLElement}
  */
-function createBlankTerm(index, ontoClasses, ontoIndividuals, ontoRelations) {
+function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRelations) {
     let term = document.createElement("section");
     term.classList.add("query-builder-term");
 
     let inputFieldSection = document.createElement("section");
+    inputFieldSection.classList.add("query-builder-term-input-fields");
     term.appendChild(inputFieldSection);
 
-    term.append(createTextInput("antecedentTerm" + index + "-var1", "?var1", true, "query-builder-input-text"));
+    inputFieldSection.appendChild(createTextInput("antecedentTerm" + index + "-var1", "?var1", true, "query-builder-input-text"));
 
-    term.append(createSelectWithOptions("antecedentTerm" + index + "rel", "query-builder-input-select",
+    inputFieldSection.appendChild(createSelectWithOptions("antecedentTerm" + index + "rel", "query-builder-input-select",
         "query-builder-input-select-option", ontoRelations));
 
-    term.append(createTextInputWithDatalist("antecedentTerm" + index + "-var2", "?var2", true,
-        ontoClasses.concat(ontoIndividuals), "query-builder-input-text", "query-builder-input-select-option"));
+    let datalist = createDatalist("antecedentTerm" + index + "-datalist-var2", ontoClasses.concat(ontoIndividuals),
+        "query-builder-input-select-option");
 
-    let andText = document.createElement("h3");
-    andText.classList.add("oxanium-purple");
-    andText.innerText = "and";
-    andText.style.display = "none";
-    term.appendChild(andText);
+    inputFieldSection.appendChild(createTextInputWithDatalist("antecedentTerm" + index + "-var2", "?var2", true,
+        "query-builder-input-text", datalist));
+
+    inputFieldSection.appendChild(datalist);
+
+    term.appendChild(createAndText());
 
     let addIcon = document.createElement("h3");
+    addIcon.id = "queryBuilderAntecedentAddTermButton-" + index;
     addIcon.classList.add("oxanium-purple", "no-bottom-margin", "highlight-on-hover", "unselectable");
     addIcon.innerText = "+";
+    addIcon.onclick = function () {
+        antecedentAddNewTermClicked(addIcon.id, ontoClasses, ontoIndividuals, ontoRelations);
+    };
     term.appendChild(addIcon);
 
     return term;
+}
+
+function createAndText() {
+    let andText = document.createElement("h3");
+    andText.classList.add("oxanium-purple");
+    andText.classList.add("no-bottom-margin");
+    andText.innerText = "and";
+    andText.style.display = "none";
+    return andText;
 }
 
 /**
@@ -81,23 +145,35 @@ function createTextInput(id, placeholder, required, ...classes) {
  * @param id The id (and name) to use for the new element.
  * @param placeholder The placeholder text of the input.
  * @param required Is the input required?
- * @param options The list of options to include in the datalist.
  * @param inputClass The CSS class to use for the text field.
- * @param optionClass The CSS class to for each datalist child element.
+ * @param datalist The datalist element to use.
  * @returns {HTMLInputElement}
  */
-function createTextInputWithDatalist(id, placeholder, required, options, inputClass, optionClass) {
+function createTextInputWithDatalist(id, placeholder, required, inputClass, datalist) {
     let input = createTextInput(id, placeholder, required, inputClass);
+    input.setAttribute("list", datalist.id)
+    return input;
+}
+
+/**
+ * Creates a datalist of options.
+ * @param id The ID of the new element to be created.
+ * @param options The list of options to include in the datalist.
+ * @param optionClass The CSS class to for each datalist child element.
+ * @returns {HTMLDataListElement}
+ */
+function createDatalist(id, options, optionClass) {
     let datalist = document.createElement("datalist");
-    for (let option in options) {
+    datalist.id = id;
+    datalist.name = id;
+    options.forEach(option => {
         let optionElement = document.createElement("option");
         optionElement.classList.add(optionClass);
         optionElement.value = option;
         optionElement.innerText = option;
         datalist.appendChild(optionElement);
-    }
-    input.list = datalist;
-    return input;
+    })
+    return datalist;
 }
 
 /**
@@ -113,12 +189,12 @@ function createSelectWithOptions(id, selectClass, optionClass, options) {
     elem.classList.add(selectClass);
     elem.id = id;
     elem.name = id;
-    for (let option in options) {
+    options.forEach(option => {
         let optionElement = document.createElement("option");
         optionElement.classList.add(optionClass);
         optionElement.value = option;
         optionElement.innerText = option;
         elem.appendChild(optionElement);
-    }
+    })
     return elem;
 }

@@ -1,10 +1,10 @@
 <%@ page import="org.semanticweb.owlapi.model.OWLEntity" %>
 <%@ page import="helper.OWLMaster" %>
 <%@ page import="java.util.Set" %>
-<%@ page import="java.util.HashSet" %>
+<%@ page import="helper.Helper" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 
-<script type="text/javascript" src="./static/js/custom.js"></script>
+<script src="./static/js/custom.js"></script>
 
 <html lang="en">
 <head>
@@ -38,6 +38,7 @@
             Set<String> classNames = OWLMaster.getOntologyClassNames(kbPath);
             Set<String> individualNames = OWLMaster.getOntologyIndividualNames(kbPath);
             Set<String> relationNames = OWLMaster.getAllRelationNames(kbPath);
+            Set<String> builtInNames = OWLMaster.getPrefixedBuiltInNames("sqwrl");
         %>
             <h1 class="oxanium-white">You provided this knowledge base:
                 <%= session.getAttribute("uploadFileOriginalName").toString()%></h1><br>
@@ -76,21 +77,42 @@
                                     <% for (String className : classNames) {%>
                                         <option class="query-builder-input-select-option" value="<%=className%>"><%=className%></option>
                                     <%}%>
+                                    <% for (String indivName : individualNames) {%>
+                                    <option class="query-builder-input-select-option" value="<%=indivName%>"><%=indivName%></option>
+                                    <%}%>
                                 </datalist>
                             </section>
 
-                            <!-- Button to add new term -->
                             <h3 class="oxanium-purple no-bottom-margin" style="display: none">and</h3>
 
-                            <!-- FIXME: UncaughtSyntaxException when button is pressed-->
-                            <h3 class="oxanium-purple no-bottom-margin highlight-on-hover unselectable"
-                                onclick="onClick(this.id, <%=classNames%>,<%=individualNames%>, <%=relationNames%>)"><b>+</b></h3>
+                            <h3 id="queryBuilderAntecedentAddTermButton-1" class="oxanium-purple no-bottom-margin highlight-on-hover unselectable"
+                                onclick="antecedentAddNewTermClicked(this.id, <%=Helper.toJSStringList(classNames)%>,
+                                    <%=Helper.toJSStringList(individualNames)%>,
+                                    <%=Helper.toJSStringList(relationNames)%>)"><b>+</b></h3>
                         </section>
                     </section>
                 </section>
                 <section class="query-builder-line">
                     <h3 class="oxanium-purple">Then</h3>
                     <section class="query-builder-section"> <!-- Right side of query (SELECT) -->
+
+                        <section class="query-builder-term">
+                            <section class="query-builder-term-input-fields">
+                                <select class="query-builder-input-select" name="consequentTerm1-rel" id="consequentTerm1-rel">
+                                    <% for (String builtInName : builtInNames) {%>
+                                    <option class="query-builder-input-select-option" value="<%=builtInName%>"><%=builtInName%></option>
+                                    <%}%>
+                                </select>
+
+                                <input class="query-builder-input-text" type="text" id="consequentTerm1-var1"
+                                       name="consequentTerm1-var1" placeholder="?var1, ?var2, ..." required>
+                            </section>
+
+                            <h3 class="oxanium-purple no-bottom-margin" style="display: none">and</h3>
+
+                            <h3 id="queryBuilderConsequentAddTermButton-1" class="oxanium-purple no-bottom-margin highlight-on-hover unselectable"
+                                onclick="consequentAddNewTermClicked(this.id, <%=Helper.toJSStringList(builtInNames)%>)"><b>+</b></h3>
+                        </section>
 
                     </section>
                 </section>
