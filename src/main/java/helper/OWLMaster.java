@@ -2,6 +2,8 @@ package helper;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
+import org.swrlapi.builtins.AbstractSWRLBuiltInLibrary;
+import org.swrlapi.builtins.sqwrl.SWRLBuiltInLibraryImpl;
 import org.swrlapi.factory.SWRLAPIFactory;
 import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLQueryEngine;
@@ -9,6 +11,7 @@ import org.swrlapi.sqwrl.SQWRLResult;
 import org.swrlapi.sqwrl.exceptions.SQWRLException;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -174,7 +177,25 @@ public class OWLMaster {
         relations.add("isDifferentFrom");
         relations.addAll(getOntologyObjectPropertyNames(ontology));
         relations.addAll(getOntologyDataPropertyNames(ontology));
+        //relations.addAll(getPrefixedBuiltInNames("swrlb"));
         return relations;
+    }
+
+    /**
+     * @param prefix The built-in prefix. E.g: swrlb, sqwrl, etc.
+     * @return The set of all (prefixed) names of the built-ins associated with the given prefix.
+     */
+    public static Set<String> getPrefixedBuiltInNames(String prefix) {
+        try {
+            Class<?> library = Class.forName("org.swrlapi.builtins." + prefix + ".SWRLBuiltInLibraryImpl");
+            if (AbstractSWRLBuiltInLibrary.class.isAssignableFrom(library)) {
+                Set<String> names = ((AbstractSWRLBuiltInLibrary) library.getConstructor().newInstance()).getBuiltInNames();
+                return Helper.map(names, x -> prefix + ":" + x);
+            }
+        } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException ex) {
+            ex.printStackTrace();
+        }
+        return new HashSet<>();
     }
 
     /**
@@ -189,8 +210,6 @@ public class OWLMaster {
 
         try {
             SQWRLQueryEngine queryEngine = SWRLAPIFactory.createSQWRLQueryEngine(ontology);
-            for (IRI iri : queryEngine.getSWRLRuleEngine().getSWRLBuiltInIRIs())
-                System.out.println(iri);
             return queryEngine.runSQWRLQuery("q1", query);
         } catch (SWRLParseException | SQWRLException ex) {
             System.out.println(ex.getMessage());
