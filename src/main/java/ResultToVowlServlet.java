@@ -53,6 +53,8 @@ public class ResultToVowlServlet extends HttpServlet {
             req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
             resp.sendRedirect(req.getContextPath() + "/result.jsp");
             e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 }
