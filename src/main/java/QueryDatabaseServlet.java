@@ -11,6 +11,12 @@ import org.swrlapi.sqwrl.SQWRLResult;
 
 import java.io.IOException;
 
+/**
+ * @author Afonso Caniço
+ * @author Afonso Sampaio
+ * @author Gustavo Ferreira
+ * @author Samuel Correia
+ */
 @WebServlet("/queryDatabaseServlet")
 @MultipartConfig
 public class QueryDatabaseServlet extends HttpServlet {

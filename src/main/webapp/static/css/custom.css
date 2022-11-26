@@ -11,6 +11,11 @@
     font-family: 'Oxanium', cursive;
 }
 
+.oxanium-purple {
+    color: #673AB7;
+    font-family: 'Oxanium', cursive;
+}
+
 .solid-purple-bg {
     background-color: #673AB7;
 }
@@ -60,7 +65,7 @@
 }
 
 .text-divider {
-    width: 25%;
+    width: 45%;
     text-align: center;
     background-color: #673AB7;
     line-height: 0.1em;
@@ -90,4 +95,79 @@
     overflow: auto;
     background-color: #090c21;
     margin: auto auto 1rem;
+}
+
+.query-builder-section {
+    max-width: 45rem;
+    min-height: 3.5rem;
+    text-align: left;
+    border: 2px solid #673AB7;
+    border-radius: 5px;
+    max-height: 20rem;
+    overflow: auto;
+    background-color: #090c21;
+    margin: auto auto 1rem;
+}
+
+.query-builder {
+    padding-top: 2rem;
+}
+
+.query-builder-line {
+    padding-bottom: 1rem;
+}
+
+.wide-30rem {
+    width: 30rem;
+}
+
+.query-builder-input-text {
+    margin-left: 0.5rem;
+    background-color: transparent;
+    border: none;
+    color: white;
+    border-bottom: 2px solid #C2A3F9;
+    font-family: 'Oxanium', cursive;
+}
+
+.query-builder-input-select {
+    margin-left: 0.5rem;
+    background-color: transparent;
+    border: none;
+    color: white;
+    border-bottom: 2px solid #C2A3F9;
+    font-family: 'Oxanium', cursive;
+    min-height: 1.75rem;
+}
+
+.query-builder-input-select-option {
+    background-color: #090c21;
+}
+
+.query-builder-term {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.8rem;
+    margin-bottom: 0.8rem;
+}
+
+.query-builder-term-input-fields {
+    overflow:auto;
+    display: flex;
+}
+
+.highlight-on-hover {
+    margin-right: 1rem;
+}
+
+.highlight-on-hover:hover {
+    color: #C2A3F9;
+}
+
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }

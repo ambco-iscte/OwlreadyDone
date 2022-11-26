@@ -14,6 +14,12 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Paths;
 
+/**
+ * @author Afonso Caniço
+ * @author Afonso Sampaio
+ * @author Gustavo Ferreira
+ * @author Samuel Correia
+ */
 @WebServlet("/submitFileServlet")
 @MultipartConfig
 public class SubmitFileServlet extends HttpServlet {
@@ -131,7 +137,7 @@ public class SubmitFileServlet extends HttpServlet {
     }
 
     /**
-     * Does the given string constitute to a valid URL?
+     * Does the given string constitute a valid URL?
      * @return True if the URL is correctly formed. False otherwise.
      */
     private boolean isValidURL(String url) {
