@@ -3,7 +3,7 @@ package helper;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat;
 import org.semanticweb.owlapi.model.*;
-import org.swrlapi.builtins.AbstractSWRLBuiltInLibrary
+import org.swrlapi.builtins.AbstractSWRLBuiltInLibrary;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 import org.swrlapi.factory.SWRLAPIFactory;

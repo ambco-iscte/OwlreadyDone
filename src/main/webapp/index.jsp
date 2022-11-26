@@ -22,7 +22,7 @@
                 <br><br>
                 <!-- Content Start --->
                 <section class="container-fluid row">
-                    <section class="col">
+                    <section class="col oxanium">
                         <aside>
                             <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-white" style="width: 380px;">
                                 <div class="d-flex align-items-center flex-shrink-0 p-3 link-dark text-decoration-none border-bottom">
@@ -70,9 +70,7 @@
                         </form>
 
                         <br><br>
-                        <h2 class="text-divider oxanium-white">
-                            <b>Or</b>
-                        </h2>
+                        <h2 class="text-divider oxanium-white"><b>Or</b></h2>
                         <br><br>
 
                         <form class="no-right-margin margin-top-1rem row g-3" action="submitFileServlet" enctype="multipart/form-data"
