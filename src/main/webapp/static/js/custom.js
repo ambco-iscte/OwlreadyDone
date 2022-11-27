@@ -1,7 +1,8 @@
 /*
  TODO: implement show button for the consequent and its features
        works just for relation isA, precisa de funcionar para as restantes
-       nao está a remover o termo da queryField se so ouver 1 termo
+       if you add a black term and delete it, even without clicking show, the field termToBeRemoved is empty and will create an error where instead of adding the new term it deletes the new term
+
  */
 function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividuals, ontoRelations) {
     if (clickedElementID.toString().startsWith("queryBuilderAntecedentAddTermButton")) {
@@ -16,7 +17,6 @@ function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividu
 
         switch (andText.style.display) {
             case "block": {   // AND is visible, disable the current term.
-                console.log(index)
                 removeQueryTerm("antecedentTerm" + index + "-var1", "antecedentTerm" + index + "-rel", "antecedentTerm" + index + "-var2");
                 term.remove();
                 break;
@@ -140,7 +140,6 @@ function antecedentShow (var1, rel, var2) {
     if (queryBuilderStringValue.includes(name)) {
         alert("You have already added that term!")
     }else
-        //if the field is already filled out, we need to add the new term to the existing one, ex: Term1 ∧ Term2
         if (queryBuilderStringValue !== ""){
             document.getElementById("queryBuilderString").value = queryBuilderStringValue + " ∧ " + name;
         }else
@@ -154,13 +153,17 @@ function constructTerm(var1, rel, var2){
     let var2Value = document.getElementById(var2).value;
     return var2Value + "(" + var1Value + ")";
 }
-//TODO if query field has only 1 term, it wont remove it
+
 function removeQueryTerm(var1, rel, var2){
     let constructedQuery = document.getElementById("queryBuilderString").value;
     let termToBeRemoved = constructTerm(var1, rel, var2);
     if (constructedQuery.includes('∧') && constructedQuery.toString().split(' ∧ ')[0] !== termToBeRemoved)
         termToBeRemoved = " ∧ " + constructTerm(var1, rel, var2);
-    else if (constructedQuery.toString().split(' ∧ ')[0] === termToBeRemoved) termToBeRemoved = constructTerm(var1, rel, var2) + " ∧ ";
+    else {
+        if (!constructedQuery.includes('∧')) termToBeRemoved = constructTerm(var1, rel, var2)
+        else
+            if (constructedQuery.toString().split(' ∧ ')[0] === termToBeRemoved) termToBeRemoved = constructTerm(var1, rel, var2) + " ∧ ";
+    }
     console.log(constructedQuery.includes('∧'))
     console.log(termToBeRemoved)
     document.getElementById("queryBuilderString").value = constructedQuery.replace(termToBeRemoved, '');
