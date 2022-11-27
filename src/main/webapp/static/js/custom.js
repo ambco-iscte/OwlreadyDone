@@ -1,3 +1,8 @@
+/*
+ TODO: implement show button for the consequent and its features
+       works just for relation isA, precisa de funcionar para as restantes
+       nao está a remover o termo da queryField se so ouver 1 termo
+ */
 function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividuals, ontoRelations) {
     if (clickedElementID.toString().startsWith("queryBuilderAntecedentAddTermButton")) {
         let elem = document.getElementById(clickedElementID);
@@ -5,14 +10,21 @@ function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividu
         let section = term.parentElement;
 
         let andText = elem.previousElementSibling;
+
+        let showText = andText.previousElementSibling;
+        let index = clickedElementID.toString().split('-')[1];
+
         switch (andText.style.display) {
             case "block": {   // AND is visible, disable the current term.
+                console.log(index)
+                removeQueryTerm("antecedentTerm" + index + "-var1", "antecedentTerm" + index + "-rel", "antecedentTerm" + index + "-var2");
                 term.remove();
                 break;
             }
             case "none": {  // AND is not visible, make visible and add new term.
                 elem.innerText = "-";
                 andText.style.display = "block";
+                showText.style.display = "block";
                 section.appendChild(createBlankAntecedentTerm(section.childElementCount + 1, ontoClasses, ontoIndividuals, ontoRelations));
                 break;
             }
@@ -50,7 +62,7 @@ function createBlankConsequentTerm(index, builtInNames) {
     inputFieldSection.classList.add("query-builder-term-input-fields");
     term.appendChild(inputFieldSection);
 
-    inputFieldSection.appendChild(createSelectWithOptions("consequentTerm" + index + "rel", "query-builder-input-select",
+    inputFieldSection.appendChild(createSelectWithOptions("consequentTerm" + index + "-rel", "query-builder-input-select",
         "query-builder-input-select-option", builtInNames));
 
     inputFieldSection.appendChild(createTextInput("consequentTerm" + index + "-var1", "?var1, ?var2, ...", true, "query-builder-input-text"));
@@ -87,7 +99,7 @@ function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRela
 
     inputFieldSection.appendChild(createTextInput("antecedentTerm" + index + "-var1", "?var1", true, "query-builder-input-text"));
 
-    inputFieldSection.appendChild(createSelectWithOptions("antecedentTerm" + index + "rel", "query-builder-input-select",
+    inputFieldSection.appendChild(createSelectWithOptions("antecedentTerm" + index + "-rel", "query-builder-input-select",
         "query-builder-input-select-option", ontoRelations));
 
     let datalist = createDatalist("antecedentTerm" + index + "-datalist-var2", ontoClasses.concat(ontoIndividuals),
@@ -97,6 +109,16 @@ function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRela
         "query-builder-input-text", datalist));
 
     inputFieldSection.appendChild(datalist);
+
+    let addTermToDisplayField = document.createElement("h3");
+    addTermToDisplayField.id = "queryBuilderAntecedentAddTermToDisplayField-" + index;
+    addTermToDisplayField.classList.add("oxanium-purple", "no-bottom-margin", "highlight-on-hover", "unselectable");
+    addTermToDisplayField.innerText = "Show";
+    addTermToDisplayField.style.display = "none";
+    addTermToDisplayField.onclick = function () {
+        antecedentShow("antecedentTerm" + index + "-var1", "antecedentTerm" + index + "-rel", "antecedentTerm" + index + "-var2");
+    };
+    term.appendChild(addTermToDisplayField);
 
     term.appendChild(createAndText());
 
@@ -110,6 +132,38 @@ function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRela
     term.appendChild(addIcon);
 
     return term;
+}
+
+function antecedentShow (var1, rel, var2) {
+    let name = constructTerm(var1, rel, var2);
+    let queryBuilderStringValue = document.getElementById("queryBuilderString").value;
+    if (queryBuilderStringValue.includes(name)) {
+        alert("You have already added that term!")
+    }else
+        //if the field is already filled out, we need to add the new term to the existing one, ex: Term1 ∧ Term2
+        if (queryBuilderStringValue !== ""){
+            document.getElementById("queryBuilderString").value = queryBuilderStringValue + " ∧ " + name;
+        }else
+            document.getElementById("queryBuilderString").value = name;
+}
+
+//TODO works only for relation isA but IT IS NOT WORKING! ALSO -> change all relations names so that they have spaces: "isA" => "is a"
+function constructTerm(var1, rel, var2){
+    let var1Value = document.getElementById(var1).value;
+    let varRelValue = document.getElementById(rel).value;
+    let var2Value = document.getElementById(var2).value;
+    return var2Value + "(" + var1Value + ")";
+}
+//TODO if query field has only 1 term, it wont remove it
+function removeQueryTerm(var1, rel, var2){
+    let constructedQuery = document.getElementById("queryBuilderString").value;
+    let termToBeRemoved = constructTerm(var1, rel, var2);
+    if (constructedQuery.includes('∧') && constructedQuery.toString().split(' ∧ ')[0] !== termToBeRemoved)
+        termToBeRemoved = " ∧ " + constructTerm(var1, rel, var2);
+    else if (constructedQuery.toString().split(' ∧ ')[0] === termToBeRemoved) termToBeRemoved = constructTerm(var1, rel, var2) + " ∧ ";
+    console.log(constructedQuery.includes('∧'))
+    console.log(termToBeRemoved)
+    document.getElementById("queryBuilderString").value = constructedQuery.replace(termToBeRemoved, '');
 }
 
 function createAndText() {

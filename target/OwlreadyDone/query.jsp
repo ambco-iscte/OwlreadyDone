@@ -82,6 +82,8 @@
                                     <%}%>
                                 </datalist>
                             </section>
+                            <h3 id="queryBuilderAntecedentAddTermToDisplayField-1" class="oxanium-purple no-bottom-margin highlight-on-hover unselectable" style="display: none"
+                                onclick="antecedentShow('antecedentTerm1-var1', 'antecedentTerm1-rel', 'antecedentTerm1-var2')"><b>Show</b></h3>
 
                             <h3 class="oxanium-purple no-bottom-margin" style="display: none">and</h3>
 
