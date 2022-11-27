@@ -10,9 +10,11 @@ import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import org.semanticweb.owlapi.util.OWLOntologyWalker;
 import org.semanticweb.owlapi.util.OWLOntologyWalkerVisitorEx;
+import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLResult;
 import org.swrlapi.sqwrl.exceptions.SQWRLException;
 import org.swrlapi.sqwrl.values.SQWRLClassResultValue;
+import org.swrlapi.sqwrl.values.SQWRLLiteralResultValue;
 import org.swrlapi.sqwrl.values.SQWRLNamedIndividualResultValue;
 
 import java.io.File;
@@ -28,11 +30,12 @@ import static helper.SubmitToGitHub.createFile;
 public class OWLOntologyCreator {
 
 
-    public static OWLOntology resultToOntology(SQWRLResult result, OWLOntology originalOntology, ServletContext context, Boolean saveFile, String fileName)
+    public static OWLOntology resultToOntology(SQWRLResult result, OWLQueryManager queryManager, ServletContext context, Boolean saveFile, String fileName)
             throws OWLOntologyCreationException, ClassNotFoundException {
         //TODO
         //String document_iri = "http://www.semanticweb.org/owlreadyDone/ontologies/2022/10/result.owl";
 
+        OWLOntology originalOntology = queryManager.getOntology();
         //get IRI if present
         Optional<IRI> document_iri_optional = originalOntology.getOntologyID().getOntologyIRI();
         IRI document_iri = null;
@@ -72,42 +75,46 @@ public class OWLOntologyCreator {
 
             while (result.next()){
 
-                //for each relevant class
-                String className = "resultClass";
-                OWLClass xClass = factory.getOWLClass(className, pm);
-                manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xClass));
-
                 if (result.hasNamedIndividualValue("x")) {
                     //x deve depender do target da query
 
                     SQWRLNamedIndividualResultValue individual = result.getNamedIndividual("x");
-                    System.out.println("Added named individual to query result ontology");
+                    System.out.println(individual);
                     OWLNamedIndividual xIndividual = factory.getOWLNamedIndividual(individual.toString(), pm);
                     manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xIndividual));
 
                     //associate individual to class
-                    manager.addAxiom(ontology, factory.getOWLClassAssertionAxiom(xClass, xIndividual));
+                    SQWRLResult classResults = queryManager.query("abox:caa(?x, "+ individual +") -> sqwrl:select(?x)");
+                    //for each relevant class
+                    while(classResults.next()){
+                        if(classResults.hasClassValue("x")){
+                            SQWRLClassResultValue classr = classResults.getClass("x");
+                            System.out.println("Found class: " +classr+" of individual: " + individual);
+                            OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
+                            manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xclassr));
+                            manager.addAxiom(ontology, factory.getOWLClassAssertionAxiom(xclassr, xIndividual));
+                        }
+                    }
                 }
 
-                /*
-                if (result.hasLiteralValue("x"))
-                    result.getLiteral("x");
+
+                if (result.hasLiteralValue("x")) {
+                    SQWRLLiteralResultValue literalResultValue = result.getLiteral("x");
+                    System.out.println(literalResultValue);
+                }
 
                 if (result.hasClassValue("x")) {
                     SQWRLClassResultValue classr = result.getClass("x");
+                    System.out.println(classr);
                     OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
-                    if(!reasoner.isSatisfiable(xclassr)) {
-                        System.out.println("XXX: " + classr.toString());
-                    }
                 }
-                */
+
             }
-            //Reset to first result row
+            //Reset to first row of results
             result.reset();
 
             if(saveFile){
                 try {
-
                     File file = new File(DirectoryHelper.getDirectory(context, "result-dir")
                             + File.separator + "result_" + fileName);
                     manager.saveOntology(ontology, format, IRI.create(file.toURI()));
@@ -124,6 +131,7 @@ public class OWLOntologyCreator {
 
         }
         catch(SQWRLException ex) { ex.printStackTrace(); }
+        catch (SWRLParseException e) { throw new RuntimeException(e); }
 
         return null;
         /*

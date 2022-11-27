@@ -1,17 +1,15 @@
 import helper.DirectoryHelper;
+import helper.OWLQueryManager;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.swrlapi.sqwrl.SQWRLResult;
 
 import java.io.IOException;
-
-import static helper.OWLMaster.getOntologyFromFile;
 import static helper.OWLOntologyCreator.resultToOntology;
 
 @WebServlet("/resultToVowlServlet")
@@ -21,6 +19,7 @@ public class ResultToVowlServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         SQWRLResult result = (SQWRLResult) req.getSession().getAttribute("queryResultObject");
+        OWLQueryManager queryManager = (OWLQueryManager) req.getSession().getAttribute("queryManager");
 
         if (result == null) {
             req.getSession().setAttribute("errorMessage", "It seems there are no query results to visualize!");
@@ -28,9 +27,8 @@ public class ResultToVowlServlet extends HttpServlet {
             return;
         }
         String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
-        OWLOntology originalOntology = getOntologyFromFile(ontoKbPath);
         try {
-            if(resultToOntology(result, originalOntology, getServletContext(), true, DirectoryHelper.getFileName(ontoKbPath)) == null) {
+            if(resultToOntology(result, queryManager, getServletContext(), true, DirectoryHelper.getFileName(ontoKbPath)) == null) {
                 req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
                 resp.sendRedirect(req.getContextPath() + "/result.jsp");
             }

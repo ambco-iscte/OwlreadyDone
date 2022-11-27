@@ -13,7 +13,6 @@ import java.util.Objects;
  */
 public class DirectoryHelper {
 
-
     /**
      * @return The full path of the upload directory of the application, as defined in web.xml
      */

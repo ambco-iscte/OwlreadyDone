@@ -59,7 +59,10 @@
                                 </section>
                             </section>
                         </form>
-                    <% } catch (SQWRLException ex) { ex.printStackTrace(); } %>
+                    <% } catch (SQWRLException ex) {
+                        ex.printStackTrace(); %>
+                        <h3 class="oxanium-white">An error has occured while displaying your query results</h3>
+                    <%} %>
                 <%} else {%>
                     <h3 class="oxanium-white">Seems like we're missing something here...</h3>
                     <h3 class="oxanium-white">Are you sure you accessed this page the way you're supposed to?</h3>
