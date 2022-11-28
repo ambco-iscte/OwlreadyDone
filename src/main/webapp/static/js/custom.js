@@ -1,8 +1,6 @@
 /*
  TODO: implement show button for the consequent and its features
-       works just for relation isA, precisa de funcionar para as restantes
-       if you add a black term and delete it, even without clicking show, the field termToBeRemoved is empty and will create an error where instead of adding the new term it deletes the new term
-
+       Nas relacoes faltam as Built-in functions. E.g., the math built-in swrlb:greaterThan(?np, 1) succeeds if the value of ?np is greater than 1.
  */
 function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividuals, ontoRelations) {
     if (clickedElementID.toString().startsWith("queryBuilderAntecedentAddTermButton")) {
@@ -15,13 +13,25 @@ function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividu
         let showText = andText.previousElementSibling;
         let index = clickedElementID.toString().split('-')[1];
 
+        let var1 = "antecedentTerm" + index + "-var1"
+        let rel = "antecedentTerm" + index + "-rel"
+        let var2 = "antecedentTerm" + index + "-var2"
+
         switch (andText.style.display) {
             case "block": {   // AND is visible, disable the current term.
-                removeQueryTerm("antecedentTerm" + index + "-var1", "antecedentTerm" + index + "-rel", "antecedentTerm" + index + "-var2");
+                if (checkIfMissingVariables(var1, rel, var2)) {
+                    alert("Unable to add new term: Check if the term fields are correctly filled out!")
+                    break;
+                }
+                removeQueryTerm(var1, rel, var2);
                 term.remove();
                 break;
             }
             case "none": {  // AND is not visible, make visible and add new term.
+                if (checkIfMissingVariables(var1, rel, var2)) {
+                    alert("Unable to add new term: Check if the term fields are correctly filled out!")
+                    break;
+                }
                 elem.innerText = "-";
                 andText.style.display = "block";
                 showText.style.display = "block";
@@ -134,6 +144,25 @@ function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRela
     return term;
 }
 
+/**
+ * Checks if a given term is missing variables
+ * @param var1
+ * @param rel
+ * @param var2
+ */
+function checkIfMissingVariables(var1, rel, var2){
+    let term = constructTerm(var1, rel, var2);
+    console.log(term.includes("?undefined"))
+    console.log(term.includes("()"))
+    return term.includes("?undefined") || term.includes("()")
+}
+
+/**
+ * Given the term variables, it constructs a Term in SQWRL format and appends it to the queryField in query,jsp
+ * @param var1 corresponds to first variable of the antecedent
+ * @param rel corresponds to second variable of the antecedent
+ * @param var2 corresponds to third variable of the antecedent
+ */
 function antecedentShow (var1, rel, var2) {
     let name = constructTerm(var1, rel, var2);
     let queryBuilderStringValue = document.getElementById("queryBuilderString").value;
@@ -146,17 +175,33 @@ function antecedentShow (var1, rel, var2) {
             document.getElementById("queryBuilderString").value = name;
 }
 
-//TODO works only for relation isA but IT IS NOT WORKING! ALSO -> change all relations names so that they have spaces: "isA" => "is a"
+/**
+ * Given the variables it creates a SQWRL term
+ * @param var1 corresponds to first variable of the antecedent
+ * @param rel corresponds to second variable of the antecedent
+ * @param var2 corresponds to third variable of the antecedent
+ * @returns {string} returns the given variables in the SQWRL query format
+ */
 function constructTerm(var1, rel, var2){
     let var1Value = document.getElementById(var1).value;
     let varRelValue = document.getElementById(rel).value;
     let var2Value = document.getElementById(var2).value;
-    return var2Value + "(" + var1Value + ")";
+
+    if (varRelValue.toString().includes("isA")) return var2Value + "(" + var1Value + ")";
+    else {
+        return varRelValue + "(?" + var1Value.toString().split('?')[1] + " ,?" + var1Value.toString().split('?')[2] + ")";}
 }
 
+/**
+ * Removes the given term from the queryField in query.jsp
+ * @param var1 corresponds to first variable of the antecedent
+ * @param rel corresponds to second variable of the antecedent
+ * @param var2 corresponds to third variable of the antecedent
+ */
 function removeQueryTerm(var1, rel, var2){
     let constructedQuery = document.getElementById("queryBuilderString").value;
     let termToBeRemoved = constructTerm(var1, rel, var2);
+    console.log("Term to be removed "+termToBeRemoved)
     if (constructedQuery.includes('∧') && constructedQuery.toString().split(' ∧ ')[0] !== termToBeRemoved)
         termToBeRemoved = " ∧ " + constructTerm(var1, rel, var2);
     else {
@@ -164,8 +209,6 @@ function removeQueryTerm(var1, rel, var2){
         else
             if (constructedQuery.toString().split(' ∧ ')[0] === termToBeRemoved) termToBeRemoved = constructTerm(var1, rel, var2) + " ∧ ";
     }
-    console.log(constructedQuery.includes('∧'))
-    console.log(termToBeRemoved)
     document.getElementById("queryBuilderString").value = constructedQuery.replace(termToBeRemoved, '');
 }
 

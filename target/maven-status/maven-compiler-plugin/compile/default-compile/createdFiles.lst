@@ -1,4 +1,5 @@
 helper\DirectoryHelper.class
+QueryFormServlet.class
 helper\OWLMaster.class
 helper\Helper.class
 SubmitFileServlet.class
