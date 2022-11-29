@@ -28,6 +28,7 @@ public class QueryDatabaseServlet extends HttpServlet {
             String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
             SQWRLResult result = OWLMaster.query(ontoKbPath, query);
             if (result != null) {
+                req.getSession().removeAttribute("queryResultObject");
                 req.getSession().setAttribute("queryString", query);
                 req.getSession().setAttribute("queryResultObject", result);
                 resp.sendRedirect(req.getContextPath() + "/result.jsp");

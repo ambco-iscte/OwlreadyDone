@@ -29,6 +29,7 @@ public class SubmitFileServlet extends HttpServlet {
         Part filePart = req.getPart("formFile");
         String url = req.getParameter("formUrl");
 
+
         String fileName = null;
         String filePath = null;
 
@@ -41,31 +42,41 @@ public class SubmitFileServlet extends HttpServlet {
             filePath = getFileFromURL(url).getAbsolutePath();
         }
 
+        showQueryPage(req, resp, fileName, filePath,"Couldn't find uploaded file or given URL.");
+    }
+
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        File[] files = DirectoryHelper.getFiles(getServletContext(), "upload-dir");
+        if(files == null){
+            req.getSession().setAttribute("errorMessage", "There are no recent files!");
+            resp.sendRedirect(req.getContextPath() + "/index.jsp");
+            return;
+        }
+
+        String recentFileName = req.getParameter("recentFile");
+        String filePath = null;
+
+        for (File file : files) {
+            if (file.getName().equals(recentFileName)) {
+                filePath = file.getAbsolutePath();
+                break;
+            }
+        }
+        showQueryPage(req, resp, recentFileName, filePath, "Couldn't find the specified file.");
+    }
+
+    private void showQueryPage(HttpServletRequest req, HttpServletResponse resp, String fileName, String filePath,
+                               String errorMessage) throws IOException {
         if (filePath != null) {
             req.getSession().setAttribute("uploadedFilePath", filePath);
             req.getSession().setAttribute("uploadFileOriginalName", fileName);
             resp.sendRedirect(req.getContextPath() + "/query.jsp");
         } else {
-            req.getSession().setAttribute("errorMessage", "Couldn't find uploaded file or given URL.");
+            req.getSession().setAttribute("errorMessage", errorMessage);
             resp.sendRedirect(req.getContextPath() + "/index.jsp");
         }
-    }
-
-    /**
-     * @return The full path of the upload directory of the application, as defined in web.xml
-     */
-    private String getUploadDirectory() {
-        String uploadDir = getServletContext().getInitParameter("upload-dir");
-        String path = getServletContext().getRealPath("") + File.separator + uploadDir;
-
-        File dir = new File(path);
-        if (!dir.exists()) {
-            boolean created = dir.mkdirs();
-            if (created)
-                System.out.println("Upload directory not present, has been created.");
-        }
-
-        return path;
     }
 
     /**
@@ -82,9 +93,10 @@ public class SubmitFileServlet extends HttpServlet {
      * @return A valid file name which avoids overwriting if a file with the attempted name already exists.
      */
     private String getValidUploadFilePath(String attemptedFilename) {
-        String filePath = getUploadDirectory() + File.separator + attemptedFilename;
+        String dirPath = DirectoryHelper.getDirectory(getServletContext(), "upload-dir").getAbsolutePath();
+        String filePath = dirPath + File.separator + attemptedFilename;
         for (int i = 1; new File(filePath).exists(); i++) {
-            filePath = getUploadDirectory() + File.separator + i + "_" + attemptedFilename;
+            filePath = dirPath + File.separator + i + "_" + attemptedFilename;
         }
         return filePath;
     }
@@ -99,7 +111,7 @@ public class SubmitFileServlet extends HttpServlet {
         String filePath = getValidUploadFilePath(getFilenameFromPart(part));
         part.write(filePath);
 
-        DirectoryHelper.purgeUploadDirectoryIfFull(getServletContext());
+        DirectoryHelper.purgeUploadDirectoryIfFull(getServletContext(), "upload-dir", "stored-upload-limit");
         return new File(filePath);
     }
 
@@ -120,7 +132,7 @@ public class SubmitFileServlet extends HttpServlet {
         channel.close();
         fileOutputStream.close();
 
-        DirectoryHelper.purgeUploadDirectoryIfFull(getServletContext());
+        DirectoryHelper.purgeUploadDirectoryIfFull(getServletContext(), "upload-dir", "stored-upload-limit");
         return new File(filePath);
     }
 
