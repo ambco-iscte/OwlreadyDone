@@ -97,7 +97,7 @@ public class OWLOntologyCreator {
 
         }
         catch(SQWRLException ex) { ex.printStackTrace(); }
-        catch (SWRLParseException e) { throw new RuntimeException(e); }
+        catch (SWRLParseException e) { e.printStackTrace();}
 
         return null;
         /*
@@ -144,7 +144,7 @@ public class OWLOntologyCreator {
         if (result.hasClassValue("x")) {
             SQWRLClassResultValue classr = result.getClass("x");
             System.out.println(classr);
-            OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
+            //OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
         }
     }
 
@@ -166,8 +166,8 @@ public class OWLOntologyCreator {
     }
 
     private static void getAndAddSuperclasses(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
-                                              OWLOntology ontology, DefaultPrefixManager pm, SQWRLResult classResults,
-                                              SQWRLClassResultValue classr, OWLClass xclassr) throws SWRLParseException, SQWRLException {
+                                              OWLOntology ontology, DefaultPrefixManager pm, SQWRLClassResultValue classr,
+                                              OWLClass xclassr) throws SWRLParseException, SQWRLException {
         SQWRLResult superClassResults = queryManager.query("tbox:sca("+ classr +", ?x) -> sqwrl:select(?x)");
         while(superClassResults.next()){
             if(superClassResults.hasClassValue("x")){
@@ -179,5 +179,4 @@ public class OWLOntologyCreator {
             }
         }
     }
-
 }

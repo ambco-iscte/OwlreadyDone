@@ -7,14 +7,19 @@ import org.swrlapi.sqwrl.SQWRLQueryEngine;
 import org.swrlapi.sqwrl.SQWRLResult;
 import org.swrlapi.sqwrl.exceptions.SQWRLException;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+
 public class OWLQueryManager {
 
     private final OWLOntology ontology;
     private final SQWRLQueryEngine queryEngine;
+    private int queryCounter;
 
     public OWLQueryManager(OWLOntology ontology) {
         this.ontology = ontology;
         this.queryEngine = SWRLAPIFactory.createSQWRLQueryEngine(ontology);
+        queryCounter = 0;
     }
 
     /**
@@ -26,7 +31,7 @@ public class OWLQueryManager {
         if (ontology == null || query == null)
             return null;
 
-        return queryEngine.runSQWRLQuery("q1", query);
+        return queryEngine.runSQWRLQuery("q" + queryCounter++, query);
     }
 
     public OWLOntology getOntology() {
