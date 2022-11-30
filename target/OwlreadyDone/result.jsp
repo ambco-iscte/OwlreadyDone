@@ -35,6 +35,7 @@
                                         <%if (result.isEmpty()) { %>
                                             <p class="oxanium text-muted">Seems like the result is empty.</p>
                                         <%}
+                                        result.reset();
                                         while (result.next()) {%>
                                             <li>
                                                 <!-- Para aceitar qualquer tipo de query e apresentar resultados -->
@@ -52,9 +53,6 @@
                                         <% } %>
                                     </ul>
                                 </section>
-
-                                <%//Reset to first result row
-                                result.reset();%>
                                 <br><br>
                                 <form class="no-right-margin margin-top-1rem row g-3" action="resultToVowlServlet" enctype="multipart/form-data" method="post">
                                     <section class="container mb-3">

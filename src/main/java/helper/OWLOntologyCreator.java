@@ -70,14 +70,11 @@ public class OWLOntologyCreator {
             for (Map.Entry<String,String> entry : format.asPrefixOWLOntologyFormat().getPrefixName2PrefixMap().entrySet())
                 pm.setPrefix(entry.getKey(), entry.getValue());
 
-            //OWLReasonerFactory reasonerFactory = (OWLReasonerFactory) Class.forName(null).newInstance();
-            //OWLReasoner reasoner = reasonerFactory.createNonBufferingReasoner(originalOntology);
-
+            //Reset to first row of results
+            result.reset();
             while (result.next()){
                 addResultsToOntology(result, queryManager, manager, factory, ontology, pm);
             }
-            //Reset to first row of results
-            result.reset();
 
             if(saveFile){
                 try {
