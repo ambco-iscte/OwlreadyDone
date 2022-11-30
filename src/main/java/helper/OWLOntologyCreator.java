@@ -13,9 +13,7 @@ import org.semanticweb.owlapi.util.OWLOntologyWalkerVisitorEx;
 import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLResult;
 import org.swrlapi.sqwrl.exceptions.SQWRLException;
-import org.swrlapi.sqwrl.values.SQWRLClassResultValue;
-import org.swrlapi.sqwrl.values.SQWRLLiteralResultValue;
-import org.swrlapi.sqwrl.values.SQWRLNamedIndividualResultValue;
+import org.swrlapi.sqwrl.values.*;
 
 import java.io.File;
 import java.util.Collection;
@@ -124,12 +122,18 @@ public class OWLOntologyCreator {
             //x deve depender do target da query
 
             SQWRLNamedIndividualResultValue individual = result.getNamedIndividual("x");
-            System.out.println(individual);
-            OWLNamedIndividual xIndividual = factory.getOWLNamedIndividual(individual.toString(), pm);
-            manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xIndividual));
+            System.out.println("Individual: " + individual);
+            OWLNamedIndividual xindividual = factory.getOWLNamedIndividual(individual.toString(), pm);
+            manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xindividual));
 
             //associate individual to class, as well as superclasses of classes
-            getAndAddClasses(queryManager, manager, factory, ontology, pm, individual, xIndividual);
+            getAndAddClasses(queryManager, manager, factory, ontology, pm, individual, xindividual);
+
+            //estes dois métodos requerem mais testes,
+            // com cada pesquisa destas demora mais tempo a criação da ontologia final
+            getAndAddDataProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
+            getAndAddObjectProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
+
         }
 
 
@@ -147,7 +151,7 @@ public class OWLOntologyCreator {
 
     private static void getAndAddClasses(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
                                          OWLOntology ontology, DefaultPrefixManager pm, SQWRLNamedIndividualResultValue individual,
-                                         OWLNamedIndividual xIndividual) throws SWRLParseException, SQWRLException {
+                                         OWLNamedIndividual xindividual) throws SWRLParseException, SQWRLException {
         SQWRLResult classResults = queryManager.query("abox:caa(?x, "+ individual +") -> sqwrl:select(?x)");
         while(classResults.next()){
             if(classResults.hasClassValue("x")){
@@ -155,12 +159,48 @@ public class OWLOntologyCreator {
                 System.out.println("Found class: " +classr+" of individual: " + individual);
                 OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
                 manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xclassr));
-                manager.addAxiom(ontology, factory.getOWLClassAssertionAxiom(xclassr, xIndividual));
+                manager.addAxiom(ontology, factory.getOWLClassAssertionAxiom(xclassr, xindividual));
 
-                //(queryManager, manager, factory, ontology, pm, classResults, classr, xclassr);
+                //getAndAddSuperclasses(queryManager, manager, factory, ontology, pm, classResults, classr, xclassr);
             }
         }
     }
+
+    private static void getAndAddDataProperties(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
+                                                OWLOntology ontology, DefaultPrefixManager pm, SQWRLNamedIndividualResultValue individual,
+                                                OWLNamedIndividual xindividual) throws SWRLParseException, SQWRLException {
+        SQWRLResult dataPropertyResults = queryManager.query("abox:dpaa("+ individual +", ?p, ?v) -> sqwrl:select(?p, ?v)");
+
+        while(dataPropertyResults.next()){
+            if(dataPropertyResults.hasObjectPropertyValue("p") && dataPropertyResults.hasLiteralValue("v")){
+                SQWRLDataPropertyResultValue property = dataPropertyResults.getDataProperty("p");
+                SQWRLLiteralResultValue value = dataPropertyResults.getLiteral("v");
+                System.out.println("Found data property: " +property+" with value: " + value);
+                OWLDataProperty xproperty = factory.getOWLDataProperty(property.toString(), pm);
+                OWLLiteral xvalue = factory.getOWLLiteral(value.toString());
+                manager.addAxiom(ontology, factory.getOWLDataPropertyAssertionAxiom(xproperty, xindividual, xvalue));
+            }
+        }
+    }
+
+    //esta função pode ser problemática quando adiciona referências a objetos que não estão declarados por si só.
+    private static void getAndAddObjectProperties(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
+                                                  OWLOntology ontology, DefaultPrefixManager pm, SQWRLNamedIndividualResultValue individual,
+                                                  OWLNamedIndividual xindividual) throws SWRLParseException, SQWRLException {
+        SQWRLResult objectPropertyResults = queryManager.query("abox:opaa("+ individual +", ?p, ?o) -> sqwrl:select(?p, ?o)");
+
+        while(objectPropertyResults.next()){
+            if(objectPropertyResults.hasObjectPropertyValue("p") && objectPropertyResults.hasNamedIndividualValue("o")){
+                SQWRLObjectPropertyResultValue property = objectPropertyResults.getObjectProperty("p");
+                SQWRLNamedIndividualResultValue object = objectPropertyResults.getNamedIndividual("o");
+                System.out.println("Found property: " +property+" with individual: " + object);
+                OWLObjectProperty xproperty = factory.getOWLObjectProperty(property.toString(), pm);
+                OWLNamedIndividual xobject = factory.getOWLNamedIndividual(object.toString(), pm);
+                manager.addAxiom(ontology, factory.getOWLObjectPropertyAssertionAxiom(xproperty, xindividual, xobject));
+            }
+        }
+    }
+
 
     private static void getAndAddSuperclasses(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
                                               OWLOntology ontology, DefaultPrefixManager pm, SQWRLClassResultValue classr,
