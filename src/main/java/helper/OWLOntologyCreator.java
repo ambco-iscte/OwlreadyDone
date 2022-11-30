@@ -118,34 +118,37 @@ public class OWLOntologyCreator {
 
     private static void addResultsToOntology(SQWRLResult result, OWLQueryManager queryManager, OWLOntologyManager manager,
                                              OWLDataFactory factory, OWLOntology ontology, DefaultPrefixManager pm) throws SQWRLException, SWRLParseException {
-        if (result.hasNamedIndividualValue("x")) {
-            //x deve depender do target da query
+        int numOfColumns = result.getNumberOfColumns();
+        for(int i = 0; i < numOfColumns; i++){
+            if (result.hasNamedIndividualValue(i)) {
+                //x deve depender do target da query
 
-            SQWRLNamedIndividualResultValue individual = result.getNamedIndividual("x");
-            System.out.println("Individual: " + individual);
-            OWLNamedIndividual xindividual = factory.getOWLNamedIndividual(individual.toString(), pm);
-            manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xindividual));
+                SQWRLNamedIndividualResultValue individual = result.getNamedIndividual(i);
+                System.out.println("Individual: " + individual);
+                OWLNamedIndividual xindividual = factory.getOWLNamedIndividual(individual.toString(), pm);
+                manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xindividual));
 
-            //associate individual to class, as well as superclasses of classes
-            getAndAddClasses(queryManager, manager, factory, ontology, pm, individual, xindividual);
+                //associate individual to class, as well as superclasses of classes
+                getAndAddClasses(queryManager, manager, factory, ontology, pm, individual, xindividual);
 
-            //estes dois métodos requerem mais testes,
-            // com cada pesquisa destas demora mais tempo a criação da ontologia final
-            getAndAddDataProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
-            getAndAddObjectProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
+                //estes dois métodos requerem mais testes,
+                // com cada pesquisa destas demora mais tempo a criação da ontologia final
+                getAndAddDataProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
+                getAndAddObjectProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
 
-        }
+            }
 
 
-        if (result.hasLiteralValue("x")) {
-            SQWRLLiteralResultValue literalResultValue = result.getLiteral("x");
-            System.out.println(literalResultValue);
-        }
+            if (result.hasLiteralValue(i)) {
+                SQWRLLiteralResultValue literalResultValue = result.getLiteral(i);
+                System.out.println(literalResultValue);
+            }
 
-        if (result.hasClassValue("x")) {
-            SQWRLClassResultValue classr = result.getClass("x");
-            System.out.println(classr);
-            //OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
+            if (result.hasClassValue(i)) {
+                SQWRLClassResultValue classr = result.getClass(i);
+                System.out.println(classr);
+                //OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
+            }
         }
     }
 

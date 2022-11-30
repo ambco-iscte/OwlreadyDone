@@ -1,5 +1,6 @@
 <%@ page import="org.swrlapi.sqwrl.SQWRLResult" %>
 <%@ page import="org.swrlapi.sqwrl.exceptions.SQWRLException" %>
+<%@ page import="java.util.List" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <html lang="en">
@@ -36,21 +37,24 @@
                                             <p class="oxanium text-muted">Seems like the result is empty.</p>
                                         <%}
                                         result.reset();
-                                        while (result.next()) {%>
-                                            <li>
-                                                <!-- Para aceitar qualquer tipo de query e apresentar resultados -->
-                                                <% if (result.hasLiteralValue("x")) {%>
-                                                    <p class="oxanium-white">Literal x: <%= result.getLiteral("x") %>
-                                                <% } %></p>
-                                                <% if (result.hasNamedIndividualValue("x")) { %>
-                                                    <p class="oxanium-white">Named Individual x: <%= result.getNamedIndividual("x") %>
+                                        while (result.next()) {
+                                            for (String column: result.getColumnNames()) { %>
+                                                <li>
+                                                    <!-- Para aceitar qualquer tipo de query e apresentar resultados -->
+                                                    <% if (result.hasLiteralValue(column)) {%>
+                                                        <p class="oxanium-white">Literal <%= column %>: <%= result.getLiteral(column) %>
+                                                    <% } %></p>
 
-                                                <% } %></p>
-                                                <% if (result.hasClassValue("x")) {%>
-                                                    <p class="oxanium-white">Class x: <%= result.getClass("x") %>
-                                                <% } %></p>
-                                            </li>
-                                        <% } %>
+                                                    <% if (result.hasNamedIndividualValue(column)) { %>
+                                                        <p class="oxanium-white">Named Individual <%= column %>: <%= result.getNamedIndividual(column) %>
+                                                    <% } %></p>
+
+                                                    <% if (result.hasClassValue(column)) {%>
+                                                        <p class="oxanium-white">Class <%= column %>: <%= result.getClass(column) %>
+                                                    <% } %></p>
+                                                </li>
+                                            <%}%>
+                                        <%}%>
                                     </ul>
                                 </section>
                                 <br><br>
