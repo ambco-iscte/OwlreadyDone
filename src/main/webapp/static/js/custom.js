@@ -1,5 +1,6 @@
 /*
  TODO: implement show button for the consequent and its features
+        Secalhar será boa ideia ter um botao de refresh, ja que caso uma pessoa altere o campo depois de clicar show, não vai conseguir apagar esse termo do query field
        Nas relacoes faltam as Built-in functions. E.g., the math built-in swrlb:greaterThan(?np, 1) succeeds if the value of ?np is greater than 1.
  */
 function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividuals, ontoRelations) {
@@ -10,7 +11,6 @@ function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividu
 
         let andText = elem.previousElementSibling;
 
-        let showText = andText.previousElementSibling;
         let index = clickedElementID.toString().split('-')[1];
 
         let var1 = "antecedentTerm" + index + "-var1"
@@ -23,7 +23,7 @@ function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividu
                     alert("Unable to add new term: Check if the term fields are correctly filled out!")
                     break;
                 }
-                removeQueryTerm(var1, rel, var2);
+                //removeQueryTerm(var1, rel, var2);
                 term.remove();
                 break;
             }
@@ -34,7 +34,6 @@ function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividu
                 }
                 elem.innerText = "-";
                 andText.style.display = "block";
-                showText.style.display = "block";
                 section.appendChild(createBlankAntecedentTerm(section.childElementCount + 1, ontoClasses, ontoIndividuals, ontoRelations));
                 break;
             }
@@ -120,16 +119,6 @@ function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRela
 
     inputFieldSection.appendChild(datalist);
 
-    let addTermToDisplayField = document.createElement("h3");
-    addTermToDisplayField.id = "queryBuilderAntecedentAddTermToDisplayField-" + index;
-    addTermToDisplayField.classList.add("oxanium-purple", "no-bottom-margin", "highlight-on-hover", "unselectable");
-    addTermToDisplayField.innerText = "Show";
-    addTermToDisplayField.style.display = "none";
-    addTermToDisplayField.onclick = function () {
-        antecedentShow("antecedentTerm" + index + "-var1", "antecedentTerm" + index + "-rel", "antecedentTerm" + index + "-var2");
-    };
-    term.appendChild(addTermToDisplayField);
-
     term.appendChild(createAndText());
 
     let addIcon = document.createElement("h3");
@@ -146,15 +135,12 @@ function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRela
 
 /**
  * Checks if a given term is missing variables
- * @param var1
- * @param rel
- * @param var2
+ * @param var1 corresponds to first variable of the antecedent
+ * @param rel corresponds to second variable of the antecedent
+ * @param var2 corresponds to third variable of the antecedent
  */
 function checkIfMissingVariables(var1, rel, var2){
-    let term = constructTerm(var1, rel, var2);
-    console.log(term.includes("?undefined"))
-    console.log(term.includes("()"))
-    return term.includes("?undefined") || term.includes("()")
+    return (constructTerm(var1, rel, var2).includes("?undefined") || constructTerm(var1, rel, var2).includes("()")) && constructTerm(var1, rel, var2) !== ''
 }
 
 /**
@@ -166,11 +152,8 @@ function checkIfMissingVariables(var1, rel, var2){
 function antecedentShow (var1, rel, var2) {
     let name = constructTerm(var1, rel, var2);
     let queryBuilderStringValue = document.getElementById("queryBuilderString").value;
-    if (queryBuilderStringValue.includes(name)) {
-        alert("You have already added that term!")
-    }else
         if (queryBuilderStringValue !== ""){
-            document.getElementById("queryBuilderString").value = queryBuilderStringValue + " ∧ " + name;
+            document.getElementById("queryBuilderString").value = queryBuilderStringValue + " ^ " + name;
         }else
             document.getElementById("queryBuilderString").value = name;
 }
@@ -183,33 +166,41 @@ function antecedentShow (var1, rel, var2) {
  * @returns {string} returns the given variables in the SQWRL query format
  */
 function constructTerm(var1, rel, var2){
+    if (document.getElementById(var1) === null) {
+        return '';}
     let var1Value = document.getElementById(var1).value;
     let varRelValue = document.getElementById(rel).value;
     let var2Value = document.getElementById(var2).value;
-
     if (varRelValue.toString().includes("isA")) return var2Value + "(" + var1Value + ")";
-    else {
-        return varRelValue + "(?" + var1Value.toString().split('?')[1] + " ,?" + var1Value.toString().split('?')[2] + ")";}
+    else return varRelValue + "(?" + var1Value.toString().split('?')[1] + " ,?" + var1Value.toString().split('?')[2] + ")";
 }
 
 /**
- * Removes the given term from the queryField in query.jsp
- * @param var1 corresponds to first variable of the antecedent
- * @param rel corresponds to second variable of the antecedent
- * @param var2 corresponds to third variable of the antecedent
+ * cleans the query field
  */
-function removeQueryTerm(var1, rel, var2){
-    let constructedQuery = document.getElementById("queryBuilderString").value;
-    let termToBeRemoved = constructTerm(var1, rel, var2);
-    console.log("Term to be removed "+termToBeRemoved)
-    if (constructedQuery.includes('∧') && constructedQuery.toString().split(' ∧ ')[0] !== termToBeRemoved)
-        termToBeRemoved = " ∧ " + constructTerm(var1, rel, var2);
-    else {
-        if (!constructedQuery.includes('∧')) termToBeRemoved = constructTerm(var1, rel, var2)
-        else
-            if (constructedQuery.toString().split(' ∧ ')[0] === termToBeRemoved) termToBeRemoved = constructTerm(var1, rel, var2) + " ∧ ";
+function cleanQueryField(){
+    if (document.getElementById("queryBuilderString").value !== "") {
+        console.log("Value of query field "+document.getElementById("queryBuilderString").value)
+        document.getElementById("queryBuilderString").value = ''
     }
-    document.getElementById("queryBuilderString").value = constructedQuery.replace(termToBeRemoved, '');
+}
+
+/**
+ * Gets all terms and shows them in the query field, does no verifications, so it lets you add repeated terms!!
+ * TODO missing consequent part
+ */
+function refreshQueryFieldButton() {
+    cleanQueryField()
+    const var1Inputs = document.querySelectorAll('input[name*="-var1"]');
+    for (let i = 0; i < var1Inputs.length; i++) {
+        let id = var1Inputs[i].id
+        console.log(id)
+        let fieldId = var1Inputs[i].id.split("Term")[1].charAt(0)
+        if (id.includes("antecedent") && !checkIfMissingVariables("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2"))
+            antecedentShow("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2");
+        //se for consequente
+            //ter um consequentShow
+    }
 }
 
 function createAndText() {

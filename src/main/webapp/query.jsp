@@ -53,7 +53,7 @@
                 <section class="query-builder">
                     <section class="query-builder-line">
                         <h3 class="oxanium-purple">If</h3>
-                        <section class="query-builder-section"> <!-- Left side of query -->
+                        <section class="query-builder-section" id="leftSideOfQuery"> <!-- Left side of query -->
                             <section class="query-builder-term"> <!-- Term proper -->
                                 <section class="query-builder-term-input-fields"> <!-- Input fields -->
                                     <input class="query-builder-input-text" type="text"
@@ -78,9 +78,8 @@
                                     <%}%>
                                 </datalist>
                             </section>
-                            <h3 id="queryBuilderAntecedentAddTermToDisplayField-1" class="oxanium-purple no-bottom-margin highlight-on-hover unselectable" style="display: none"
-                                onclick="antecedentShow('antecedentTerm1-var1', 'antecedentTerm1-rel', 'antecedentTerm1-var2')"><b>Show</b></h3>
-
+                                <!--<h3 id="queryBuilderAntecedentAddTermToDisplayField-1" class="oxanium-purple no-bottom-margin highlight-on-hover unselectable" style="display: none"
+                                onclick="antecedentShow('antecedentTerm1-var1', 'antecedentTerm1-rel', 'antecedentTerm1-var2')"><b>Show</b></h3>-->
                                 <h3 class="oxanium-purple no-bottom-margin" style="display: none">and</h3>
 
                                 <h3 id="queryBuilderAntecedentAddTermButton-1"
@@ -93,7 +92,7 @@
                     </section>
                     <section class="query-builder-line">
                         <h3 class="oxanium-purple">Then</h3>
-                        <section class="query-builder-section"> <!-- Right side of query (SELECT) -->
+                        <section class="query-builder-section" id="rightSideOfQuery"> <!-- Right side of query (SELECT) -->
 
                             <section class="query-builder-term">
                                 <section class="query-builder-term-input-fields">
@@ -120,7 +119,9 @@
 
                         </section>
                     </section>
-
+                    <h3 class="oxanium-purple no-bottom-margin highlight-on-hover unselectable"
+                        onclick="refreshQueryFieldButton()"><b>Refresh Query Field</b>
+                    </h3>
                     <!-- Query preview and submit buttom -->
                     <form class="no-right-margin margin-top-1rem row g-3" action="queryDatabaseServlet"
                           enctype="multipart/form-data" method="post">
