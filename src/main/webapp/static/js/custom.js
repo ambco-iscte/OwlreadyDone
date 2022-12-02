@@ -1,7 +1,5 @@
 /*
- TODO: implement show button for the consequent and its features
-        Secalhar será boa ideia ter um botao de refresh, ja que caso uma pessoa altere o campo depois de clicar show, não vai conseguir apagar esse termo do query field
-       Nas relacoes faltam as Built-in functions. E.g., the math built-in swrlb:greaterThan(?np, 1) succeeds if the value of ?np is greater than 1.
+ TODO: Nas relacoes faltam as Built-in functions. E.g., the math built-in swrlb:greaterThan(?np, 1) succeeds if the value of ?np is greater than 1.
  */
 function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividuals, ontoRelations) {
     if (clickedElementID.toString().startsWith("queryBuilderAntecedentAddTermButton")) {
@@ -144,7 +142,7 @@ function checkIfMissingVariables(var1, rel, var2){
 }
 
 /**
- * Given the term variables, it constructs a Term in SQWRL format and appends it to the queryField in query,jsp
+ * Given the term variables, it constructs a Term antecedent in SQWRL format and appends it to the queryField in query,jsp
  * @param var1 corresponds to first variable of the antecedent
  * @param rel corresponds to second variable of the antecedent
  * @param var2 corresponds to third variable of the antecedent
@@ -156,6 +154,25 @@ function antecedentShow (var1, rel, var2) {
             document.getElementById("queryBuilderString").value = queryBuilderStringValue + " ^ " + name;
         }else
             document.getElementById("queryBuilderString").value = name;
+}
+
+/**
+ * Given the term variables, it constructs a Term consequent in SQWRL format and appends it to the queryField in query,jsp
+ * @param var1
+ * @param rel
+ * @returns {string}
+ */
+function consequentShow(var1, rel){
+    if (document.getElementById(var1) === null) {
+        return '';}
+    let var1Value = document.getElementById(var1).value;
+    let varRelValue = document.getElementById(rel).value;
+    let name = varRelValue +"("+ var1Value +")"
+    let queryBuilderStringValue = document.getElementById("queryBuilderString").value;
+    if (queryBuilderStringValue !== ""){
+        document.getElementById("queryBuilderString").value = name + '->' + queryBuilderStringValue ;
+    }else
+        document.getElementById("queryBuilderString").value = name;
 }
 
 /**
@@ -187,19 +204,21 @@ function cleanQueryField(){
 
 /**
  * Gets all terms and shows them in the query field, does no verifications, so it lets you add repeated terms!!
- * TODO missing consequent part
  */
 function refreshQueryFieldButton() {
     cleanQueryField()
     const var1Inputs = document.querySelectorAll('input[name*="-var1"]');
     for (let i = 0; i < var1Inputs.length; i++) {
-        let id = var1Inputs[i].id
-        console.log(id)
+        let var1 = var1Inputs[i].id
+        console.log(var1)
         let fieldId = var1Inputs[i].id.split("Term")[1].charAt(0)
-        if (id.includes("antecedent") && !checkIfMissingVariables("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2"))
+        if (var1.includes("antecedent") && !checkIfMissingVariables("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2"))
             antecedentShow("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2");
-        //se for consequente
-            //ter um consequentShow
+        else
+            if (var1.includes("consequent")) {
+                let relField = var1.replace('var'+fieldId,'rel')
+                consequentShow(var1, relField)
+            }
     }
 }
 
