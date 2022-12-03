@@ -55,9 +55,9 @@ public class SubmitToGitHub {
         var createMap = Map.of(
                 "message", "New file added",
                 "content", encodedContent);
-
+        String filepath = "/contents/" + f.getName();
         var requestBody = objectMapper.writeValueAsString(createMap);
-        return put("/contents/example.owl", requestBody);
+        return put(filepath, requestBody);
     }
 
 
