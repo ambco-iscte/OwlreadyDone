@@ -1,5 +1,6 @@
 /*
  TODO: Nas relacoes faltam as Built-in functions. E.g., the math built-in swrlb:greaterThan(?np, 1) succeeds if the value of ?np is greater than 1.
+        Se adicionar 4 termos de consequente e apagar 1 dos termos do meio, os ids vao ficar errados e não vai ser possivel adicionar mais ficheiros
  */
 function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividuals, ontoRelations) {
     if (clickedElementID.toString().startsWith("queryBuilderAntecedentAddTermButton")) {
@@ -162,7 +163,7 @@ function antecedentShow (var1, rel, var2) {
  * @param rel
  * @returns {string}
  */
-function consequentShow(var1, rel){
+function consequentShow(var1, rel, isFirstConsequent){
     if (document.getElementById(var1) === null) {
         return '';}
     let var1Value = document.getElementById(var1).value;
@@ -170,7 +171,10 @@ function consequentShow(var1, rel){
     let name = varRelValue +"("+ var1Value +")"
     let queryBuilderStringValue = document.getElementById("queryBuilderString").value;
     if (queryBuilderStringValue !== ""){
-        document.getElementById("queryBuilderString").value = name + '->' + queryBuilderStringValue ;
+        if (isFirstConsequent)
+            document.getElementById("queryBuilderString").value = queryBuilderStringValue + '->' + name;
+        else
+            document.getElementById("queryBuilderString").value = queryBuilderStringValue + '^' + name;
     }else
         document.getElementById("queryBuilderString").value = name;
 }
@@ -206,18 +210,22 @@ function cleanQueryField(){
  * Gets all terms and shows them in the query field, does no verifications, so it lets you add repeated terms!!
  */
 function refreshQueryFieldButton() {
-    cleanQueryField()
+    let isFirstConsequent = true;
+    cleanQueryField();
     const var1Inputs = document.querySelectorAll('input[name*="-var1"]');
     for (let i = 0; i < var1Inputs.length; i++) {
         let var1 = var1Inputs[i].id
-        console.log(var1)
         let fieldId = var1Inputs[i].id.split("Term")[1].charAt(0)
         if (var1.includes("antecedent") && !checkIfMissingVariables("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2"))
             antecedentShow("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2");
         else
             if (var1.includes("consequent")) {
-                let relField = var1.replace('var'+fieldId,'rel')
-                consequentShow(var1, relField)
+                if (isFirstConsequent) {
+                    consequentShow(var1, var1.replace('var1','rel'), isFirstConsequent)
+                    isFirstConsequent = false;
+                    console.log(var1)
+                }else
+                    consequentShow(var1, var1.replace('var1','rel'), isFirstConsequent)
             }
     }
 }
