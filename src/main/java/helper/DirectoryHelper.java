@@ -78,12 +78,19 @@ public class DirectoryHelper {
     /**
      * Deletes the oldest file in the context's upload directory.
      */
-    private static void purgeUploadDirectory(ServletContext context, String dirInitParameter) {
+    private static void purgeOldestFileFromDirectory(ServletContext context, String dirInitParameter) {
         File oldest = getOldestStoredFile(context, dirInitParameter);
-        if (oldest != null) {
-            if (oldest.delete()) {
-                OWLMaster.purgeOntologyMap(oldest.getAbsolutePath());
-                System.out.println("Successfuly deleted oldest file in the directory and cleared ontology map.");
+        deleteFile(oldest);
+    }
+
+    public static void deleteFile(File fileToDelete){
+        if (fileToDelete != null) {
+            System.out.println("Out");
+
+            if (fileToDelete.delete()) {
+                System.out.println("True");
+                OWLMaster.purgeOntologyMap(fileToDelete.getAbsolutePath());
+                System.out.println("Successfuly deleted file in the directory and removed it from ontology map.");
             }
         }
     }
@@ -92,8 +99,8 @@ public class DirectoryHelper {
      * Deletes the oldest file in the context's upload directory, but only if the number of files in this directory
      * surpasses the limit defined in web.xml; Otherwise, does nothing.
      */
-    public static void purgeUploadDirectoryIfFull(ServletContext context, String dirInitParameter, String uploadLimitInitParameter) {
+    public static void purgeDirectoryIfFull(ServletContext context, String dirInitParameter, String uploadLimitInitParameter) {
         if (isUploadDirectoryFull(context, dirInitParameter, uploadLimitInitParameter))
-            purgeUploadDirectory(context, dirInitParameter);
+            purgeOldestFileFromDirectory(context, dirInitParameter);
     }
 }

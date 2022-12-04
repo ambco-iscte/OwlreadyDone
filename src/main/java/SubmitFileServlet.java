@@ -1,4 +1,5 @@
 import helper.DirectoryHelper;
+import helper.OWLMaster;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -69,13 +70,30 @@ public class SubmitFileServlet extends HttpServlet {
 
     private void showQueryPage(HttpServletRequest req, HttpServletResponse resp, String fileName, String filePath,
                                String errorMessage) throws IOException {
-        if (filePath != null) {
-            req.getSession().setAttribute("uploadedFilePath", filePath);
-            req.getSession().setAttribute("uploadFileOriginalName", fileName);
-            resp.sendRedirect(req.getContextPath() + "/query.jsp");
-        } else {
+        if (filePath == null || fileName == null) {
             req.getSession().setAttribute("errorMessage", errorMessage);
             resp.sendRedirect(req.getContextPath() + "/index.jsp");
+        } else {
+            if (OWLMaster.getOntologyFromFile(filePath) == null){
+
+                //Deleting the file doesn't work currently,
+                //it seems that by using the method to read the file and try to add it as an ontology
+                //the file input stream doesnt close, and as such the file can't be deleted until the server closes
+                File file = new File(filePath);
+                //System.out.println(file.getName());
+                //DirectoryHelper.deleteFile(file);
+
+                //For now, these files are deleted on exit:
+                file.deleteOnExit();
+
+                req.getSession().setAttribute("errorMessage", "An error while using the ontology file, " +
+                        "is it formatted correctly?");
+                resp.sendRedirect(req.getContextPath() + "/index.jsp");
+            } else {
+                req.getSession().setAttribute("uploadedFilePath", filePath);
+                req.getSession().setAttribute("uploadFileOriginalName", fileName);
+                resp.sendRedirect(req.getContextPath() + "/query.jsp");
+            }
         }
     }
 
@@ -111,7 +129,7 @@ public class SubmitFileServlet extends HttpServlet {
         String filePath = getValidUploadFilePath(getFilenameFromPart(part));
         part.write(filePath);
 
-        DirectoryHelper.purgeUploadDirectoryIfFull(getServletContext(), "upload-dir", "stored-upload-limit");
+        DirectoryHelper.purgeDirectoryIfFull(getServletContext(), "upload-dir", "stored-upload-limit");
         return new File(filePath);
     }
 
@@ -132,7 +150,7 @@ public class SubmitFileServlet extends HttpServlet {
         channel.close();
         fileOutputStream.close();
 
-        DirectoryHelper.purgeUploadDirectoryIfFull(getServletContext(), "upload-dir", "stored-upload-limit");
+        DirectoryHelper.purgeDirectoryIfFull(getServletContext(), "upload-dir", "stored-upload-limit");
         return new File(filePath);
     }
 

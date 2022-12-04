@@ -5,6 +5,7 @@ import org.semanticweb.owlapi.model.*;
 import org.swrlapi.builtins.AbstractSWRLBuiltInLibrary;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.*;
 import java.lang.reflect.InvocationTargetException;
 
@@ -43,7 +44,7 @@ public class OWLMaster {
                 ontologies.putIfAbsent(kbPath, onto);
                 return onto;
             }
-        } catch (Exception ex) {
+        } catch (OWLOntologyCreationException ex) {
             System.err.println("Couldn't load ontology from file: " + ex.getMessage());
         }
         return null;
