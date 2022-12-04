@@ -49,7 +49,9 @@ public class QueryDatabaseServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/result.jsp");
 
         } catch (SWRLParseException | SQWRLException e) {
-            throw new RuntimeException(e);
+            req.getSession().setAttribute("errorMessage", "There seems to be an error with your query!");
+            resp.sendRedirect(req.getContextPath() + "/query.jsp");
+            System.err.println("Error while executing query: " + e.getMessage());
         }
 
 
