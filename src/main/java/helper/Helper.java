@@ -11,14 +11,6 @@ import java.util.stream.Collectors;
 public class Helper {
 
     /**
-     * Splits a camelCase or TitleCase string to include spaces.
-     * @author https://stackoverflow.com/users/367273/npe
-     */
-    public static String camelCaseToSpaces(String str) {
-        return String.join(" ", str.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])"));
-    }
-
-    /**
      * Converts a collection of Strings to a JS/HTML-valid list of strings.
      */
     public static String toJSStringList(Collection<String> collection) {

@@ -1,21 +1,19 @@
 package helper;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat;
 import org.semanticweb.owlapi.model.*;
 import org.swrlapi.builtins.AbstractSWRLBuiltInLibrary;
-import org.semanticweb.owlapi.util.DefaultPrefixManager;
-import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 import org.swrlapi.factory.SWRLAPIFactory;
 import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLQueryEngine;
 import org.swrlapi.sqwrl.SQWRLResult;
 import org.swrlapi.sqwrl.exceptions.SQWRLException;
-import org.swrlapi.sqwrl.values.SQWRLNamedIndividualResultValue;
 
 import java.io.File;
-import java.util.*;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * Contains helper methods for interacting with OWL knowledge bases.
@@ -48,14 +46,24 @@ public class OWLMaster {
         File file = new File(kbPath);
         try {
             if (file.exists()) {
+                // FIXME: stupid exceptions with malformed knowledge bases are still thrown, thanks to OWLAPI. Find a way to check if a file is parsable beforehand?
                 OWLOntology onto = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(file);
                 ontologies.putIfAbsent(kbPath, onto);
                 return onto;
             }
-        } catch (Exception ex) {
-            System.err.println("Couldn't load ontology from file: " + ex.getMessage());
+        } catch (OWLOntologyCreationException ex) {
+            ex.printStackTrace(System.err);
         }
         return null;
+    }
+
+    /**
+     * Loads an OWL knowledge base from the given file.
+     * @param kbFile An OWL knowledge base file.
+     * @return The ontology present in the specified knowledge base.
+     */
+    public static OWLOntology getOntologyFromFile(File kbFile) {
+        return getOntologyFromFile(kbFile.getPath());
     }
 
     /**
@@ -177,12 +185,12 @@ public class OWLMaster {
         relations.add("is different from");
         relations.addAll(getOntologyObjectPropertyNames(ontology));
         relations.addAll(getOntologyDataPropertyNames(ontology));
-        //relations.addAll(getPrefixedBuiltInNames("swrlb"));
+        //relations.addAll(getPrefixedBuiltInNames("swrlb")); WARNING - VERY LONG STRINGS
         return relations;
     }
 
     /**
-     * @param prefix The built-in prefix. E.g: swrlb, sqwrl, etc.
+     * @param prefix The built-in prefix. E.g: 'swrlb', 'sqwrl', etc.
      * @return The set of all (prefixed) names of the built-ins associated with the given prefix.
      */
     public static Set<String> getPrefixedBuiltInNames(String prefix) {
@@ -193,7 +201,7 @@ public class OWLMaster {
                 return Helper.map(names, x -> prefix + ":" + x);
             }
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException ex) {
-            ex.printStackTrace();
+            ex.printStackTrace(System.err);
         }
         return new HashSet<>();
     }
@@ -207,14 +215,12 @@ public class OWLMaster {
     public static SQWRLResult query(OWLOntology ontology, String query) {
         if (ontology == null || query == null)
             return null;
-
         try {
             SQWRLQueryEngine queryEngine = SWRLAPIFactory.createSQWRLQueryEngine(ontology);
-            return queryEngine.runSQWRLQuery("q1", query);
+            return queryEngine.runSQWRLQuery(String.valueOf(System.currentTimeMillis()), query);
         } catch (SWRLParseException | SQWRLException ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace(System.err);
         }
-
         return null;
     }
 
@@ -226,5 +232,30 @@ public class OWLMaster {
      */
     public static SQWRLResult query(String kbPath, String query) {
         return query(getOntologyFromFile(kbPath), query);
+    }
+
+    /**
+     * Is the specified file a valid OWL document?
+     * @return True if the file is a valid, well-formed OWL file; False, otherwise.
+     */
+    public static boolean isValidOntologyFile(File file) {
+        return file != null && getOntologyFromFile(file.getPath()) != null;
+    }
+
+    /**
+     * @return A filename-ready version of the given ontology's ID.
+     */
+    public static String getEncodedOntologyID(OWLOntology ontology) {
+        if (ontology == null)
+            return null;
+
+        OWLOntologyID id = ontology.getOntologyID();
+        String toUse = "";
+
+        if (id.getVersionIRI().isPresent()) toUse = id.getVersionIRI().get().toString();
+        else if (id.getOntologyIRI().isPresent()) toUse = id.getOntologyIRI().get().toString();
+
+        // https://stackoverflow.com/questions/1184176/how-can-i-safely-encode-a-string-in-java-to-use-as-a-filename
+        return "owl-" + URLEncoder.encode(toUse, StandardCharsets.UTF_8);
     }
 }

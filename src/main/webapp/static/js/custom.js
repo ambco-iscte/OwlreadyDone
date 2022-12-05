@@ -1,3 +1,6 @@
+let currentAntecedentTermNumber = 1;
+let currentConsequentTermNumber = 1;
+
 function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividuals, ontoRelations) {
     if (clickedElementID.toString().startsWith("queryBuilderAntecedentAddTermButton")) {
         let elem = document.getElementById(clickedElementID);
@@ -13,7 +16,7 @@ function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividu
             case "none": {  // AND is not visible, make visible and add new term.
                 elem.innerText = "-";
                 andText.style.display = "block";
-                section.appendChild(createBlankAntecedentTerm(section.childElementCount + 1, ontoClasses, ontoIndividuals, ontoRelations));
+                section.appendChild(createBlankAntecedentTerm(++currentAntecedentTermNumber, ontoClasses, ontoIndividuals, ontoRelations));
                 break;
             }
         }
@@ -35,7 +38,7 @@ function consequentAddNewTermClicked(clickedElementID, builtInNames) {
             case "none": {  // AND is not visible, make visible and add new term.
                 elem.innerText = "-";
                 andText.style.display = "block";
-                section.appendChild(createBlankConsequentTerm(section.childElementCount + 1, builtInNames));
+                section.appendChild(createBlankConsequentTerm(++currentConsequentTermNumber, builtInNames));
                 break;
             }
         }

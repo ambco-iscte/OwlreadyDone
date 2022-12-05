@@ -1,6 +1,7 @@
+import helper.DirectoryHelper;
 import helper.OWLMaster;
 
-import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -9,6 +10,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.swrlapi.sqwrl.SQWRLResult;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -27,15 +31,37 @@ public class QueryDatabaseServlet extends HttpServlet {
         if (query != null) {
             String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
             SQWRLResult result = OWLMaster.query(ontoKbPath, query);
-            if (result != null) {
+            if (result != null) { // Query executed successfully!
                 req.getSession().removeAttribute("queryResultObject");
                 req.getSession().setAttribute("queryString", query);
                 req.getSession().setAttribute("queryResultObject", result);
+                writeQueryToFile(req.getServletContext(), ontoKbPath, query);
+
                 resp.sendRedirect(req.getContextPath() + "/result.jsp");
                 return;
             }
         }
         req.getSession().setAttribute("errorMessage", "There was an error running your query!");
         resp.sendRedirect(req.getContextPath() + "/query.jsp");
+    }
+
+    /**
+     * Writes a query to an ontology's query history file.
+     * @param context The current servlet context.
+     * @param ontologyKbPath The path to the ontology's knowledge base file.
+     * @param query The SQWRL query string to write.
+     */
+    private void writeQueryToFile(ServletContext context, String ontologyKbPath, String query) {
+        try {
+            File history = DirectoryHelper.getMatchingHistoryFile(context, ontologyKbPath);
+            if (history != null) {
+                BufferedWriter queryHistoryWriter = new BufferedWriter(new FileWriter(history, true));
+                queryHistoryWriter.write(query);
+                queryHistoryWriter.newLine();
+                queryHistoryWriter.close();
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace(System.err);
+        }
     }
 }

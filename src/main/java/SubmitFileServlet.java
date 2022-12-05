@@ -1,4 +1,5 @@
 import helper.DirectoryHelper;
+import helper.OWLMaster;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -29,22 +30,29 @@ public class SubmitFileServlet extends HttpServlet {
         Part filePart = req.getPart("formFile");
         String url = req.getParameter("formUrl");
 
-
         String fileName = null;
         String filePath = null;
 
         if (filePart != null) {
             fileName = filePart.getSubmittedFileName();
-            filePath = getFileFromPart(filePart).getAbsolutePath();
+            filePath = getAbsoluteFilepath(getFileFromPart(filePart));
         }
         else if (url != null && isValidURL(url)) {
             fileName = FilenameUtils.getName(url);
-            filePath = getFileFromURL(url).getAbsolutePath();
+            filePath = getAbsoluteFilepath(getFileFromURL(url));
         }
 
-        showQueryPage(req, resp, fileName, filePath,"Couldn't find uploaded file or given URL.");
+        showQueryPage(req, resp, fileName, filePath,"Couldn't find uploaded file or download from URL, or the file was malformed.\nAre you sure you provided a valid OWL file or a direct link to one?");
     }
 
+    /**
+     * @return The absolute path of the given File instance, if it is non-null; Null, otherwise.
+     */
+    private String getAbsoluteFilepath(File file) {
+        if (file == null)
+            return null;
+        return file.getAbsolutePath();
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -67,8 +75,7 @@ public class SubmitFileServlet extends HttpServlet {
         showQueryPage(req, resp, recentFileName, filePath, "Couldn't find the specified file.");
     }
 
-    private void showQueryPage(HttpServletRequest req, HttpServletResponse resp, String fileName, String filePath,
-                               String errorMessage) throws IOException {
+    private void showQueryPage(HttpServletRequest req, HttpServletResponse resp, String fileName, String filePath, String errorMessage) throws IOException {
         if (filePath != null) {
             req.getSession().setAttribute("uploadedFilePath", filePath);
             req.getSession().setAttribute("uploadFileOriginalName", fileName);
@@ -110,9 +117,7 @@ public class SubmitFileServlet extends HttpServlet {
     private File getFileFromPart(Part part) throws IOException {
         String filePath = getValidUploadFilePath(getFilenameFromPart(part));
         part.write(filePath);
-
-        DirectoryHelper.purgeUploadDirectoryIfFull(getServletContext(), "upload-dir", "stored-upload-limit");
-        return new File(filePath);
+        return validateOrDelete(new File(filePath));
     }
 
     /**
@@ -132,13 +137,23 @@ public class SubmitFileServlet extends HttpServlet {
         channel.close();
         fileOutputStream.close();
 
-        DirectoryHelper.purgeUploadDirectoryIfFull(getServletContext(), "upload-dir", "stored-upload-limit");
-        return new File(filePath);
+        return validateOrDelete(new File(filePath));
+    }
+
+    /**
+     * Is the file a valid OWL file? If not, delete it.
+     * @return The given file, if it is a valid OWL document; Null, otherwise.
+     */
+    private File validateOrDelete(File file) {
+        if (!OWLMaster.isValidOntologyFile(file) && file.delete())
+            return null;
+        DirectoryHelper.purgeUploadDirectoryIfFull(getServletContext(), "stored-upload-limit");
+        return file;
     }
 
     /**
      * Does the given string constitute a valid URL?
-     * @return True if the URL is correctly formed. False otherwise.
+     * @return True if the URL is correctly formed; False otherwise.
      */
     private boolean isValidURL(String url) {
         try {

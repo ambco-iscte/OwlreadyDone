@@ -65,12 +65,12 @@
 }
 
 .text-divider {
-    width: 45%;
+    width: 55rem;
     text-align: center;
     background-color: #673AB7;
     line-height: 0.1em;
     margin: 10px auto 20px;
-    border-radius: 10px
+    border-radius: 10px;
 }
 
 .text-divider b {
