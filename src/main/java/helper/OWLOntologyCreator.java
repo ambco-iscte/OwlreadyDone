@@ -92,7 +92,6 @@ public class OWLOntologyCreator {
 
         }
         catch(SQWRLException ex) { ex.printStackTrace(); }
-        catch (SWRLParseException e) { e.printStackTrace();}
 
         return null;
         /*
@@ -117,7 +116,7 @@ public class OWLOntologyCreator {
     }
 
     private static void addResultsToOntology(SQWRLResult result, OWLQueryManager queryManager, OWLOntologyManager manager,
-                                             OWLDataFactory factory, OWLOntology ontology, DefaultPrefixManager pm) throws SQWRLException, SWRLParseException {
+                                             OWLDataFactory factory, OWLOntology ontology, DefaultPrefixManager pm) throws SQWRLException {
         int numOfColumns = result.getNumberOfColumns();
         for(int i = 0; i < numOfColumns; i++){
             if (result.hasNamedIndividualValue(i)) {
@@ -128,13 +127,17 @@ public class OWLOntologyCreator {
                 OWLNamedIndividual xindividual = factory.getOWLNamedIndividual(individual.toString(), pm);
                 manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xindividual));
 
-                //associate individual to class, as well as superclasses of classes
-                getAndAddClasses(queryManager, manager, factory, ontology, pm, individual, xindividual);
+                try {
+                    //associate individual to class, as well as superclasses of classes
+                    getAndAddClasses(queryManager, manager, factory, ontology, pm, individual, xindividual);
 
-                //estes dois métodos requerem mais testes,
-                // com cada pesquisa destas demora mais tempo a criação da ontologia final
-                getAndAddDataProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
-                getAndAddObjectProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
+                    //estes dois métodos requerem mais testes,
+                    // com cada pesquisa destas demora mais tempo a criação da ontologia final
+                    getAndAddDataProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
+                    getAndAddObjectProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
+                } catch (SQWRLException | SWRLParseException e) {
+                    e.printStackTrace();
+                }
 
             }
 
@@ -155,6 +158,7 @@ public class OWLOntologyCreator {
     private static void getAndAddClasses(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
                                          OWLOntology ontology, DefaultPrefixManager pm, SQWRLNamedIndividualResultValue individual,
                                          OWLNamedIndividual xindividual) throws SWRLParseException, SQWRLException {
+
         SQWRLResult classResults = queryManager.query("abox:caa(?x, "+ individual +") -> sqwrl:select(?x)");
         while(classResults.next()){
             if(classResults.hasClassValue("x")){
@@ -163,7 +167,6 @@ public class OWLOntologyCreator {
                 OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
                 manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xclassr));
                 manager.addAxiom(ontology, factory.getOWLClassAssertionAxiom(xclassr, xindividual));
-
                 //getAndAddSuperclasses(queryManager, manager, factory, ontology, pm, classResults, classr, xclassr);
             }
         }
@@ -175,12 +178,12 @@ public class OWLOntologyCreator {
         SQWRLResult dataPropertyResults = queryManager.query("abox:dpaa("+ individual +", ?p, ?v) -> sqwrl:select(?p, ?v)");
 
         while(dataPropertyResults.next()){
-            if(dataPropertyResults.hasObjectPropertyValue("p") && dataPropertyResults.hasLiteralValue("v")){
+            if(dataPropertyResults.hasDataPropertyValue("p") && dataPropertyResults.hasLiteralValue("v")){
                 SQWRLDataPropertyResultValue property = dataPropertyResults.getDataProperty("p");
                 SQWRLLiteralResultValue value = dataPropertyResults.getLiteral("v");
                 System.out.println("Found data property: " +property+" with value: " + value);
                 OWLDataProperty xproperty = factory.getOWLDataProperty(property.toString(), pm);
-                OWLLiteral xvalue = factory.getOWLLiteral(value.toString());
+                OWLLiteral xvalue = factory.getOWLLiteral(value.getValue());
                 manager.addAxiom(ontology, factory.getOWLDataPropertyAssertionAxiom(xproperty, xindividual, xvalue));
             }
         }

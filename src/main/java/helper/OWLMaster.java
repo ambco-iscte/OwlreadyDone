@@ -78,7 +78,8 @@ public class OWLMaster {
     private static String getEntityReadableName(OWLEntity entity) {
         if (entity == null)
             return null;
-        return entity.toStringID().split("#")[1];
+        String[] tokens = entity.toStringID().split("#");
+        return tokens.length > 1 ? tokens[1] : tokens[0];
     }
 
     /**
