@@ -15,6 +15,7 @@ import static helper.OWLOntologyCreator.resultToOntology;
 @WebServlet("/resultToVowlServlet")
 @MultipartConfig
 public class ResultToVowlServlet extends HttpServlet {
+    final static String webvowlPath = "http://vowl.visualdataweb.org/webvowl-old/webvowl-old.html#iri=https://github.com/uhfonso/TestRepo/blob/main/";
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -37,9 +38,13 @@ public class ResultToVowlServlet extends HttpServlet {
                 //Código temporário
                 //idealmente neste redirect é usada uma nova janela.
                 //para tal parece que a melhor opção é tentar colocar a parte do redirect no html em si, n sei como
-                //resp.sendRedirect("https://service.tib.eu/webvowl/#iri=http://paul.staroch.name/thesis/SmartHomeWeather.owl");
                 req.getSession().setAttribute("errorMessage", "It worked!");
-                resp.sendRedirect(req.getContextPath() + "/result.jsp");
+                //resp.sendRedirect(req.getContextPath() + "/result.jsp");
+                //// http://vowl.visualdataweb.org/webvowl-old/webvowl-old.html#iri=https://github.com/uhfonso/TestRepo/blob/main/result_10_Pizza.owl?raw=true
+                String filename = DirectoryHelper.getFileName(ontoKbPath);
+                resp.sendRedirect(webvowlPath + filename + "?raw=true");
+                // a query que tenhoe estado a fazer nao funciona ?? tbox:cd(?x) -> sqwrl:select(?x), mas se testar com versoes antigas ja funciona
+                // gostaria de nao ter isto hardcoded, mas tenho de entender melhor como funciona o get da rest api, nao percebo como ir buscar o path do ficheiro em especifico
             }
 
         } catch (OWLOntologyAlreadyExistsException e) {

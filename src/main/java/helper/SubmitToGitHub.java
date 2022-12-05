@@ -34,18 +34,23 @@ public class SubmitToGitHub {
         return response.body();
     }
 
-    /**
-    private static String getResourceFile(String filename) throws IOException {
-        var fileStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(filename);
-        return new String(Objects.requireNonNull(fileStream).readAllBytes(), StandardCharsets.UTF_8);
-    } **/
+    private String get(String path) throws IOException, InterruptedException {
+        var request = HttpRequest.newBuilder().uri(URI.create(baseUrl + path))
+                .setHeader("Authorization", authorization)
+                .GET()
+                .build();
+
+        var response = HttpClient.newHttpClient().send(request, BodyHandlers.ofString());
+        System.out.println(response.body());
+        return response.body();
+    }
 
     private static String encodeFileToBase64(File file) {
         try {
             byte[] fileContent = Files.readAllBytes(file.toPath());
             return getEncoder().encodeToString(fileContent);
         } catch (IOException e) {
-            throw new IllegalStateException("could not read file " + file, e);
+            throw new IllegalStateException("Could not read file " + file, e);
         }
     }
 
@@ -56,9 +61,14 @@ public class SubmitToGitHub {
                 "message", "New file added",
                 "content", encodedContent);
         String filepath = "/contents/" + f.getName();
+        System.out.println(filepath);
         var requestBody = objectMapper.writeValueAsString(createMap);
         return put(filepath, requestBody);
     }
 
 
 }
+
+
+// http://vowl.visualdataweb.org/webvowl-old/webvowl-old.html#iri=https://github.com/uhfonso/TestRepo/blob/main/result_10_Pizza.owl?raw=true
+// http://vowl.visualdataweb.org/webvowl-old/webvowl-old.html#iri= + 'github path' + ?raw=true

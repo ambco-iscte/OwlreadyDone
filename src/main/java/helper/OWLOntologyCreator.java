@@ -30,6 +30,7 @@ public class OWLOntologyCreator {
 
     public static OWLOntology resultToOntology(SQWRLResult result, OWLQueryManager queryManager, ServletContext context, Boolean saveFile, String fileName)
             throws OWLOntologyCreationException, ClassNotFoundException {
+        System.out.println(fileName);
         //TODO
         //String document_iri = "http://www.semanticweb.org/owlreadyDone/ontologies/2022/10/result.owl";
 
