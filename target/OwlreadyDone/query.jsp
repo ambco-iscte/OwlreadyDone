@@ -119,10 +119,10 @@
 
                         </section>
                     </section>
-                    <h3 class="oxanium-purple no-bottom-margin highlight-on-hover unselectable"
-                        onclick="refreshQueryFieldButton()"><b>Refresh Query Field</b>
-                    </h3>
                     <!-- Query preview and submit buttom -->
+                    <h3 class="owl-btn btn btn-primary" onclick="refreshQueryFieldButton()">
+                        <b>Refresh Query Field</b>
+                    </h3>
                     <form class="no-right-margin margin-top-1rem row g-3" action="queryDatabaseServlet"
                           enctype="multipart/form-data" method="post">
                         <section class="container mb-3">

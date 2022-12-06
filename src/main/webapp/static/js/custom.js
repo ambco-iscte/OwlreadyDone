@@ -17,19 +17,16 @@ function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividu
 
         switch (andText.style.display) {
             case "block": {   // AND is visible, disable the current term.
-                if (checkIfMissingVariables(var1, rel, var2)) {
-                    alert("Unable to add new term: Check if the term fields are correctly filled out!")
-                    break;
-                }
-                //removeQueryTerm(var1, rel, var2);
+                if (checkIfMissingAntecedentVariables(var1, rel, var2)) {
+                    alert("Unable to add new antecedent term: Check if the term fields are correctly filled out!")
+                    break;}
                 term.remove();
                 break;
             }
             case "none": {  // AND is not visible, make visible and add new term.
-                if (checkIfMissingVariables(var1, rel, var2)) {
-                    alert("Unable to add new term: Check if the term fields are correctly filled out!")
-                    break;
-                }
+                if (checkIfMissingAntecedentVariables(var1, rel, var2)) {
+                    alert("Unable to add new antecedent term: Check if the term fields are correctly filled out!")
+                    break;}
                 elem.innerText = "-";
                 andText.style.display = "block";
                 section.appendChild(createBlankAntecedentTerm(++currentAntecedentTermNumber, ontoClasses, ontoIndividuals, ontoRelations));
@@ -46,12 +43,20 @@ function consequentAddNewTermClicked(clickedElementID, builtInNames) {
         let section = term.parentElement;
 
         let andText = elem.previousElementSibling;
+        let index = clickedElementID.toString().split('-')[1];
+        let var1Id = "consequentTerm" + index + "-var1"
         switch (andText.style.display) {
             case "block": {   // AND is visible, disable the current term.
+                if (checkIfMissingConsequentVariables(var1Id)) {
+                    alert("Unable to add new consequent term: Check if the term fields are correctly filled out!")
+                    break;}
                 term.remove();
                 break;
             }
             case "none": {  // AND is not visible, make visible and add new term.
+                if (checkIfMissingConsequentVariables(var1Id)) {
+                    alert("Unable to add new consequent term: Check if the term fields are correctly filled out!")
+                    break;}
                 elem.innerText = "-";
                 andText.style.display = "block";
                 section.appendChild(createBlankConsequentTerm(++currentConsequentTermNumber, builtInNames));
@@ -137,8 +142,16 @@ function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRela
  * @param rel corresponds to second variable of the antecedent
  * @param var2 corresponds to third variable of the antecedent
  */
-function checkIfMissingVariables(var1, rel, var2){
+function checkIfMissingAntecedentVariables(var1, rel, var2){
     return (constructTerm(var1, rel, var2).includes("?undefined") || constructTerm(var1, rel, var2).includes("()")) && constructTerm(var1, rel, var2) !== ''
+}
+
+/**
+ * Checks if a given term is missing variables
+ * @param var1Id corresponds to first variable of the consequent
+ */
+function checkIfMissingConsequentVariables(var1Id){
+    return document.getElementById(var1Id).value === "";
 }
 
 /**
@@ -166,6 +179,8 @@ function consequentShow(var1, rel, isFirstConsequent){
     if (document.getElementById(var1) === null) {
         return '';}
     let var1Value = document.getElementById(var1).value;
+    if (var1Value.toString().split('?').length>2 && !var1Value.toString().includes(','))
+        var1Value = var1Value.toString().replaceAll('?', ', ?').replace(', ?', '?')
     let varRelValue = document.getElementById(rel).value;
     let name = varRelValue +"("+ var1Value +")"
     let queryBuilderStringValue = document.getElementById("queryBuilderString").value;
@@ -192,17 +207,17 @@ function constructTerm(var1, rel, var2){
     let varRelValue = document.getElementById(rel).value;
     let var2Value = document.getElementById(var2).value;
     if (varRelValue.toString().includes("isA")) return var2Value + "(" + var1Value + ")";
-    else return varRelValue + "(?" + var1Value.toString().split('?')[1] + " ,?" + var1Value.toString().split('?')[2] + ")";
+    else
+        if (var1Value.toString().includes(',')) return varRelValue + "(?" + var1Value.toString().split('?')[1] + " ?" + var1Value.toString().split('?')[2] + ")";
+        else return varRelValue + "(?" + var1Value.toString().split('?')[1] + ", ?" + var1Value.toString().split('?')[2] + ")";
 }
 
 /**
  * cleans the query field
  */
 function cleanQueryField(){
-    if (document.getElementById("queryBuilderString").value !== "") {
-        console.log("Value of query field "+document.getElementById("queryBuilderString").value)
-        document.getElementById("queryBuilderString").value = ''
-    }
+    if (document.getElementById("queryBuilderString").value !== "")
+        document.getElementById("queryBuilderString").value = '';
 }
 
 /**
@@ -215,16 +230,12 @@ function refreshQueryFieldButton() {
     for (let i = 0; i < var1Inputs.length; i++) {
         let var1 = var1Inputs[i].id
         let fieldId = var1Inputs[i].id.split("Term")[1].charAt(0)
-        if (var1.includes("antecedent") && !checkIfMissingVariables("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2"))
+        if (var1.includes("antecedent") && !checkIfMissingAntecedentVariables("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2"))
             antecedentShow("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2");
         else
-            if (var1.includes("consequent")) {
-                if (isFirstConsequent) {
-                    consequentShow(var1, var1.replace('var1','rel'), isFirstConsequent)
-                    isFirstConsequent = false;
-                    console.log(var1)
-                }else
-                    consequentShow(var1, var1.replace('var1','rel'), isFirstConsequent)
+            if (var1.includes("consequent") && !checkIfMissingConsequentVariables(var1)) {
+                consequentShow(var1, var1.replace('var1','rel'), isFirstConsequent)
+                if (isFirstConsequent) isFirstConsequent = false;
             }
     }
 }
