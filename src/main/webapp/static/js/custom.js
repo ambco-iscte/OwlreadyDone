@@ -158,9 +158,9 @@ function antecedentShow (var1, rel, var2) {
 
 /**
  * Given the term variables, it constructs a Term consequent in SQWRL format and appends it to the queryField in query,jsp
- * @param var1
- * @param rel
- * @returns {string}
+ * @param var1 corresponds to first variable of the consequent
+ * @param rel corresponds to second variable of the consequent
+ * @param isFirstConsequent checks if the consequent term it's the first, for viewing purpose
  */
 function consequentShow(var1, rel, isFirstConsequent){
     if (document.getElementById(var1) === null) {
