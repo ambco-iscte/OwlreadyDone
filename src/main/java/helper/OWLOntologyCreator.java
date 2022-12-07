@@ -2,21 +2,14 @@ package helper;
 
 import com.google.common.base.Optional;
 import jakarta.servlet.ServletContext;
-import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat;
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
-import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
-import org.semanticweb.owlapi.util.OWLOntologyWalker;
-import org.semanticweb.owlapi.util.OWLOntologyWalkerVisitorEx;
 import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLResult;
 import org.swrlapi.sqwrl.exceptions.SQWRLException;
 import org.swrlapi.sqwrl.values.*;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Map;
 import java.io.IOException;
 
@@ -156,6 +149,11 @@ public class OWLOntologyCreator {
                 System.out.println(classr);
                 OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
                 manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xclassr));
+                try {
+                    getAndAddSuperclassesAndSubclasses(queryManager, manager, factory, ontology, pm, classr, xclassr);
+                } catch (SWRLParseException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -211,19 +209,42 @@ public class OWLOntologyCreator {
             }
         }
     }
-
-
-    private static void getAndAddSuperclasses(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
-                                              OWLOntology ontology, DefaultPrefixManager pm, SQWRLClassResultValue classr,
-                                              OWLClass xclassr) throws SWRLParseException, SQWRLException {
-        SQWRLResult superClassResults = queryManager.query("tbox:sca("+ classr +", ?x) -> sqwrl:select(?x)");
-        while(superClassResults.next()){
-            if(superClassResults.hasClassValue("x")){
-                SQWRLClassResultValue sclassr = superClassResults.getClass("x");
-                System.out.println("Found superclass: " +sclassr+" of class: " + classr);
+/*
+    private static void getAndAddSubclasses(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
+                                            OWLOntology ontology, DefaultPrefixManager pm, SQWRLClassResultValue classr,
+                                            OWLClass xclassr) throws SWRLParseException, SQWRLException {
+        SQWRLResult subclassResults = queryManager.query("tbox:sca(?x, " + classr + ") -> sqwrl:select(?x)");
+        while(subclassResults.next()){
+            if(subclassResults.hasClassValue("x")){
+                SQWRLClassResultValue sclassr = subclassResults.getClass("x");
+                System.out.println("Found subclass: " +sclassr+" of class: " + classr);
                 OWLClass xsclassr = factory.getOWLClass(sclassr.toString(), pm);
                 manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xsclassr));
-                manager.addAxiom(ontology, factory.getOWLSubClassOfAxiom(xclassr, xsclassr));
+                manager.addAxiom(ontology, factory.getOWLSubClassOfAxiom(xsclassr, xclassr));
+            }
+        }
+    }
+*/
+    private static void getAndAddSuperclassesAndSubclasses(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
+                                            OWLOntology ontology, DefaultPrefixManager pm, SQWRLClassResultValue classr,
+                                            OWLClass xclassr) throws SWRLParseException, SQWRLException {
+        String[] args = {"?x, " + classr, classr + ", ?x",};
+        for(int i = 0; i < args.length; i++){
+            SQWRLResult superclassResults = queryManager.query("tbox:sca(" + args[i] + ") -> sqwrl:select(?x)");
+            while(superclassResults.next()){
+                if(superclassResults.hasClassValue("x")){
+                    SQWRLClassResultValue sclassr = superclassResults.getClass("x");
+                    OWLClass xsclassr = factory.getOWLClass(sclassr.toString(), pm);
+                    manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xsclassr));
+                    if(i==0){
+                        System.out.println("Found subclass: " +sclassr+" of class: " + classr);
+                        manager.addAxiom(ontology, factory.getOWLSubClassOfAxiom(xsclassr, xclassr));
+                    }
+                    else{
+                        System.out.println("Found superclass: " +sclassr+" of class: " + classr);
+                        manager.addAxiom(ontology, factory.getOWLSubClassOfAxiom(xclassr, xsclassr));
+                    }
+                }
             }
         }
     }
