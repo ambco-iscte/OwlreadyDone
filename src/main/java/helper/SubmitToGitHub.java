@@ -61,7 +61,7 @@ public class SubmitToGitHub {
                 "message", "New file added",
                 "content", encodedContent);
         String filepath = "/contents/" + f.getName();
-        System.out.println(filepath);
+        //System.out.println(filepath);
         var requestBody = objectMapper.writeValueAsString(createMap);
         return put(filepath, requestBody);
     }

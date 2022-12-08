@@ -16,9 +16,12 @@ import org.swrlapi.sqwrl.exceptions.SQWRLException;
 import org.swrlapi.sqwrl.values.*;
 
 import java.io.File;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Map;
 import java.io.IOException;
+
 
 import static helper.SubmitToGitHub.createFile;
 
@@ -28,9 +31,9 @@ import static helper.SubmitToGitHub.createFile;
 public class OWLOntologyCreator {
 
 
-    public static OWLOntology resultToOntology(SQWRLResult result, OWLQueryManager queryManager, ServletContext context, Boolean saveFile, String fileName)
+    public static File resultToOntology(SQWRLResult result, OWLQueryManager queryManager, ServletContext context, Boolean saveFile, String fileName)
             throws OWLOntologyCreationException, ClassNotFoundException {
-        System.out.println(fileName);
+        //System.out.println(fileName);
         //TODO
         //String document_iri = "http://www.semanticweb.org/owlreadyDone/ontologies/2022/10/result.owl";
 
@@ -66,20 +69,23 @@ public class OWLOntologyCreator {
             OWLOntology ontology = manager.createOntology(document_iri);
             DefaultPrefixManager pm = new DefaultPrefixManager();
             pm.setDefaultPrefix(document_iri + "#");
-            for (Map.Entry<String,String> entry : format.asPrefixOWLOntologyFormat().getPrefixName2PrefixMap().entrySet())
+            for (Map.Entry<String, String> entry : format.asPrefixOWLOntologyFormat().getPrefixName2PrefixMap().entrySet())
                 pm.setPrefix(entry.getKey(), entry.getValue());
 
             //Reset to first row of results
             result.reset();
-            while (result.next()){
+            while (result.next()) {
                 addResultsToOntology(result, queryManager, manager, factory, ontology, pm);
             }
 
-            if(saveFile){
+            File file = null;
+            if (saveFile) {
                 try {
-                    File file = new File(DirectoryHelper.getDirectory(context, "result-dir")
-                            + File.separator + "result_" + fileName);
+                    Timestamp ts = new Timestamp(System.currentTimeMillis());
+                    file = new File(DirectoryHelper.getDirectory(context, "result-dir")
+                            + File.separator + "result_" + ts.getTime() + "_" + fileName);
                     manager.saveOntology(ontology, format, IRI.create(file.toURI()));
+                    System.out.println("OOC" + file.getAbsolutePath());
                     createFile(file.getAbsolutePath());
                     // guardar no rep -> apagar este ficheiro criado maybe?
 
@@ -89,7 +95,7 @@ public class OWLOntologyCreator {
             }
 
             manager.removeOntology(ontology);
-            return ontology;
+            return file;
 
         }
         catch(SQWRLException ex) { ex.printStackTrace(); }

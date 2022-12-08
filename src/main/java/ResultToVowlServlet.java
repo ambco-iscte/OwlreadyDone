@@ -9,13 +9,14 @@ import org.semanticweb.owlapi.model.OWLOntologyAlreadyExistsException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.swrlapi.sqwrl.SQWRLResult;
 
+import java.io.File;
 import java.io.IOException;
 import static helper.OWLOntologyCreator.resultToOntology;
 
 @WebServlet("/resultToVowlServlet")
 @MultipartConfig
 public class ResultToVowlServlet extends HttpServlet {
-    final static String webvowlPath = "http://vowl.visualdataweb.org/webvowl-old/webvowl-old.html#iri=https://github.com/uhfonso/TestRepo/blob/main/";
+    final static String webVowlPath = "http://vowl.visualdataweb.org/webvowl-old/webvowl-old.html#iri=https://github.com/uhfonso/TestRepo/blob/main/";
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -29,7 +30,8 @@ public class ResultToVowlServlet extends HttpServlet {
         }
         String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
         try {
-            if(resultToOntology(result, queryManager, getServletContext(), true, DirectoryHelper.getFileName(ontoKbPath)) == null) {
+            File f = resultToOntology(result, queryManager, getServletContext(), true, DirectoryHelper.getFileName(ontoKbPath));
+            if(!f.exists()) {
                 req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
                 resp.sendRedirect(req.getContextPath() + "/result.jsp");
             }
@@ -39,10 +41,7 @@ public class ResultToVowlServlet extends HttpServlet {
                 //idealmente neste redirect é usada uma nova janela.
                 //para tal parece que a melhor opção é tentar colocar a parte do redirect no html em si, n sei como
                 req.getSession().setAttribute("errorMessage", "It worked!");
-                //resp.sendRedirect(req.getContextPath() + "/result.jsp");
-                //// http://vowl.visualdataweb.org/webvowl-old/webvowl-old.html#iri=https://github.com/uhfonso/TestRepo/blob/main/result_10_Pizza.owl?raw=true
-                String filename = DirectoryHelper.getFileName(ontoKbPath);
-                resp.sendRedirect(webvowlPath + filename + "?raw=true");
+                resp.sendRedirect(webVowlPath + f.getName() + "?raw=true");
                 // a query que tenhoe estado a fazer nao funciona ?? tbox:cd(?x) -> sqwrl:select(?x), mas se testar com versoes antigas ja funciona
                 // gostaria de nao ter isto hardcoded, mas tenho de entender melhor como funciona o get da rest api, nao percebo como ir buscar o path do ficheiro em especifico
             }
