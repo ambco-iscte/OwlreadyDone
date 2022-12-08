@@ -43,7 +43,7 @@
                                                     </strong>
                                                     <small>Size: <%=file.length() / 1024%> KB</small>
                                                 </div>
-                                                <div class="mb-1 small">Date Added:
+                                                <div class="mb-1 small">Last Used:
                                                     <%=new SimpleDateFormat("dd/MM/yyyy HH:mm").format(file.lastModified())%>
                                                 </div>
                                             </a>

@@ -139,7 +139,7 @@ public class OWLOntologyCreator {
                 SQWRLLiteralResultValue literal = result.getLiteral(i);
                 System.out.println("Literal: " + literal);
                 OWLLiteral xliteral = factory.getOWLLiteral(literal.toString());
-                OWLIndividual xindividual = factory.getOWLNamedIndividual("Inidivual", pm);
+                OWLIndividual xindividual = factory.getOWLNamedIndividual("Individual", pm);
                 OWLDataProperty xproperty = factory.getOWLDataProperty("LiteralValue", pm);
                 manager.addAxiom(ontology, factory.getOWLDataPropertyAssertionAxiom(xproperty, xindividual, xliteral));
             }
