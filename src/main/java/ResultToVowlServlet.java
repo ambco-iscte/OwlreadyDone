@@ -12,6 +12,7 @@ import org.swrlapi.sqwrl.SQWRLResult;
 import java.io.File;
 import java.io.IOException;
 import static helper.OWLOntologyCreator.resultToOntology;
+import static helper.SubmitToGitHub.createFile;
 
 @WebServlet("/resultToVowlServlet")
 @MultipartConfig
@@ -41,6 +42,7 @@ public class ResultToVowlServlet extends HttpServlet {
                 //idealmente neste redirect é usada uma nova janela.
                 //para tal parece que a melhor opção é tentar colocar a parte do redirect no html em si, n sei como
                 req.getSession().setAttribute("errorMessage", "It worked!");
+                createFile(f.getAbsolutePath());
                 resp.sendRedirect(webVowlPath + f.getName() + "?raw=true");
                 // a query que tenhoe estado a fazer nao funciona ?? tbox:cd(?x) -> sqwrl:select(?x), mas se testar com versoes antigas ja funciona
                 // gostaria de nao ter isto hardcoded, mas tenho de entender melhor como funciona o get da rest api, nao percebo como ir buscar o path do ficheiro em especifico
@@ -56,6 +58,8 @@ public class ResultToVowlServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/result.jsp");
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

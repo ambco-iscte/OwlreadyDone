@@ -85,11 +85,10 @@ public class OWLOntologyCreator {
                     file = new File(DirectoryHelper.getDirectory(context, "result-dir")
                             + File.separator + "result_" + ts.getTime() + "_" + fileName);
                     manager.saveOntology(ontology, format, IRI.create(file.toURI()));
-                    System.out.println("OOC" + file.getAbsolutePath());
-                    createFile(file.getAbsolutePath());
+
                     // guardar no rep -> apagar este ficheiro criado maybe?
 
-                } catch (OWLOntologyStorageException | IOException | InterruptedException e) {
+                } catch (OWLOntologyStorageException e) {
                     throw new RuntimeException(e);
                 }
             }
