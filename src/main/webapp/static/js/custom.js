@@ -143,7 +143,9 @@ function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRela
  * @param var2 corresponds to third variable of the antecedent
  */
 function checkIfMissingAntecedentVariables(var1, rel, var2){
-    return (constructTerm(var1, rel, var2).includes("?undefined") || constructTerm(var1, rel, var2).includes("()")) && constructTerm(var1, rel, var2) !== ''
+    console.log(constructTerm(var1, rel, var2).includes("?undefined"))
+    console.log(constructTerm(var1, rel, var2).includes("()") )
+    return constructTerm(var1, rel, var2).includes("?undefined") || constructTerm(var1, rel, var2).includes("()")
 }
 
 /**
@@ -201,17 +203,15 @@ function consequentShow(var1, rel, isFirstConsequent){
  * @returns {string} returns the given variables in the SQWRL query format
  */
 function constructTerm(var1, rel, var2){
-    if (document.getElementById(var1) === null) {
+    if (document.getElementById(var1) === null || document.getElementById(var1).value === "" || document.getElementById(var2).value === "") {
         return '';}
     let var1Value = document.getElementById(var1).value;
     let varRelValue = document.getElementById(rel).value;
     let var2Value = document.getElementById(var2).value;
     if (varRelValue.toString().includes("isA")) return var2Value + "(" + var1Value + ")";
     else
-        if (var1Value.toString().includes(',')) return varRelValue + "(?" + var1Value.toString().split('?')[1] + " ?" + var1Value.toString().split('?')[2] + ")";
-        else return varRelValue + "(?" + var1Value.toString().split('?')[1] + ", ?" + var1Value.toString().split('?')[2] + ")";
+        return varRelValue + "(" + var1Value.toString() + ", " + var2Value.toString() + ")";
 }
-
 /**
  * cleans the query field
  */

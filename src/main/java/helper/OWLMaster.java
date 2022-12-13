@@ -6,6 +6,7 @@ import org.semanticweb.owlapi.model.*;
 import org.swrlapi.builtins.AbstractSWRLBuiltInLibrary;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
+import org.swrlapi.builtins.SWRLBuiltInLibrary;
 import org.swrlapi.factory.SWRLAPIFactory;
 import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLQueryEngine;
@@ -177,7 +178,12 @@ public class OWLMaster {
         relations.add("isDifferentFrom");
         relations.addAll(getOntologyObjectPropertyNames(ontology));
         relations.addAll(getOntologyDataPropertyNames(ontology));
-        //relations.addAll(getPrefixedBuiltInNames("swrlb"));
+        relations.addAll(getPrefixedBuiltInNames("abox"));
+        relations.addAll(getPrefixedBuiltInNames("rbox"));
+        relations.addAll(getPrefixedBuiltInNames("tbox"));
+        relations.addAll(getPrefixedBuiltInNames("swrlb"));
+        relations.addAll(getPrefixedBuiltInNames("swrlm"));
+        relations.addAll(getPrefixedBuiltInNames("swrlx"));
         return relations;
     }
 
