@@ -181,6 +181,7 @@ public class OWLMaster {
         relations.addAll(getPrefixedBuiltInNames("abox"));
         relations.addAll(getPrefixedBuiltInNames("rbox"));
         relations.addAll(getPrefixedBuiltInNames("tbox"));
+        relations.addAll(getPrefixedBuiltInNames("sqwrl"));
         relations.addAll(getPrefixedBuiltInNames("swrlb"));
         relations.addAll(getPrefixedBuiltInNames("swrlm"));
         relations.addAll(getPrefixedBuiltInNames("swrlx"));
