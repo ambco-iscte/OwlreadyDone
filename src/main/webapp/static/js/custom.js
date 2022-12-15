@@ -155,6 +155,26 @@ function checkIfMissingConsequentVariables(var1Id){
 }
 
 /**
+ * Cleans the variable removing unwanted spaces, and formats it in the correct way, even if the user doesnt, eg., ?x?z => ?x, ?z, ?k                ,           ?a => ?k, ?a
+ * @param varXValue The variable field to be cleaned
+ * @returns {string} The cleaned variable
+ */
+function cleanQueryShowVariables(varXValue){
+    let aux;
+    let splitVarFieldByQuestionMarks = varXValue.toString().split('?').map(element => element.trim()).filter(element => element !== '')
+    varXValue = ""
+    for (let i = 0; i < splitVarFieldByQuestionMarks.length; i++) {
+        splitVarFieldByQuestionMarks[i] = splitVarFieldByQuestionMarks[i].replace(" ","")
+        if(i !== splitVarFieldByQuestionMarks.length-1) {
+            let cleanInBetweenVariables = splitVarFieldByQuestionMarks[i].split(',').map(element => element.trim()).filter(element => element !== '')
+            aux = "?" + cleanInBetweenVariables[0]+", "
+        }else
+            aux = "?"+splitVarFieldByQuestionMarks[i]
+        varXValue+=aux
+    }
+    return varXValue
+}
+/**
  * Given the term variables, it constructs a Term antecedent in SQWRL format and appends it to the queryField in query,jsp
  * @param var1 corresponds to first variable of the antecedent
  * @param rel corresponds to second variable of the antecedent
@@ -178,10 +198,11 @@ function antecedentShow (var1, rel, var2) {
 function consequentShow(var1, rel, isFirstConsequent){
     if (document.getElementById(var1) === null) {
         return '';}
-    let var1Value = document.getElementById(var1).value;
-    if (var1Value.toString().split('?').length>2 && !var1Value.toString().includes(','))
-        var1Value = var1Value.toString().replaceAll('?', ', ?').replace(', ?', '?')
+    let var1Value = cleanQueryShowVariables(document.getElementById(var1).value)
     let varRelValue = document.getElementById(rel).value;
+
+    document.getElementById(var1).value = var1Value
+
     let name = varRelValue +"("+ var1Value +")"
     let queryBuilderStringValue = document.getElementById("queryBuilderString").value;
     if (queryBuilderStringValue !== ""){
@@ -203,11 +224,17 @@ function consequentShow(var1, rel, isFirstConsequent){
 function constructTerm(var1, rel, var2){
     if (document.getElementById(var1) === null || document.getElementById(var1).value === "") {
         return '';}
-    let var1Value = document.getElementById(var1).value;
+    let var1Value = cleanQueryShowVariables(document.getElementById(var1).value)
     let varRelValue = document.getElementById(rel).value;
-    let var2Value = document.getElementById(var2).value;
-    if (var2Value.toString().split('?').length>2 && !var2Value.toString().includes(','))
-        var2Value = var2Value.toString().replaceAll('?', ', ?').replace(', ?', '?')
+    let var2Value
+    if(document.getElementById(var2).value.toString().includes('?'))
+        var2Value = cleanQueryShowVariables(document.getElementById(var2).value)
+    else
+        var2Value = document.getElementById(var2).value
+
+    document.getElementById(var1).value = var1Value
+    document.getElementById(var2).value = var2Value
+
     if (varRelValue.toString().includes("isA")) return var2Value + "(" + var1Value + ")";
     else
         if(var2Value !== "") return varRelValue + "(" + var1Value.toString() + ", " + var2Value.toString() + ")";
