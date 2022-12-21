@@ -2,12 +2,12 @@ package helper;
 
 import com.google.common.base.Optional;
 import jakarta.servlet.ServletContext;
-import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
+import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLResult;
 import org.swrlapi.sqwrl.exceptions.SQWRLException;
-import org.swrlapi.sqwrl.values.SQWRLNamedIndividualResultValue;
+import org.swrlapi.sqwrl.values.*;
 
 import java.io.File;
 import java.util.Map;
@@ -21,10 +21,12 @@ import static helper.SubmitToGitHub.createFile;
 public class OWLOntologyCreator {
 
 
-    public static OWLOntology resultToOntology(SQWRLResult result, OWLOntology originalOntology, ServletContext context, Boolean saveFile, String fileName) throws OWLOntologyCreationException {
+    public static OWLOntology resultToOntology(SQWRLResult result, OWLQueryManager queryManager, ServletContext context, Boolean saveFile, String fileName)
+            throws OWLOntologyCreationException, ClassNotFoundException {
         //TODO
         //String document_iri = "http://www.semanticweb.org/owlreadyDone/ontologies/2022/10/result.owl";
 
+        OWLOntology originalOntology = queryManager.getOntology();
         //get IRI if present
         Optional<IRI> document_iri_optional = originalOntology.getOntologyID().getOntologyIRI();
         IRI document_iri = null;
@@ -36,9 +38,6 @@ public class OWLOntologyCreator {
             return null;
         }
 
-        document_iri = IRI.create(document_iri + "_result");
-
-        //obtain prefixes from ontology
         OWLOntologyManager manager = originalOntology.getOWLOntologyManager();
         OWLDocumentFormat format = manager.getOntologyFormat(originalOntology);
 
@@ -46,8 +45,6 @@ public class OWLOntologyCreator {
             System.out.println("format is null");
             return null;
         }
-        //format.asPrefixOWLOntologyFormat().getpre
-        //originalOntology.getOntologyID().
 
         try {
             if (result.isEmpty()) {
@@ -55,56 +52,30 @@ public class OWLOntologyCreator {
                 return null;
             }
 
+            document_iri = IRI.create(document_iri + "_result");
 
             OWLDataFactory factory = manager.getOWLDataFactory();
-
             OWLOntology ontology = manager.createOntology(document_iri);
             DefaultPrefixManager pm = new DefaultPrefixManager();
             pm.setDefaultPrefix(document_iri + "#");
             for (Map.Entry<String,String> entry : format.asPrefixOWLOntologyFormat().getPrefixName2PrefixMap().entrySet())
                 pm.setPrefix(entry.getKey(), entry.getValue());
 
-            while (result.next()){
-                if (result.hasNamedIndividualValue("x")) {
-                    //a partir do iri do resultado pode ser mais fácil obter info
-
-                    //x deve depender do target da query
-                    SQWRLNamedIndividualResultValue individual = result.getNamedIndividual("x");
-                    //originalOntology.
-                    System.out.println("Added named individual to query result ontology");
-                    OWLNamedIndividual xIndividual = factory.getOWLNamedIndividual(individual.toString(), pm);
-                    manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xIndividual));
-
-                    individual.getIRI();
-                    //System.out.println(xIndividual.asOWLClass().toString());
-                }
-
-                /*
-                if (result.hasLiteralValue("x"))
-                    result.getLiteral("x");
-
-                if (result.hasClassValue("x"))
-                    result.getClass("x");
-                */
-            }
-            //Reset to first result row
+            //Reset to first row of results
             result.reset();
+            while (result.next()){
+                addResultsToOntology(result, queryManager, manager, factory, ontology, pm);
+            }
 
             if(saveFile){
                 try {
-                    FunctionalSyntaxDocumentFormat ontologyFormat = new FunctionalSyntaxDocumentFormat();
-                    ontologyFormat.copyPrefixesFrom(pm);
                     File file = new File(DirectoryHelper.getDirectory(context, "result-dir")
                             + File.separator + "result_" + fileName);
-                    manager.saveOntology(ontology, ontologyFormat, IRI.create(file.toURI()));
+                    manager.saveOntology(ontology, format, IRI.create(file.toURI()));
                     createFile(file.getAbsolutePath());
-                    // guardar no rep
+                    // guardar no rep -> apagar este ficheiro criado maybe?
 
-                } catch (OWLOntologyStorageException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } catch (InterruptedException e) {
+                } catch (OWLOntologyStorageException | IOException | InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -117,14 +88,6 @@ public class OWLOntologyCreator {
 
         return null;
         /*
-
-        //for each relevant class
-        String className = "";
-        OWLClass xClass = factory.getOWLClass(className, pm);
-        manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xClass));
-
-        //for each individual
-
         //for relevant subclass axioms
         String xAxiomIdentifier = "";
         OWLAnnotationProperty annotationProperty = factory.getOWLAnnotationProperty(OWLRDFVocabulary.RDFS_COMMENT.getIRI());
@@ -134,10 +97,6 @@ public class OWLOntologyCreator {
         OWLSubClassOfAxiom subClassOfAxiom = factory.getOWLSubClassOfAxiom(xClass, xClass, Collections.singleton(annotation));
         manager.addAxiom(ontology, subClassOfAxiom);
 
-
-        //associate individuals
-        manager.addAxiom(ontology, factory.getOWLClassAssertionAxiom(xClass, xIndividual));
-
         //for each object property
         String propertyName = "";
         OWLObjectProperty xProperty = factory.getOWLObjectProperty(propertyName, pm);
@@ -146,6 +105,147 @@ public class OWLOntologyCreator {
         manager.addAxiom(ontology, factory.getOWLObjectPropertyAssertionAxiom(xProperty, xIndividual, xIndividual));
 
          */
+
     }
 
+    private static void addResultsToOntology(SQWRLResult result, OWLQueryManager queryManager, OWLOntologyManager manager,
+                                             OWLDataFactory factory, OWLOntology ontology, DefaultPrefixManager pm) throws SQWRLException {
+        int numOfColumns = result.getNumberOfColumns();
+        for(int i = 0; i < numOfColumns; i++){
+            if (result.hasNamedIndividualValue(i)) {
+                //x deve depender do target da query
+
+                SQWRLNamedIndividualResultValue individual = result.getNamedIndividual(i);
+                System.out.println("Individual: " + individual);
+                OWLNamedIndividual xindividual = factory.getOWLNamedIndividual(individual.toString(), pm);
+                manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xindividual));
+
+                try {
+                    //associate individual to class, as well as superclasses of classes
+                    getAndAddClasses(queryManager, manager, factory, ontology, pm, individual, xindividual);
+
+                    //estes dois métodos requerem mais testes,
+                    // com cada pesquisa destas demora mais tempo a criação da ontologia final
+                    getAndAddDataProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
+                    getAndAddObjectProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
+                } catch (SQWRLException | SWRLParseException | OWLRuntimeException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+
+            if (result.hasLiteralValue(i)) {
+                SQWRLLiteralResultValue literal = result.getLiteral(i);
+                System.out.println("Literal: " + literal);
+                OWLLiteral xliteral = factory.getOWLLiteral(literal.toString());
+                OWLIndividual xindividual = factory.getOWLNamedIndividual("Individual", pm);
+                OWLDataProperty xproperty = factory.getOWLDataProperty("LiteralValue", pm);
+                manager.addAxiom(ontology, factory.getOWLDataPropertyAssertionAxiom(xproperty, xindividual, xliteral));
+            }
+
+            if (result.hasClassValue(i)) {
+                SQWRLClassResultValue classr = result.getClass(i);
+                System.out.println(classr);
+                OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
+                manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xclassr));
+                try {
+                    getAndAddSuperclassesAndSubclasses(queryManager, manager, factory, ontology, pm, classr, xclassr);
+                } catch (SWRLParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private static void getAndAddClasses(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
+                                         OWLOntology ontology, DefaultPrefixManager pm, SQWRLNamedIndividualResultValue individual,
+                                         OWLNamedIndividual xindividual) throws SWRLParseException, SQWRLException {
+
+        SQWRLResult classResults = queryManager.query("abox:caa(?x, "+ individual +") -> sqwrl:select(?x)");
+        while(classResults.next()){
+            if(classResults.hasClassValue("x")){
+                SQWRLClassResultValue classr = classResults.getClass("x");
+                System.out.println("Found class: " +classr+" of individual: " + individual);
+                OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
+                manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xclassr));
+                manager.addAxiom(ontology, factory.getOWLClassAssertionAxiom(xclassr, xindividual));
+                //getAndAddSuperclasses(queryManager, manager, factory, ontology, pm, classResults, classr, xclassr);
+            }
+        }
+    }
+
+    private static void getAndAddDataProperties(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
+                                                OWLOntology ontology, DefaultPrefixManager pm, SQWRLNamedIndividualResultValue individual,
+                                                OWLNamedIndividual xindividual) throws SWRLParseException, SQWRLException {
+        SQWRLResult dataPropertyResults = queryManager.query("abox:dpaa("+ individual +", ?p, ?v) -> sqwrl:select(?p, ?v)");
+
+        while(dataPropertyResults.next()){
+            if(dataPropertyResults.hasDataPropertyValue("p") && dataPropertyResults.hasLiteralValue("v")){
+                SQWRLDataPropertyResultValue property = dataPropertyResults.getDataProperty("p");
+                SQWRLLiteralResultValue value = dataPropertyResults.getLiteral("v");
+                System.out.println("Found data property: " +property+" with value: " + value);
+                OWLDataProperty xproperty = factory.getOWLDataProperty(property.toString(), pm);
+                OWLLiteral xvalue = factory.getOWLLiteral(value.getValue());
+                manager.addAxiom(ontology, factory.getOWLDataPropertyAssertionAxiom(xproperty, xindividual, xvalue));
+            }
+        }
+    }
+
+    //esta função pode ser problemática quando adiciona referências a objetos que não estão declarados por si só.
+    private static void getAndAddObjectProperties(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
+                                                  OWLOntology ontology, DefaultPrefixManager pm, SQWRLNamedIndividualResultValue individual,
+                                                  OWLNamedIndividual xindividual) throws SWRLParseException, SQWRLException {
+        SQWRLResult objectPropertyResults = queryManager.query("abox:opaa("+ individual +", ?p, ?o) -> sqwrl:select(?p, ?o)");
+
+        while(objectPropertyResults.next()){
+            if(objectPropertyResults.hasObjectPropertyValue("p") && objectPropertyResults.hasNamedIndividualValue("o")){
+                SQWRLObjectPropertyResultValue property = objectPropertyResults.getObjectProperty("p");
+                SQWRLIndividualResultValue object = objectPropertyResults.getNamedIndividual("o");
+                System.out.println("Found property: " +property+" with individual: " + object);
+                OWLObjectProperty xproperty = factory.getOWLObjectProperty(property.toString(), pm);
+                OWLIndividual xobject = factory.getOWLNamedIndividual(object.toString(), pm);
+                manager.addAxiom(ontology, factory.getOWLObjectPropertyAssertionAxiom(xproperty, xindividual, xobject));
+            }
+        }
+    }
+/*
+    private static void getAndAddSubclasses(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
+                                            OWLOntology ontology, DefaultPrefixManager pm, SQWRLClassResultValue classr,
+                                            OWLClass xclassr) throws SWRLParseException, SQWRLException {
+        SQWRLResult subclassResults = queryManager.query("tbox:sca(?x, " + classr + ") -> sqwrl:select(?x)");
+        while(subclassResults.next()){
+            if(subclassResults.hasClassValue("x")){
+                SQWRLClassResultValue sclassr = subclassResults.getClass("x");
+                System.out.println("Found subclass: " +sclassr+" of class: " + classr);
+                OWLClass xsclassr = factory.getOWLClass(sclassr.toString(), pm);
+                manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xsclassr));
+                manager.addAxiom(ontology, factory.getOWLSubClassOfAxiom(xsclassr, xclassr));
+            }
+        }
+    }
+*/
+    private static void getAndAddSuperclassesAndSubclasses(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
+                                            OWLOntology ontology, DefaultPrefixManager pm, SQWRLClassResultValue classr,
+                                            OWLClass xclassr) throws SWRLParseException, SQWRLException {
+        String[] args = {"?x, " + classr, classr + ", ?x",};
+        for(int i = 0; i < args.length; i++){
+            SQWRLResult superclassResults = queryManager.query("tbox:sca(" + args[i] + ") -> sqwrl:select(?x)");
+            while(superclassResults.next()){
+                if(superclassResults.hasClassValue("x")){
+                    SQWRLClassResultValue sclassr = superclassResults.getClass("x");
+                    OWLClass xsclassr = factory.getOWLClass(sclassr.toString(), pm);
+                    manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xsclassr));
+                    if(i==0){
+                        System.out.println("Found subclass: " +sclassr+" of class: " + classr);
+                        manager.addAxiom(ontology, factory.getOWLSubClassOfAxiom(xsclassr, xclassr));
+                    }
+                    else{
+                        System.out.println("Found superclass: " +sclassr+" of class: " + classr);
+                        manager.addAxiom(ontology, factory.getOWLSubClassOfAxiom(xclassr, xsclassr));
+                    }
+                }
+            }
+        }
+    }
 }

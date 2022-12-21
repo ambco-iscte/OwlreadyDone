@@ -8,12 +8,25 @@ function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividu
         let section = term.parentElement;
 
         let andText = elem.previousElementSibling;
+
+        let index = clickedElementID.toString().split('-')[1];
+
+        let var1 = "antecedentTerm" + index + "-var1"
+        let rel = "antecedentTerm" + index + "-rel"
+        let var2 = "antecedentTerm" + index + "-var2"
+
         switch (andText.style.display) {
             case "block": {   // AND is visible, disable the current term.
+                if (checkIfMissingAntecedentVariables(var1, rel, var2)) {
+                    alert("Unable to add new antecedent term: Check if the term fields are correctly filled out!")
+                    break;}
                 term.remove();
                 break;
             }
             case "none": {  // AND is not visible, make visible and add new term.
+                if (checkIfMissingAntecedentVariables(var1, rel, var2)) {
+                    alert("Unable to add new antecedent term: Check if the term fields are correctly filled out!")
+                    break;}
                 elem.innerText = "-";
                 andText.style.display = "block";
                 section.appendChild(createBlankAntecedentTerm(++currentAntecedentTermNumber, ontoClasses, ontoIndividuals, ontoRelations));
@@ -30,12 +43,20 @@ function consequentAddNewTermClicked(clickedElementID, builtInNames) {
         let section = term.parentElement;
 
         let andText = elem.previousElementSibling;
+        let index = clickedElementID.toString().split('-')[1];
+        let var1Id = "consequentTerm" + index + "-var1"
         switch (andText.style.display) {
             case "block": {   // AND is visible, disable the current term.
+                if (checkIfMissingConsequentVariables(var1Id)) {
+                    alert("Unable to add new consequent term: Check if the term fields are correctly filled out!")
+                    break;}
                 term.remove();
                 break;
             }
             case "none": {  // AND is not visible, make visible and add new term.
+                if (checkIfMissingConsequentVariables(var1Id)) {
+                    alert("Unable to add new consequent term: Check if the term fields are correctly filled out!")
+                    break;}
                 elem.innerText = "-";
                 andText.style.display = "block";
                 section.appendChild(createBlankConsequentTerm(++currentConsequentTermNumber, builtInNames));
@@ -53,7 +74,7 @@ function createBlankConsequentTerm(index, builtInNames) {
     inputFieldSection.classList.add("query-builder-term-input-fields");
     term.appendChild(inputFieldSection);
 
-    inputFieldSection.appendChild(createSelectWithOptions("consequentTerm" + index + "rel", "query-builder-input-select",
+    inputFieldSection.appendChild(createSelectWithOptions("consequentTerm" + index + "-rel", "query-builder-input-select",
         "query-builder-input-select-option", builtInNames));
 
     inputFieldSection.appendChild(createTextInput("consequentTerm" + index + "-var1", "?var1, ?var2, ...", true, "query-builder-input-text"));
@@ -90,7 +111,7 @@ function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRela
 
     inputFieldSection.appendChild(createTextInput("antecedentTerm" + index + "-var1", "?var1", true, "query-builder-input-text"));
 
-    inputFieldSection.appendChild(createSelectWithOptions("antecedentTerm" + index + "rel", "query-builder-input-select",
+    inputFieldSection.appendChild(createSelectWithOptions("antecedentTerm" + index + "-rel", "query-builder-input-select",
         "query-builder-input-select-option", ontoRelations));
 
     let datalist = createDatalist("antecedentTerm" + index + "-datalist-var2", ontoClasses.concat(ontoIndividuals),
@@ -113,6 +134,110 @@ function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRela
     term.appendChild(addIcon);
 
     return term;
+}
+
+/**
+ * Checks if a given term is missing variables
+ * @param var1 corresponds to first variable of the antecedent
+ * @param rel corresponds to second variable of the antecedent
+ * @param var2 corresponds to third variable of the antecedent
+ */
+function checkIfMissingAntecedentVariables(var1, rel, var2){
+    return (constructTerm(var1, rel, var2).includes("?undefined") || constructTerm(var1, rel, var2).includes("()")) && constructTerm(var1, rel, var2) !== ''
+}
+
+/**
+ * Checks if a given term is missing variables
+ * @param var1Id corresponds to first variable of the consequent
+ */
+function checkIfMissingConsequentVariables(var1Id){
+    return document.getElementById(var1Id).value === "";
+}
+
+/**
+ * Given the term variables, it constructs a Term antecedent in SQWRL format and appends it to the queryField in query,jsp
+ * @param var1 corresponds to first variable of the antecedent
+ * @param rel corresponds to second variable of the antecedent
+ * @param var2 corresponds to third variable of the antecedent
+ */
+function antecedentShow (var1, rel, var2) {
+    let name = constructTerm(var1, rel, var2);
+    let queryBuilderStringValue = document.getElementById("queryBuilderString").value;
+        if (queryBuilderStringValue !== ""){
+            document.getElementById("queryBuilderString").value = queryBuilderStringValue + " ^ " + name;
+        }else
+            document.getElementById("queryBuilderString").value = name;
+}
+
+/**
+ * Given the term variables, it constructs a Term consequent in SQWRL format and appends it to the queryField in query,jsp
+ * @param var1 corresponds to first variable of the consequent
+ * @param rel corresponds to second variable of the consequent
+ * @param isFirstConsequent checks if the consequent term it's the first, for viewing purpose
+ */
+function consequentShow(var1, rel, isFirstConsequent){
+    if (document.getElementById(var1) === null) {
+        return '';}
+    let var1Value = document.getElementById(var1).value;
+    if (var1Value.toString().split('?').length>2 && !var1Value.toString().includes(','))
+        var1Value = var1Value.toString().replaceAll('?', ', ?').replace(', ?', '?')
+    let varRelValue = document.getElementById(rel).value;
+    let name = varRelValue +"("+ var1Value +")"
+    let queryBuilderStringValue = document.getElementById("queryBuilderString").value;
+    if (queryBuilderStringValue !== ""){
+        if (isFirstConsequent)
+            document.getElementById("queryBuilderString").value = queryBuilderStringValue + '->' + name;
+        else
+            document.getElementById("queryBuilderString").value = queryBuilderStringValue + '^' + name;
+    }else
+        document.getElementById("queryBuilderString").value = name;
+}
+
+/**
+ * Given the variables it creates a SQWRL term
+ * @param var1 corresponds to first variable of the antecedent
+ * @param rel corresponds to second variable of the antecedent
+ * @param var2 corresponds to third variable of the antecedent
+ * @returns {string} returns the given variables in the SQWRL query format
+ */
+function constructTerm(var1, rel, var2){
+    if (document.getElementById(var1) === null) {
+        return '';}
+    let var1Value = document.getElementById(var1).value;
+    let varRelValue = document.getElementById(rel).value;
+    let var2Value = document.getElementById(var2).value;
+    if (varRelValue.toString().includes("isA")) return var2Value + "(" + var1Value + ")";
+    else
+        if (var1Value.toString().includes(',')) return varRelValue + "(?" + var1Value.toString().split('?')[1] + " ?" + var1Value.toString().split('?')[2] + ")";
+        else return varRelValue + "(?" + var1Value.toString().split('?')[1] + ", ?" + var1Value.toString().split('?')[2] + ")";
+}
+
+/**
+ * cleans the query field
+ */
+function cleanQueryField(){
+    if (document.getElementById("queryBuilderString").value !== "")
+        document.getElementById("queryBuilderString").value = '';
+}
+
+/**
+ * Gets all terms and shows them in the query field, does no verifications, so it lets you add repeated terms!!
+ */
+function refreshQueryFieldButton() {
+    let isFirstConsequent = true;
+    cleanQueryField();
+    const var1Inputs = document.querySelectorAll('input[name*="-var1"]');
+    for (let i = 0; i < var1Inputs.length; i++) {
+        let var1 = var1Inputs[i].id
+        let fieldId = var1Inputs[i].id.split("Term")[1].charAt(0)
+        if (var1.includes("antecedent") && !checkIfMissingAntecedentVariables("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2"))
+            antecedentShow("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2");
+        else
+            if (var1.includes("consequent") && !checkIfMissingConsequentVariables(var1)) {
+                consequentShow(var1, var1.replace('var1','rel'), isFirstConsequent)
+                if (isFirstConsequent) isFirstConsequent = false;
+            }
+    }
 }
 
 function createAndText() {
