@@ -27,7 +27,7 @@ function consequentAddNewTermClicked(clickedElementID, builtInNames) {
         let elem = document.getElementById(clickedElementID);
         let term = elem.parentElement;
         let section = term.parentElement;
-        let andText = elem.previousElementSibling;
+        let andText = elem.previousElementSibling;2
         switch (andText.style.display) {
             case "block": {   // AND is visible, disable the current term.
                 term.remove();
@@ -212,7 +212,7 @@ function constructTerm(var1, rel, var2){
     document.getElementById(var1).value = var1Value
     document.getElementById(var2).value = var2Value
 
-    if (varRelValue.toString().includes("isA")) return var2Value + "(" + var1Value + ")";
+    if (varRelValue.toString()==="isA") return var2Value + "(" + var1Value + ")";
     else
         if(var2Value !== "") return varRelValue + "(" + var1Value.toString() + ", " + var2Value.toString() + ")";
         else return varRelValue + "(" + var1Value.toString() + ")";

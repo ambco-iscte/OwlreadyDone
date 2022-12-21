@@ -2,6 +2,11 @@
 <%@ page import="helper.OWLMaster" %>
 <%@ page import="java.util.Set" %>
 <%@ page import="helper.Helper" %>
+<%@ page import="java.nio.file.Files" %>
+<%@ page import="helper.DirectoryHelper" %>
+<%@ page import="java.util.Objects" %>
+<%@ page import="java.io.File" %>
+<%@ page import="java.util.List" %>
 <%@ page import="org.semanticweb.owlapi.io.SystemOutDocumentTarget" %>
 <%@ page import="java.util.stream.Collectors" %>
 <%@ page import="java.util.Collection" %>
@@ -14,7 +19,7 @@
 <html lang="en">
     <head>
         <%@ include file="templates/head.jsp" %>
-        <title>Owlready Done</title>
+        <title>OWLReady.Done</title>
     </head>
     <body class="owl-bg">
         <section class="margin-top-3 text-center">
@@ -22,10 +27,9 @@
             <section>
                 <div class="col-lg-6 mx-auto">
                     <% if (session.getAttribute("errorMessage") != null) {%>
-                    <p class="oxanium-white"><b><%= session.getAttribute("errorMessage") %>
-                    </b></p>
-                    <% session.removeAttribute("errorMessage");
-                    }%>
+                        <br/>
+                        <pre class="oxanium-white"><b><%= session.getAttribute("errorMessage") %></b></pre>
+                    <% session.removeAttribute("errorMessage"); }%>
                 </div>
                 <br><br>
                 <!-- Content Start --->
@@ -101,8 +105,7 @@
 
                             <section class="query-builder-term">
                                 <section class="query-builder-term-input-fields">
-                                    <select class="query-builder-input-select" name="consequentTerm1-rel"
-                                            id="consequentTerm1-rel">
+                                    <select class="query-builder-input-select" name="consequentTerm1-rel" id="consequentTerm1-rel">
                                         <% for (String builtInName : builtInNames) {%>
                                         <option class="query-builder-input-select-option"
                                                 value="<%=builtInName%>"><%=builtInName%>
@@ -150,17 +153,47 @@
                 <form class="no-right-margin margin-top-1rem row g-3" action="queryDatabaseServlet"
                       enctype="multipart/form-data" method="post">
                     <section class="container mb-3">
-                        <h3><label for="queryString" class="form-url-label oxanium-white">Query your knowledge base directly
+                        <h3><label for="directQueryString" class="form-url-label oxanium-white">Query your knowledge base directly
                             using SQWRL</label></h3>
                         <section class="d-inline-flex">
                             <input class="form-control wide-30rem mx-auto" type="text"
-                                   id="queryString" name="queryString" placeholder="SQWRL query" required>
+                                   id="directQueryString" name="queryString" placeholder="SQWRL query" required>
                             <div class="margin-left-1rem">
                                 <button class="owl-btn btn btn-primary" type="submit">Query</button>
                             </div>
                         </section>
                     </section>
                 </form>
+
+                <%
+                    File historyFile = DirectoryHelper.getMatchingHistoryFile(session.getServletContext(), kbPath);
+                    if (historyFile != null && historyFile.exists()) {
+                        List<String> historyQueries = Files.readAllLines(historyFile.toPath());
+                        if (!historyQueries.isEmpty()) {
+                %>
+                <!-- These elements only appear if the ontology has a non-empty query history file. -->
+                <br><br>
+                <h2 class="text-divider oxanium-white"><b>Or</b></h2>
+                <br><br>
+
+                <form class="no-right-margin margin-top-1rem row g-3" action="queryDatabaseServlet" enctype="multipart/form-data" method="post">
+                    <section class="container mb-3">
+                        <h3><label for="historyQueryString" class="form-url-label oxanium-white">Use a query that's already been used for your ontology</label></h3>
+                        <section class="d-inline-flex">
+                            <select class="wide-30rem" name="queryString" id="historyQueryString">
+                                <% for (String query : historyQueries) {%>
+                                    <option value="<%=query%>"><%=query%></option>
+                                <%}%>
+                            </select>
+                            <div class="margin-left-1rem">
+                                <button class="owl-btn btn btn-primary" type="submit">Query</button>
+                            </div>
+                        </section>
+                    </section>
+                </form>
+
+                <% } } %>
+
                 <%} else {%>
                 <h3 class="oxanium-white">Seems like we're missing something here...</h3>
                 <h3 class="oxanium-white">Are you sure you accessed this page the way you're supposed to?</h3>
