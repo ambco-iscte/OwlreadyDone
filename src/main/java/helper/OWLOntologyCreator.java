@@ -2,14 +2,21 @@ package helper;
 
 import com.google.common.base.Optional;
 import jakarta.servlet.ServletContext;
+import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
+import org.semanticweb.owlapi.util.OWLOntologyWalker;
+import org.semanticweb.owlapi.util.OWLOntologyWalkerVisitorEx;
 import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLResult;
 import org.swrlapi.sqwrl.exceptions.SQWRLException;
 import org.swrlapi.sqwrl.values.*;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Map;
 import java.io.IOException;
 
@@ -21,7 +28,7 @@ import static helper.SubmitToGitHub.createFile;
 public class OWLOntologyCreator {
 
 
-    public static OWLOntology resultToOntology(SQWRLResult result, OWLQueryManager queryManager, ServletContext context, Boolean saveFile, String fileName)
+    public static File resultToOntology(SQWRLResult result, OWLQueryManager queryManager, ServletContext context, Boolean saveFile, String fileName)
             throws OWLOntologyCreationException, ClassNotFoundException {
         //TODO
         //String document_iri = "http://www.semanticweb.org/owlreadyDone/ontologies/2022/10/result.owl";
@@ -58,33 +65,36 @@ public class OWLOntologyCreator {
             OWLOntology ontology = manager.createOntology(document_iri);
             DefaultPrefixManager pm = new DefaultPrefixManager();
             pm.setDefaultPrefix(document_iri + "#");
-            for (Map.Entry<String,String> entry : format.asPrefixOWLOntologyFormat().getPrefixName2PrefixMap().entrySet())
+            for (Map.Entry<String, String> entry : format.asPrefixOWLOntologyFormat().getPrefixName2PrefixMap().entrySet())
                 pm.setPrefix(entry.getKey(), entry.getValue());
 
             //Reset to first row of results
             result.reset();
-            while (result.next()){
+            while (result.next()) {
                 addResultsToOntology(result, queryManager, manager, factory, ontology, pm);
             }
 
-            if(saveFile){
+            File file = null;
+            if (saveFile) {
                 try {
-                    File file = new File(DirectoryHelper.getDirectory(context, "result-dir")
-                            + File.separator + "result_" + fileName);
+                    Timestamp ts = new Timestamp(System.currentTimeMillis());
+                    file = new File(DirectoryHelper.getDirectory(context, "result-dir")
+                            + File.separator + "result_" + ts.getTime() + "_" + fileName);
                     manager.saveOntology(ontology, format, IRI.create(file.toURI()));
-                    createFile(file.getAbsolutePath());
+
                     // guardar no rep -> apagar este ficheiro criado maybe?
 
-                } catch (OWLOntologyStorageException | IOException | InterruptedException e) {
+                } catch (OWLOntologyStorageException e) {
                     throw new RuntimeException(e);
                 }
             }
 
             manager.removeOntology(ontology);
-            return ontology;
+            return file;
 
         }
         catch(SQWRLException ex) { ex.printStackTrace(); }
+        catch (SWRLParseException e) { e.printStackTrace();}
 
         return null;
         /*
@@ -170,6 +180,7 @@ public class OWLOntologyCreator {
                 OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
                 manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xclassr));
                 manager.addAxiom(ontology, factory.getOWLClassAssertionAxiom(xclassr, xindividual));
+
                 //getAndAddSuperclasses(queryManager, manager, factory, ontology, pm, classResults, classr, xclassr);
             }
         }
