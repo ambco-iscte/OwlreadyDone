@@ -13,11 +13,12 @@ import java.io.File;
 import java.io.IOException;
 import static helper.OWLOntologyCreator.resultToOntology;
 import static helper.SubmitToGitHub.createFile;
+import configuration.Configuration;
 
 @WebServlet("/resultToVowlServlet")
 @MultipartConfig
 public class ResultToVowlServlet extends HttpServlet {
-    final static String webVowlPath = "http://vowl.visualdataweb.org/webvowl-old/webvowl-old.html#iri=https://github.com/uhfonso/TestRepo/blob/main/";
+    final static String webVowlPath = Configuration.getWebVowlURL();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {

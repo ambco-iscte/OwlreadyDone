@@ -48,4 +48,11 @@ public class Configuration {
     public static String getGitHubAuthorizationToken() {
         return getProperty("GITHUB_AUTH_TOKEN");
     }
+
+    /**
+     * @return The WebVowl website link, to be used in {@link }.
+     */
+    public static String getWebVowlURL() {
+        return getProperty("WEB_VOWL_URL");
+    }
 }
