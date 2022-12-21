@@ -7,6 +7,11 @@
 <%@ page import="java.util.Objects" %>
 <%@ page import="java.io.File" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.semanticweb.owlapi.io.SystemOutDocumentTarget" %>
+<%@ page import="java.util.stream.Collectors" %>
+<%@ page import="java.util.Collection" %>
+<%@ page import="java.util.stream.Stream" %>
+<%@ page import="java.util.List" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <script src="./static/js/custom.js"></script>
@@ -131,7 +136,7 @@
                         <section class="container mb-3">
                             <section class="d-inline-flex">
                                 <input class="form-control wide-30rem mx-auto" type="text" readonly
-                                       id="queryBuilderString" name="queryString"
+                                       id="queryBuilderString" name="queryBuilderString"
                                        placeholder="Your query will show up here!" required>
                                 <div class="margin-left-1rem">
                                     <button class="owl-btn btn btn-primary" type="submit">Query</button>

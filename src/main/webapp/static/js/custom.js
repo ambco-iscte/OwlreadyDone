@@ -143,7 +143,7 @@ function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRela
  * @param var2 corresponds to third variable of the antecedent
  */
 function checkIfMissingAntecedentVariables(var1, rel, var2){
-    return (constructTerm(var1, rel, var2).includes("?undefined") || constructTerm(var1, rel, var2).includes("()")) && constructTerm(var1, rel, var2) !== ''
+    return constructTerm(var1, rel, var2).includes("?undefined") || constructTerm(var1, rel, var2).includes("()")
 }
 
 /**
@@ -154,6 +154,26 @@ function checkIfMissingConsequentVariables(var1Id){
     return document.getElementById(var1Id).value === "";
 }
 
+/**
+ * Cleans the variable removing unwanted spaces, and formats it in the correct way, even if the user doesnt, eg., ?x?z => ?x, ?z, ?k                ,           ?a => ?k, ?a
+ * @param varXValue The variable field to be cleaned
+ * @returns {string} The cleaned variable
+ */
+function cleanQueryShowVariables(varXValue){
+    let aux;
+    let splitVarFieldByQuestionMarks = varXValue.toString().split('?').map(element => element.trim()).filter(element => element !== '')
+    varXValue = ""
+    for (let i = 0; i < splitVarFieldByQuestionMarks.length; i++) {
+        splitVarFieldByQuestionMarks[i] = splitVarFieldByQuestionMarks[i].replace(" ","")
+        if(i !== splitVarFieldByQuestionMarks.length-1) {
+            let cleanInBetweenVariables = splitVarFieldByQuestionMarks[i].split(',').map(element => element.trim()).filter(element => element !== '')
+            aux = "?" + cleanInBetweenVariables[0]+", "
+        }else
+            aux = "?"+splitVarFieldByQuestionMarks[i]
+        varXValue+=aux
+    }
+    return varXValue
+}
 /**
  * Given the term variables, it constructs a Term antecedent in SQWRL format and appends it to the queryField in query,jsp
  * @param var1 corresponds to first variable of the antecedent
@@ -178,10 +198,11 @@ function antecedentShow (var1, rel, var2) {
 function consequentShow(var1, rel, isFirstConsequent){
     if (document.getElementById(var1) === null) {
         return '';}
-    let var1Value = document.getElementById(var1).value;
-    if (var1Value.toString().split('?').length>2 && !var1Value.toString().includes(','))
-        var1Value = var1Value.toString().replaceAll('?', ', ?').replace(', ?', '?')
+    let var1Value = cleanQueryShowVariables(document.getElementById(var1).value)
     let varRelValue = document.getElementById(rel).value;
+
+    document.getElementById(var1).value = var1Value
+
     let name = varRelValue +"("+ var1Value +")"
     let queryBuilderStringValue = document.getElementById("queryBuilderString").value;
     if (queryBuilderStringValue !== ""){
@@ -201,17 +222,24 @@ function consequentShow(var1, rel, isFirstConsequent){
  * @returns {string} returns the given variables in the SQWRL query format
  */
 function constructTerm(var1, rel, var2){
-    if (document.getElementById(var1) === null) {
+    if (document.getElementById(var1) === null || document.getElementById(var1).value === "") {
         return '';}
-    let var1Value = document.getElementById(var1).value;
+    let var1Value = cleanQueryShowVariables(document.getElementById(var1).value)
     let varRelValue = document.getElementById(rel).value;
-    let var2Value = document.getElementById(var2).value;
+    let var2Value
+    if(document.getElementById(var2).value.toString().includes('?'))
+        var2Value = cleanQueryShowVariables(document.getElementById(var2).value)
+    else
+        var2Value = document.getElementById(var2).value
+
+    document.getElementById(var1).value = var1Value
+    document.getElementById(var2).value = var2Value
+
     if (varRelValue.toString().includes("isA")) return var2Value + "(" + var1Value + ")";
     else
-        if (var1Value.toString().includes(',')) return varRelValue + "(?" + var1Value.toString().split('?')[1] + " ?" + var1Value.toString().split('?')[2] + ")";
-        else return varRelValue + "(?" + var1Value.toString().split('?')[1] + ", ?" + var1Value.toString().split('?')[2] + ")";
+        if(var2Value !== "") return varRelValue + "(" + var1Value.toString() + ", " + var2Value.toString() + ")";
+        else return varRelValue + "(" + var1Value.toString() + ")";
 }
-
 /**
  * cleans the query field
  */

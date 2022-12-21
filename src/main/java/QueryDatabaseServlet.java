@@ -28,6 +28,7 @@ public class QueryDatabaseServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String query = req.getParameter("queryString");
+        if (query == null) query = req.getParameter("queryBuilderString");
         if (query != null) {
             String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
             File kb = new File(ontoKbPath);
@@ -45,7 +46,7 @@ public class QueryDatabaseServlet extends HttpServlet {
                 return;
             }
         }
-        req.getSession().setAttribute("errorMessage", "There was an error running your query!");
+        req.getSession().setAttribute("errorMessage", "There was an error running your query! ");
         resp.sendRedirect(req.getContextPath() + "/query.jsp");
     }
 

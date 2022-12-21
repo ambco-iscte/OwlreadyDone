@@ -2,6 +2,11 @@
 <%@ page import="helper.OWLMaster" %>
 <%@ page import="java.util.Set" %>
 <%@ page import="helper.Helper" %>
+<%@ page import="org.semanticweb.owlapi.io.SystemOutDocumentTarget" %>
+<%@ page import="java.util.stream.Collectors" %>
+<%@ page import="java.util.Collection" %>
+<%@ page import="java.util.stream.Stream" %>
+<%@ page import="java.util.List" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <script src="./static/js/custom.js"></script>
