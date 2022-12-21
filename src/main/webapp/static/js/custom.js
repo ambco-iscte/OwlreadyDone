@@ -28,7 +28,6 @@ function consequentAddNewTermClicked(clickedElementID, builtInNames) {
         let term = elem.parentElement;
         let section = term.parentElement;
         let andText = elem.previousElementSibling;
-        let index = clickedElementID.toString().split('-')[1];
         switch (andText.style.display) {
             case "block": {   // AND is visible, disable the current term.
                 term.remove();
