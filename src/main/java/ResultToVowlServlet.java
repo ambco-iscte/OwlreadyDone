@@ -1,5 +1,5 @@
 import helper.DirectoryHelper;
-import helper.OWLQueryManager;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -23,7 +23,6 @@ public class ResultToVowlServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         SQWRLResult result = (SQWRLResult) req.getSession().getAttribute("queryResultObject");
-        OWLQueryManager queryManager = (OWLQueryManager) req.getSession().getAttribute("queryManager");
 
         if (result == null) {
             req.getSession().setAttribute("errorMessage", "It seems there are no query results to visualize!");
@@ -32,7 +31,7 @@ public class ResultToVowlServlet extends HttpServlet {
         }
         String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
         try {
-            File f = resultToOntology(result, queryManager, getServletContext(), true, DirectoryHelper.getFileName(ontoKbPath));
+            File f = resultToOntology(result, getServletContext(), ontoKbPath, true, DirectoryHelper.getFileName(ontoKbPath));
             if(!f.exists()) {
                 req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
                 resp.sendRedirect(req.getContextPath() + "/result.jsp");

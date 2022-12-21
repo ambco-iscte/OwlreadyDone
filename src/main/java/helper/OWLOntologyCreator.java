@@ -19,11 +19,12 @@ import java.util.Map;
 public class OWLOntologyCreator {
 
 
-    public static File resultToOntology(SQWRLResult result, OWLQueryManager queryManager, ServletContext context, Boolean saveFile, String fileName)
+    public static File resultToOntology(SQWRLResult result, ServletContext context, String ontoKbPath, Boolean saveFile, String fileName)
             throws OWLOntologyCreationException, ClassNotFoundException {
         //TODO
 
-        OWLOntology originalOntology = queryManager.getOntology();
+
+        OWLOntology originalOntology = OWLMaster.getOntologyFromFile(ontoKbPath);
         //get IRI if present
         Optional<IRI> document_iri_optional = originalOntology.getOntologyID().getOntologyIRI();
         IRI document_iri = null;
@@ -61,7 +62,7 @@ public class OWLOntologyCreator {
             //Reset to first row of results
             result.reset();
             while (result.next()) {
-                addResultsToOntology(result, queryManager, manager, factory, ontology, pm);
+                addResultsToOntology(result, manager, factory, originalOntology, ontology, pm);
             }
 
             File file = null;
@@ -104,8 +105,8 @@ public class OWLOntologyCreator {
 
     }
 
-    private static void addResultsToOntology(SQWRLResult result, OWLQueryManager queryManager, OWLOntologyManager manager,
-                                             OWLDataFactory factory, OWLOntology ontology, DefaultPrefixManager pm) throws SQWRLException {
+    private static void addResultsToOntology(SQWRLResult result, OWLOntologyManager manager, OWLDataFactory factory,
+                                             OWLOntology originalOntology, OWLOntology ontology, DefaultPrefixManager pm) throws SQWRLException {
         int numOfColumns = result.getNumberOfColumns();
         for(int i = 0; i < numOfColumns; i++){
             if (result.hasNamedIndividualValue(i)) {
@@ -118,12 +119,12 @@ public class OWLOntologyCreator {
 
                 try {
                     //associate individual to class, as well as superclasses of classes
-                    getAndAddClasses(queryManager, manager, factory, ontology, pm, individual, xindividual);
+                    getAndAddClasses(manager, factory, originalOntology, ontology, pm, individual, xindividual);
 
                     //estes dois métodos requerem mais testes,
                     // com cada pesquisa destas demora mais tempo a criação da ontologia final
-                    getAndAddDataProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
-                    getAndAddObjectProperties(queryManager, manager, factory, ontology, pm, individual, xindividual);
+                    getAndAddDataProperties(manager, factory, originalOntology, ontology, pm, individual, xindividual);
+                    getAndAddObjectProperties(manager, factory, originalOntology, ontology, pm, individual, xindividual);
                 } catch (SQWRLException | SWRLParseException | OWLRuntimeException e) {
                     e.printStackTrace();
                 }
@@ -146,7 +147,7 @@ public class OWLOntologyCreator {
                 OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
                 manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xclassr));
                 try {
-                    getAndAddSuperclassesAndSubclasses(queryManager, manager, factory, ontology, pm, classr, xclassr);
+                    getAndAddSuperclassesAndSubclasses(manager, factory, originalOntology, ontology, pm, classr, xclassr);
                 } catch (SWRLParseException e) {
                     e.printStackTrace();
                 }
@@ -154,11 +155,11 @@ public class OWLOntologyCreator {
         }
     }
 
-    private static void getAndAddClasses(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
+    private static void getAndAddClasses(OWLOntologyManager manager, OWLDataFactory factory, OWLOntology originalOntology,
                                          OWLOntology ontology, DefaultPrefixManager pm, SQWRLNamedIndividualResultValue individual,
                                          OWLNamedIndividual xindividual) throws SWRLParseException, SQWRLException {
 
-        SQWRLResult classResults = queryManager.query("abox:caa(?x, "+ individual +") -> sqwrl:select(?x)");
+        SQWRLResult classResults = OWLMaster.query(originalOntology, "abox:caa(?x, "+ individual +") -> sqwrl:select(?x)");
         while(classResults.next()){
             if(classResults.hasClassValue("x")){
                 SQWRLClassResultValue classr = classResults.getClass("x");
@@ -172,10 +173,10 @@ public class OWLOntologyCreator {
         }
     }
 
-    private static void getAndAddDataProperties(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
+    private static void getAndAddDataProperties(OWLOntologyManager manager, OWLDataFactory factory, OWLOntology originalOntology,
                                                 OWLOntology ontology, DefaultPrefixManager pm, SQWRLNamedIndividualResultValue individual,
                                                 OWLNamedIndividual xindividual) throws SWRLParseException, SQWRLException {
-        SQWRLResult dataPropertyResults = queryManager.query("abox:dpaa("+ individual +", ?p, ?v) -> sqwrl:select(?p, ?v)");
+        SQWRLResult dataPropertyResults = OWLMaster.query(originalOntology, "abox:dpaa("+ individual +", ?p, ?v) -> sqwrl:select(?p, ?v)");
 
         while(dataPropertyResults.next()){
             if(dataPropertyResults.hasDataPropertyValue("p") && dataPropertyResults.hasLiteralValue("v")){
@@ -190,10 +191,10 @@ public class OWLOntologyCreator {
     }
 
     //esta função pode ser problemática quando adiciona referências a objetos que não estão declarados por si só.
-    private static void getAndAddObjectProperties(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
+    private static void getAndAddObjectProperties(OWLOntologyManager manager, OWLDataFactory factory, OWLOntology originalOntology,
                                                   OWLOntology ontology, DefaultPrefixManager pm, SQWRLNamedIndividualResultValue individual,
                                                   OWLNamedIndividual xindividual) throws SWRLParseException, SQWRLException {
-        SQWRLResult objectPropertyResults = queryManager.query("abox:opaa("+ individual +", ?p, ?o) -> sqwrl:select(?p, ?o)");
+        SQWRLResult objectPropertyResults = OWLMaster.query(originalOntology, "abox:opaa("+ individual +", ?p, ?o) -> sqwrl:select(?p, ?o)");
 
         while(objectPropertyResults.next()){
             if(objectPropertyResults.hasObjectPropertyValue("p") && objectPropertyResults.hasNamedIndividualValue("o")){
@@ -222,12 +223,12 @@ public class OWLOntologyCreator {
         }
     }
 */
-    private static void getAndAddSuperclassesAndSubclasses(OWLQueryManager queryManager, OWLOntologyManager manager, OWLDataFactory factory,
+    private static void getAndAddSuperclassesAndSubclasses(OWLOntologyManager manager, OWLDataFactory factory, OWLOntology originalOntology,
                                             OWLOntology ontology, DefaultPrefixManager pm, SQWRLClassResultValue classr,
                                             OWLClass xclassr) throws SWRLParseException, SQWRLException {
         String[] args = {"?x, " + classr, classr + ", ?x",};
         for(int i = 0; i < args.length; i++){
-            SQWRLResult superclassResults = queryManager.query("tbox:sca(" + args[i] + ") -> sqwrl:select(?x)");
+            SQWRLResult superclassResults = OWLMaster.query(originalOntology, "tbox:sca(" + args[i] + ") -> sqwrl:select(?x)");
             while(superclassResults.next()){
                 if(superclassResults.hasClassValue("x")){
                     SQWRLClassResultValue sclassr = superclassResults.getClass("x");
