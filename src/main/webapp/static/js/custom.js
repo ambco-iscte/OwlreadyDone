@@ -6,27 +6,13 @@ function antecedentAddNewTermClicked(clickedElementID, ontoClasses, ontoIndividu
         let elem = document.getElementById(clickedElementID);
         let term = elem.parentElement;
         let section = term.parentElement;
-
         let andText = elem.previousElementSibling;
-
-        let index = clickedElementID.toString().split('-')[1];
-
-        let var1 = "antecedentTerm" + index + "-var1"
-        let rel = "antecedentTerm" + index + "-rel"
-        let var2 = "antecedentTerm" + index + "-var2"
-
         switch (andText.style.display) {
             case "block": {   // AND is visible, disable the current term.
-                if (checkIfMissingAntecedentVariables(var1, rel, var2)) {
-                    alert("Unable to add new antecedent term: Check if the term fields are correctly filled out!")
-                    break;}
                 term.remove();
                 break;
             }
             case "none": {  // AND is not visible, make visible and add new term.
-                if (checkIfMissingAntecedentVariables(var1, rel, var2)) {
-                    alert("Unable to add new antecedent term: Check if the term fields are correctly filled out!")
-                    break;}
                 elem.innerText = "-";
                 andText.style.display = "block";
                 section.appendChild(createBlankAntecedentTerm(++currentAntecedentTermNumber, ontoClasses, ontoIndividuals, ontoRelations));
@@ -41,22 +27,14 @@ function consequentAddNewTermClicked(clickedElementID, builtInNames) {
         let elem = document.getElementById(clickedElementID);
         let term = elem.parentElement;
         let section = term.parentElement;
-
         let andText = elem.previousElementSibling;
         let index = clickedElementID.toString().split('-')[1];
-        let var1Id = "consequentTerm" + index + "-var1"
         switch (andText.style.display) {
             case "block": {   // AND is visible, disable the current term.
-                if (checkIfMissingConsequentVariables(var1Id)) {
-                    alert("Unable to add new consequent term: Check if the term fields are correctly filled out!")
-                    break;}
                 term.remove();
                 break;
             }
             case "none": {  // AND is not visible, make visible and add new term.
-                if (checkIfMissingConsequentVariables(var1Id)) {
-                    alert("Unable to add new consequent term: Check if the term fields are correctly filled out!")
-                    break;}
                 elem.innerText = "-";
                 andText.style.display = "block";
                 section.appendChild(createBlankConsequentTerm(++currentConsequentTermNumber, builtInNames));
@@ -143,7 +121,7 @@ function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRela
  * @param var2 corresponds to third variable of the antecedent
  */
 function checkIfMissingAntecedentVariables(var1, rel, var2){
-    return constructTerm(var1, rel, var2).includes("?undefined") || constructTerm(var1, rel, var2).includes("()")
+    return constructTerm(var1, rel, var2) === "" || constructTerm(var1, rel, var2).includes("?undefined") || constructTerm(var1, rel, var2).includes("()")
 }
 
 /**
