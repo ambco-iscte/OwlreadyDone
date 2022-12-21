@@ -13,16 +13,14 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.file.Files;
 import java.util.Map;
-import java.util.Objects;
 
 import static java.util.Base64.getEncoder;
-import static org.apache.commons.codec.binary.Base64.*;
 
 public class SubmitToGitHub {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static String put(String path, String body) throws IOException, InterruptedException {
-        String baseUrl = Configuration.getGitHubBaseURL();
+        String baseUrl = Configuration.getGitHubAPIURL();
         String authorization = Configuration.getGitHubAuthorizationToken();
 
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(baseUrl + path))

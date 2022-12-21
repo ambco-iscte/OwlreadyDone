@@ -2,25 +2,16 @@ package helper;
 
 import com.google.common.base.Optional;
 import jakarta.servlet.ServletContext;
-import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat;
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
-import org.semanticweb.owlapi.util.CollectionFactory;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
-import org.semanticweb.owlapi.util.OWLOntologyWalker;
-import org.semanticweb.owlapi.util.OWLOntologyWalkerVisitorEx;
 import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLResult;
 import org.swrlapi.sqwrl.exceptions.SQWRLException;
 import org.swrlapi.sqwrl.values.*;
 
 import java.io.File;
-import java.util.Collection;
+import java.sql.Timestamp;
 import java.util.Map;
-import java.io.IOException;
-
-import static helper.SubmitToGitHub.createFile;
 
 /**
  * Contains helper methods for the creation of a new ontology.
@@ -31,7 +22,6 @@ public class OWLOntologyCreator {
     public static File resultToOntology(SQWRLResult result, OWLQueryManager queryManager, ServletContext context, Boolean saveFile, String fileName)
             throws OWLOntologyCreationException, ClassNotFoundException {
         //TODO
-        //String document_iri = "http://www.semanticweb.org/owlreadyDone/ontologies/2022/10/result.owl";
 
         OWLOntology originalOntology = queryManager.getOntology();
         //get IRI if present
@@ -81,9 +71,6 @@ public class OWLOntologyCreator {
                     file = new File(DirectoryHelper.getDirectory(context, "result-dir")
                             + File.separator + "result_" + ts.getTime() + "_" + fileName);
                     manager.saveOntology(ontology, format, IRI.create(file.toURI()));
-
-                    // guardar no rep -> apagar este ficheiro criado maybe?
-
                 } catch (OWLOntologyStorageException e) {
                     throw new RuntimeException(e);
                 }
@@ -94,7 +81,6 @@ public class OWLOntologyCreator {
 
         }
         catch(SQWRLException ex) { ex.printStackTrace(); }
-        catch (SWRLParseException e) { e.printStackTrace();}
 
         return null;
         /*

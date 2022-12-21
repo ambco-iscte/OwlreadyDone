@@ -38,8 +38,8 @@ public class Configuration {
     /**
      * @return The base GitHub repository URL, to be used in {@link helper.SubmitToGitHub}.
      */
-    public static String getGitHubBaseURL() {
-        return getProperty("GITHUB_BASE_URL");
+    public static String getGitHubAPIURL() {
+        return getProperty("GITHUB_API_URL");
     }
 
     /**
