@@ -45,8 +45,7 @@ public class OWLMaster {
 
         File file = new File(kbPath);
         try {
-            if (file.exists()) {
-                // FIXME: stupid exceptions with malformed knowledge bases are still thrown, thanks to OWLAPI. Find a way to check if a file is parsable beforehand?
+            if (file.exists()) { // TODO: silence internal loadOntologyFromOntologyDocument exceptions?
                 OWLOntology onto = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(file);
                 ontologies.putIfAbsent(kbPath, onto);
                 return onto;
@@ -94,7 +93,10 @@ public class OWLMaster {
     private static String getEntityReadableName(OWLEntity entity) {
         if (entity == null)
             return null;
-        return entity.toStringID().split("#")[1];
+        String[] tokens = entity.toStringID().split("#");
+        if (tokens.length > 1)
+            return tokens[1];
+        return tokens[0];
     }
 
     /**
@@ -239,7 +241,7 @@ public class OWLMaster {
      * @return True if the file is a valid, well-formed OWL file; False, otherwise.
      */
     public static boolean isValidOntologyFile(File file) {
-        return file != null && getOntologyFromFile(file.getPath()) != null;
+        return file != null && !DirectoryHelper.isDeleteOnExit(file) && getOntologyFromFile(file.getPath()) != null;
     }
 
     /**

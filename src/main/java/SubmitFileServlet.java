@@ -14,6 +14,7 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Paths;
+import java.util.Set;
 
 /**
  * @author Afonso Caniço
@@ -56,8 +57,8 @@ public class SubmitFileServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        File[] files = DirectoryHelper.getFiles(getServletContext(), "upload-dir");
-        if(files == null){
+        Set<File> files = DirectoryHelper.getFiles(getServletContext(), "upload-dir");
+        if (files == null) {
             req.getSession().setAttribute("errorMessage", "There are no recent files!");
             resp.sendRedirect(req.getContextPath() + "/index.jsp");
             return;
@@ -141,13 +142,17 @@ public class SubmitFileServlet extends HttpServlet {
     }
 
     /**
-     * Is the file a valid OWL file? If not, delete it.
+     * Is the given file a valid OWL file? If not, schedule it for deletion (see {@link DirectoryHelper#deleteOnExit}).
      * @return The given file, if it is a valid OWL document; Null, otherwise.
      */
     private File validateOrDelete(File file) {
-        if (!OWLMaster.isValidOntologyFile(file) && file.delete())
+        if (!OWLMaster.isValidOntologyFile(file)) {
+            DirectoryHelper.deleteOnExit(file);
             return null;
+        }
         DirectoryHelper.purgeUploadDirectoryIfFull(getServletContext(), "stored-upload-limit");
+        if (file.setLastModified(System.currentTimeMillis()))
+            System.out.println("File " + file.getName() + " has been modified (upload).");
         return file;
     }
 

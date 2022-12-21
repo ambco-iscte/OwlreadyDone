@@ -16,4 +16,8 @@
         <param-name>query-history-dir</param-name> <!-- Where should query history files be stored? (Path relative to root.) -->
         <param-value>history</param-value>
     </context-param>
+
+    <listener>
+        <listener-class>ServletContextListener</listener-class>
+    </listener>
 </web-app>

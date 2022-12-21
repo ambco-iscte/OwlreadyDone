@@ -4,7 +4,8 @@ import jakarta.servlet.ServletContext;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Contains helper methods for managing the directories of a ServletContext.
@@ -14,6 +15,28 @@ import java.util.Arrays;
  * @author Samuel Correia
  */
 public class DirectoryHelper {
+
+    private static final List<File> markedForDeletion = new ArrayList<>();
+
+    /**
+     * Schedules a file to be deleted when the virtual machine closes.
+     * @param file The file to be deleted.
+     */
+    public static void deleteOnExit(File file) {
+        if (file != null) {
+            file.deleteOnExit();
+            if (!markedForDeletion.contains(file))
+                markedForDeletion.add(file);
+        }
+    }
+
+    /**
+     * Is the specified file scheduled to be deleted when the virtual machine closes?
+     * @return True if the file has been marked for deletion on exit; False, otherwise.
+     */
+    public static boolean isDeleteOnExit(File file) {
+        return file != null && markedForDeletion.contains(file);
+    }
 
     /**
      * @param context The current servlet context.
@@ -47,22 +70,22 @@ public class DirectoryHelper {
      * @return The number of files in the directory, if applicable; 0 otherwise.
      */
     public static int getDirectoryFileCount(ServletContext context, String dirInitParameter) {
-        File[] files = getFiles(context, dirInitParameter);
+        Set<File> files = getFiles(context, dirInitParameter);
         if (files != null)
-            return files.length;
+            return files.size();
         return 0;
     }
 
     /**
      * @param context The current servlet context.
      * @param dirInitParameter The init parameter for the directory, as specified in web.xml.
-     * @return An array containing all files in the given directory.
+     * @return A set containing all non-marked (see {@link #deleteOnExit DirectoryHelper.deleteOnExit}) files in the given directory.
      */
-    public static File[] getFiles(ServletContext context, String dirInitParameter) {
+    public static Set<File> getFiles(ServletContext context, String dirInitParameter) {
         File dir = getDirectory(context, dirInitParameter);
         if (dir.exists() && dir.isDirectory())
-            return dir.listFiles();
-        return new File[] { };
+            return Arrays.stream(dir.listFiles()).filter(x -> !isDeleteOnExit(x)).collect(Collectors.toSet());
+        return new HashSet<>();
     }
 
     /**
@@ -84,15 +107,20 @@ public class DirectoryHelper {
      * the directory is valid. Null, otherwise.
      */
     private static File getOldestStoredFile(ServletContext context, String dirInitParameter) {
-        File[] files = getDirectory(context, dirInitParameter).listFiles();
-        if (files == null) return null;
+        Set<File> files = getFiles(context, dirInitParameter);
+        if (files == null)
+            return null;
 
-        File oldest = files[0];
-        for (File file : files) {
-            if (file.lastModified() < oldest.lastModified())
-                oldest = file;
+        Optional<File> oldestOptional = files.stream().findFirst();
+        if (oldestOptional.isPresent()) {
+            File oldest = oldestOptional.get();
+            for (File file : files) {
+                if (file.lastModified() < oldest.lastModified())
+                    oldest = file;
+            }
+            return oldest;
         }
-        return oldest;
+        return null;
     }
 
     /**
@@ -150,7 +178,7 @@ public class DirectoryHelper {
         if (ontology == null)
             return null;
 
-        return Arrays.stream(getFiles(context, "query-history-dir"))
+        return getFiles(context, "query-history-dir").stream()
                 .filter(file -> isMatchingHistoryFile(ontology, file))
                 .findFirst()
                 .orElse(new File(getDirectory(context, "query-history-dir"), OWLMaster.getEncodedOntologyID(ontology)));

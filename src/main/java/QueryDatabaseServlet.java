@@ -30,6 +30,10 @@ public class QueryDatabaseServlet extends HttpServlet {
         String query = req.getParameter("queryString");
         if (query != null) {
             String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
+            File kb = new File(ontoKbPath);
+            if (kb.setLastModified(System.currentTimeMillis()))
+                System.out.println("File " + kb.getName() + " has been modified (query).");
+
             SQWRLResult result = OWLMaster.query(ontoKbPath, query);
             if (result != null) { // Query executed successfully!
                 req.getSession().removeAttribute("queryResultObject");
