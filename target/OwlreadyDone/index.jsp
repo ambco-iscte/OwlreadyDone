@@ -6,7 +6,7 @@
 <html lang="en">
     <head>
         <%@ include file="templates/head.jsp" %>
-        <title>OWLReady</title>
+        <title>OWLReady.Done</title>
     </head>
     <body class="owl-bg">
         <section class="margin-top-3 text-center">
@@ -14,10 +14,9 @@
             <section>
                 <div class="col-lg-6 mx-auto">
                     <% if (session.getAttribute("errorMessage") != null) {%>
-                    <p class="oxanium-white"><b><%= session.getAttribute("errorMessage") %>
-                    </b></p>
-                    <% session.removeAttribute("errorMessage");
-                    }%>
+                        <br/>
+                        <pre class="oxanium-white"><b><%= session.getAttribute("errorMessage") %></b></pre>
+                    <% session.removeAttribute("errorMessage"); }%>
                 </div>
                 <br><br>
                 <!-- Content Start --->

@@ -12,4 +12,12 @@
         <param-name>result-dir</param-name> <!-- Where should query result files be stored? (Path relative to root.) -->
         <param-value>results</param-value>
     </context-param>
+    <context-param>
+        <param-name>query-history-dir</param-name> <!-- Where should query history files be stored? (Path relative to root.) -->
+        <param-value>history</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>ServletContextListener</listener-class>
+    </listener>
 </web-app>

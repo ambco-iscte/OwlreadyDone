@@ -36,7 +36,7 @@ public class QueryDatabaseServlet extends HttpServlet {
                 System.out.println("File " + kb.getName() + " has been modified (query).");
 
             SQWRLResult result = OWLMaster.query(ontoKbPath, query);
-            if (result != null) { // Query executed successfully!
+            if (result != null) {
                 req.getSession().removeAttribute("queryResultObject");
                 req.getSession().setAttribute("queryString", query);
                 req.getSession().setAttribute("queryResultObject", result);
