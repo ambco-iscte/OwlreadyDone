@@ -3,9 +3,6 @@ package helper;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.swrlapi.builtins.AbstractSWRLBuiltInLibrary;
-import org.semanticweb.owlapi.util.DefaultPrefixManager;
-import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
-import org.swrlapi.builtins.SWRLBuiltInLibrary;
 import org.swrlapi.factory.SWRLAPIFactory;
 import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLQueryEngine;
@@ -28,6 +25,7 @@ import java.util.*;
 public class OWLMaster {
 
     private static final Map<String, OWLOntology> ontologies = new HashMap<>();
+    private static final Map<OWLOntology, SQWRLQueryEngine> queryEngines = new HashMap<>();
 
     /**
      * Deletes a mapping from the stored ontology map.
@@ -185,15 +183,14 @@ public class OWLMaster {
      */
     private static Set<String> getAllRelationNames(OWLOntology ontology) {
         Set<String> relations = new HashSet<>();
-        relations.add("isA");
-        relations.add("isTheSameAs");
-        relations.add("isDifferentFrom");
+        relations.add("is a");
+        relations.add("sameAs");
+        relations.add("differentFrom");
         relations.addAll(getOntologyObjectPropertyNames(ontology));
         relations.addAll(getOntologyDataPropertyNames(ontology));
         relations.addAll(getPrefixedBuiltInNames("abox"));
         relations.addAll(getPrefixedBuiltInNames("rbox"));
         relations.addAll(getPrefixedBuiltInNames("tbox"));
-        relations.addAll(getPrefixedBuiltInNames("sqwrl"));
         relations.addAll(getPrefixedBuiltInNames("swrlb"));
         relations.addAll(getPrefixedBuiltInNames("swrlm"));
         relations.addAll(getPrefixedBuiltInNames("swrlx"));
@@ -227,12 +224,23 @@ public class OWLMaster {
         if (ontology == null || query == null)
             return null;
         try {
-            SQWRLQueryEngine queryEngine = SWRLAPIFactory.createSQWRLQueryEngine(ontology);
-            return queryEngine.runSQWRLQuery(String.valueOf(System.currentTimeMillis()), query);
+            return getQueryEngine(ontology).runSQWRLQuery(String.valueOf(System.currentTimeMillis()), query);
         } catch (SWRLParseException | SQWRLException ex) {
             ex.printStackTrace(System.err);
         }
         return null;
+    }
+
+    /**
+     * Gets the SQWRL Query Engine for the specified ontology. If none is present, a new one is created.
+     * @param ontology An OWL ontology reference.
+     * @return A SQWRL Query Engine associated with the given ontology.
+     */
+    private static SQWRLQueryEngine getQueryEngine(OWLOntology ontology) {
+        if (ontology == null)
+            return null;
+        queryEngines.putIfAbsent(ontology, SWRLAPIFactory.createSQWRLQueryEngine(ontology));
+        return queryEngines.get(ontology);
     }
 
     /**

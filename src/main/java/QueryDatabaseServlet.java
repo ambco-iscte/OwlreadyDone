@@ -28,10 +28,14 @@ public class QueryDatabaseServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String query = req.getParameter("queryString");
-        if (query == null) query = req.getParameter("queryBuilderString");
+
+        if (query == null)
+            query = req.getParameter("queryBuilderString");
+
         if (query != null) {
             String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
             File kb = new File(ontoKbPath);
+
             if (kb.setLastModified(System.currentTimeMillis()))
                 System.out.println("File " + kb.getName() + " has been modified (query).");
 

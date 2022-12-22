@@ -17,7 +17,6 @@ public class ServletContextListener implements jakarta.servlet.ServletContextLis
         System.out.println("Servlet context created: " + e.toString());
         try {
             Configuration.load(e.getServletContext().getResourceAsStream(CONFIGURATION_FILE));
-            System.out.println("Successfully loaded server configuration file.");
         } catch (IOException ex) {
             ex.printStackTrace(System.err);
         }

@@ -43,7 +43,8 @@ public class SubmitFileServlet extends HttpServlet {
             filePath = getAbsoluteFilepath(getFileFromURL(url));
         }
 
-        showQueryPage(req, resp, fileName, filePath,"Couldn't find uploaded file or download from URL, or the file was malformed.\nAre you sure you provided a valid OWL file or a direct link to one?");
+        showQueryPage(req, resp, fileName, filePath,"Couldn't find uploaded file or download from URL, or " +
+                "the file was malformed.\nAre you sure you provided a valid OWL file or a direct link to one?");
     }
 
     /**
@@ -76,6 +77,15 @@ public class SubmitFileServlet extends HttpServlet {
         showQueryPage(req, resp, recentFileName, filePath, "Couldn't find the specified file.");
     }
 
+    /**
+     * Shows the query page for an ontology, if possible; Redirects to the home page, otherwise.
+     * @param req The HTTP servlet request.
+     * @param resp The HTTP servlet response.
+     * @param fileName The file name of the uploaded ontology file.
+     * @param filePath The file path of the uploaded ontology file.
+     * @param errorMessage The error message to display when redirecting back to the home page.
+     * @throws IOException If an error occurred when redirecting.
+     */
     private void showQueryPage(HttpServletRequest req, HttpServletResponse resp, String fileName, String filePath, String errorMessage) throws IOException {
         if (filePath != null) {
             req.getSession().setAttribute("uploadedFilePath", filePath);

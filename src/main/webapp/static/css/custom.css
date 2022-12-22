@@ -132,6 +132,7 @@
 
 .query-builder-input-select {
     margin-left: 0.5rem;
+    max-width: 30%;
     background-color: transparent;
     border: none;
     color: white;
@@ -170,4 +171,8 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.term-and-text {
+    margin-right: 1.6rem;
 }

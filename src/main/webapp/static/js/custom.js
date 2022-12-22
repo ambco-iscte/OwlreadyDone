@@ -114,27 +114,27 @@ function createBlankAntecedentTerm(index, ontoClasses, ontoIndividuals, ontoRela
 }
 
 /**
- * Checks if a given term is missing variables
- * @param var1 corresponds to first variable of the antecedent
- * @param rel corresponds to second variable of the antecedent
- * @param var2 corresponds to third variable of the antecedent
+ * Is an antecedent term missing any variables?
+ * @param var1 First variable of the term.
+ * @param rel Relation of the term.
+ * @param var2 Second variable of the term.
  */
-function checkIfMissingAntecedentVariables(var1, rel, var2){
+function isAntecedentTermMissingVariables(var1, rel, var2){
     return constructTerm(var1, rel, var2) === "" || constructTerm(var1, rel, var2).includes("?undefined") || constructTerm(var1, rel, var2).includes("()")
 }
 
 /**
- * Checks if a given term is missing variables
- * @param var1Id corresponds to first variable of the consequent
+ * Is a consequent term missing variables, i.e. is its variable field empty?
+ * @param variableElementId The variable field of the Term.
  */
-function checkIfMissingConsequentVariables(var1Id){
-    return document.getElementById(var1Id).value === "";
+function isConsequentTermMissingVariables(variableElementId){
+    return document.getElementById(variableElementId).value === "";
 }
 
 /**
- * Cleans the variable removing unwanted spaces, and formats it in the correct way, even if the user doesnt, eg., ?x?z => ?x, ?z, ?k                ,           ?a => ?k, ?a
- * @param varXValue The variable field to be cleaned
- * @returns {string} The cleaned variable
+ * Cleans the variable, removing unwanted spaces, and formats it correctly. E.g. ?x?z => ?x, ?z
+ * @param varXValue The variable field to be cleaned.
+ * @returns {string} The cleaned variable.
  */
 function cleanQueryShowVariables(varXValue){
     let aux;
@@ -142,28 +142,30 @@ function cleanQueryShowVariables(varXValue){
     varXValue = ""
     for (let i = 0; i < splitVarFieldByQuestionMarks.length; i++) {
         splitVarFieldByQuestionMarks[i] = splitVarFieldByQuestionMarks[i].replace(" ","")
-        if(i !== splitVarFieldByQuestionMarks.length-1) {
+        if(i !== splitVarFieldByQuestionMarks.length - 1) {
             let cleanInBetweenVariables = splitVarFieldByQuestionMarks[i].split(',').map(element => element.trim()).filter(element => element !== '')
             aux = "?" + cleanInBetweenVariables[0]+", "
-        }else
-            aux = "?"+splitVarFieldByQuestionMarks[i]
+        } else
+            aux = "?" + splitVarFieldByQuestionMarks[i]
         varXValue+=aux
     }
     return varXValue
 }
+
 /**
- * Given the term variables, it constructs a Term antecedent in SQWRL format and appends it to the queryField in query,jsp
- * @param var1 corresponds to first variable of the antecedent
- * @param rel corresponds to second variable of the antecedent
- * @param var2 corresponds to third variable of the antecedent
+ * Given the term variables, constructs an antecedent term in SQWRL format and appends it to the query field.
+ * @param var1 First variable of the term.
+ * @param rel Relation of the term.
+ * @param var2 Second variable of the term.
  */
 function antecedentShow (var1, rel, var2) {
     let name = constructTerm(var1, rel, var2);
-    let queryBuilderStringValue = document.getElementById("queryBuilderString").value;
-        if (queryBuilderStringValue !== ""){
-            document.getElementById("queryBuilderString").value = queryBuilderStringValue + " ^ " + name;
-        }else
-            document.getElementById("queryBuilderString").value = name;
+    let queryField = document.getElementById("queryBuilderString");
+    let queryBuilderStringValue = queryField.value;
+        if (queryBuilderStringValue !== "")
+            queryField.value = queryBuilderStringValue + " ^ " + name;
+        else
+            queryField.value = name;
 }
 
 /**
@@ -173,82 +175,100 @@ function antecedentShow (var1, rel, var2) {
  * @param isFirstConsequent checks if the consequent term it's the first, for viewing purpose
  */
 function consequentShow(var1, rel, isFirstConsequent){
-    if (document.getElementById(var1) === null) {
-        return '';}
-    let var1Value = cleanQueryShowVariables(document.getElementById(var1).value)
+    let var1Element = document.getElementById(var1);
+    if (var1Element === null)
+        return '';
+
+    let queryField = document.getElementById("queryBuilderString");
+    let var1Value = cleanQueryShowVariables(document.getElementById(var1).value);
     let varRelValue = document.getElementById(rel).value;
 
-    document.getElementById(var1).value = var1Value
+    var1Element.value = var1Value;
 
-    let name = varRelValue +"("+ var1Value +")"
-    let queryBuilderStringValue = document.getElementById("queryBuilderString").value;
-    if (queryBuilderStringValue !== ""){
+    let name = varRelValue +"("+ var1Value +")";
+    let queryBuilderStringValue = queryField.value;
+
+    if (queryBuilderStringValue !== "") {
         if (isFirstConsequent)
-            document.getElementById("queryBuilderString").value = queryBuilderStringValue + '->' + name;
+            queryField.value = queryBuilderStringValue + ' -> ' + name;
         else
-            document.getElementById("queryBuilderString").value = queryBuilderStringValue + '^' + name;
-    }else
-        document.getElementById("queryBuilderString").value = name;
+            queryField.value = queryBuilderStringValue + ' ^ ' + name;
+    } else
+        queryField.value = name;
 }
 
 /**
- * Given the variables it creates a SQWRL term
- * @param var1 corresponds to first variable of the antecedent
- * @param rel corresponds to second variable of the antecedent
- * @param var2 corresponds to third variable of the antecedent
- * @returns {string} returns the given variables in the SQWRL query format
+ * Given the correct variables, creates a SQWRL query term.
+ * @param var1 First variable of the term.
+ * @param rel Relation of the term.
+ * @param var2 Second variable of the term.
+ * @returns {string} The given variables in SQWRL query format.
  */
 function constructTerm(var1, rel, var2){
-    if (document.getElementById(var1) === null || document.getElementById(var1).value === "") {
-        return '';}
-    let var1Value = cleanQueryShowVariables(document.getElementById(var1).value)
+    let var1Element = document.getElementById(var1);
+    let var2Element = document.getElementById(var2);
+
+    if (var1Element === null || var1Element.value === "")
+        return '';
+
+    let var1Value = cleanQueryShowVariables(var1Element.value);
     let varRelValue = document.getElementById(rel).value;
-    let var2Value
-    if(document.getElementById(var2).value.toString().includes('?'))
-        var2Value = cleanQueryShowVariables(document.getElementById(var2).value)
+    let var2Value;
+    if (var2Element.value.toString().includes('?'))
+        var2Value = cleanQueryShowVariables(var2Element.value);
     else
-        var2Value = document.getElementById(var2).value
+        var2Value = var2Element.value;
 
-    document.getElementById(var1).value = var1Value
-    document.getElementById(var2).value = var2Value
+    var1Element.value = var1Value;
+    var2Element.value = var2Value;
 
-    if (varRelValue.toString()==="isA") return var2Value + "(" + var1Value + ")";
-    else
-        if(var2Value !== "") return varRelValue + "(" + var1Value.toString() + ", " + var2Value.toString() + ")";
-        else return varRelValue + "(" + var1Value.toString() + ")";
+    if (varRelValue.toString() === "is a")
+        return var2Value + "(" + var1Value + ")";
+    else {
+        if (var2Value !== "")
+            return varRelValue + "(" + var1Value.toString() + ", " + var2Value.toString() + ")";
+        return varRelValue + "(" + var1Value.toString() + ")";
+    }
 }
+
 /**
- * cleans the query field
+ * Cleans the query field.
  */
 function cleanQueryField(){
-    if (document.getElementById("queryBuilderString").value !== "")
-        document.getElementById("queryBuilderString").value = '';
+    document.getElementById("queryBuilderString").value = '';
 }
 
 /**
- * Gets all terms and shows them in the query field, does no verifications, so it lets you add repeated terms!!
+ * Constructs a full SQWRL query from all the terms in the query builder interface.
  */
-function refreshQueryFieldButton() {
+function onRefreshQueryFieldButtonClicked() {
     let isFirstConsequent = true;
     cleanQueryField();
+
     const var1Inputs = document.querySelectorAll('input[name*="-var1"]');
+
     for (let i = 0; i < var1Inputs.length; i++) {
-        let var1 = var1Inputs[i].id
-        let fieldId = var1Inputs[i].id.split("Term")[1].charAt(0)
-        if (var1.includes("antecedent") && !checkIfMissingAntecedentVariables("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2"))
-            antecedentShow("antecedentTerm" + fieldId + "-var1", "antecedentTerm" + fieldId + "-rel", "antecedentTerm" + fieldId + "-var2");
-        else
-            if (var1.includes("consequent") && !checkIfMissingConsequentVariables(var1)) {
-                consequentShow(var1, var1.replace('var1','rel'), isFirstConsequent)
-                if (isFirstConsequent) isFirstConsequent = false;
-            }
+        let var1 = var1Inputs[i].id;
+        let fieldId = var1Inputs[i].id.split("Term")[1].charAt(0);
+
+        let var1ElementId = "antecedentTerm" + fieldId + "-var1";
+        let relElementId = "antecedentTerm" + fieldId + "-rel";
+        let var2ElementId = "antecedentTerm" + fieldId + "-var2";
+
+        if (var1.includes("antecedent") && !isAntecedentTermMissingVariables(var1ElementId, relElementId, var2ElementId)) {
+            antecedentShow(var1ElementId, relElementId, var2ElementId);
+        }
+        else if (var1.includes("consequent") && !isConsequentTermMissingVariables(var1)) {
+            consequentShow(var1, var1.replace('var1','rel'), isFirstConsequent);
+            if (isFirstConsequent)
+                isFirstConsequent = false;
+        }
     }
 }
 
 function createAndText() {
     let andText = document.createElement("h3");
-    andText.classList.add("oxanium-purple");
-    andText.classList.add("no-bottom-margin");
+    andText.classList.add("oxanium-purple", "no-bottom-margin", "term-and-text");
     andText.innerText = "and";
     andText.style.display = "none";
     return andText;
@@ -284,7 +304,7 @@ function createTextInput(id, placeholder, required, ...classes) {
  */
 function createTextInputWithDatalist(id, placeholder, required, inputClass, datalist) {
     let input = createTextInput(id, placeholder, required, inputClass);
-    input.setAttribute("list", datalist.id)
+    input.setAttribute("list", datalist.id);
     return input;
 }
 

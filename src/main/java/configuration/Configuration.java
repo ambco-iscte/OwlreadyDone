@@ -22,8 +22,10 @@ public class Configuration {
      */
     public static void load(InputStream stream) throws IOException {
         if (stream == null)
-            throw new IllegalArgumentException("Input stream of configuration file must be non-null.");
+            throw new IllegalArgumentException("Input stream of configuration file must be non-null. " +
+                    "Are you sure the config.properties file is present?");
         properties.load(stream);
+        System.out.println("Successfully loaded server configuration file.");
     }
 
     /**
@@ -50,7 +52,7 @@ public class Configuration {
     }
 
     /**
-     * @return The WebVowl website link, to be used in {@link }.
+     * @return The WebVowl website URL, to be used in {@link ResultToVowlServlet}.
      */
     public static String getWebVowlURL() {
         return getProperty("WEB_VOWL_URL");

@@ -4,13 +4,8 @@
 <%@ page import="helper.Helper" %>
 <%@ page import="java.nio.file.Files" %>
 <%@ page import="helper.DirectoryHelper" %>
-<%@ page import="java.util.Objects" %>
 <%@ page import="java.io.File" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.semanticweb.owlapi.io.SystemOutDocumentTarget" %>
-<%@ page import="java.util.stream.Collectors" %>
-<%@ page import="java.util.Collection" %>
-<%@ page import="java.util.stream.Stream" %>
 <%@ page import="java.util.List" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 
@@ -89,7 +84,7 @@
                             </section>
                                 <!--<h3 id="queryBuilderAntecedentAddTermToDisplayField-1" class="oxanium-purple no-bottom-margin highlight-on-hover unselectable" style="display: none"
                                 onclick="antecedentShow('antecedentTerm1-var1', 'antecedentTerm1-rel', 'antecedentTerm1-var2')"><b>Show</b></h3>-->
-                                <h3 class="oxanium-purple no-bottom-margin" style="display: none">and</h3>
+                                <h3 class="oxanium-purple no-bottom-margin term-and-text" style="display: none;">and</h3>
 
                                 <h3 id="queryBuilderAntecedentAddTermButton-1"
                                     class="oxanium-purple no-bottom-margin highlight-on-hover unselectable"
@@ -117,7 +112,7 @@
                                            name="consequentTerm1-var1" placeholder="?var1, ?var2, ..." required>
                                 </section>
 
-                                <h3 class="oxanium-purple no-bottom-margin" style="display: none">and</h3>
+                                <h3 class="oxanium-purple no-bottom-margin term-and-text" style="display: none">and</h3>
 
                                 <h3 id="queryBuilderConsequentAddTermButton-1"
                                     class="oxanium-purple no-bottom-margin highlight-on-hover unselectable"
@@ -128,7 +123,7 @@
                         </section>
                     </section>
                     <!-- Query preview and submit buttom -->
-                    <h3 class="owl-btn btn btn-primary" onclick="refreshQueryFieldButton()">
+                    <h3 class="owl-btn btn btn-primary" onclick="onRefreshQueryFieldButtonClicked()">
                         <b>Refresh Query Field</b>
                     </h3>
                     <form class="no-right-margin margin-top-1rem row g-3" action="queryDatabaseServlet"

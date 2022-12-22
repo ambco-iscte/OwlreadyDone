@@ -1,5 +1,5 @@
 import helper.DirectoryHelper;
-import jakarta.servlet.ServletContext;
+
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -18,7 +18,6 @@ import configuration.Configuration;
 @WebServlet("/resultToVowlServlet")
 @MultipartConfig
 public class ResultToVowlServlet extends HttpServlet {
-    final static String webVowlPath = Configuration.getWebVowlURL();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -32,18 +31,18 @@ public class ResultToVowlServlet extends HttpServlet {
         String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
         try {
             File f = resultToOntology(result, getServletContext(), ontoKbPath, true, DirectoryHelper.getFileName(ontoKbPath));
-            if(!f.exists()) {
+            if (f != null && !f.exists()) {
                 req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
                 resp.sendRedirect(req.getContextPath() + "/result.jsp");
             }
-            else {
+            else if (f != null) {
                 //Fazer o upload da ontologia para algum lado para depois enviar para o vowl
                 //Código temporário
                 //idealmente neste redirect é usada uma nova janela.
                 //para tal parece que a melhor opção é tentar colocar a parte do redirect no html em si, n sei como
                 req.getSession().setAttribute("errorMessage", "It worked!");
                 createFile(f.getAbsolutePath());
-                resp.sendRedirect(webVowlPath + f.getName() + "?raw=true");
+                resp.sendRedirect(Configuration.getWebVowlURL() + f.getName() + "?raw=true");
                 // a query que tenhoe estado a fazer nao funciona ?? tbox:cd(?x) -> sqwrl:select(?x), mas se testar com versoes antigas ja funciona
                 // gostaria de nao ter isto hardcoded, mas tenho de entender melhor como funciona o get da rest api, nao percebo como ir buscar o path do ficheiro em especifico
             }
@@ -52,14 +51,11 @@ public class ResultToVowlServlet extends HttpServlet {
             req.getSession().setAttribute("errorMessage", "Ontology result has already been created!");
             resp.sendRedirect(req.getContextPath() + "/result.jsp");
             e.printStackTrace();
-        }
-        catch (OWLOntologyCreationException e) {
+        } catch (OWLOntologyCreationException e) {
             req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
             resp.sendRedirect(req.getContextPath() + "/result.jsp");
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (ClassNotFoundException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
