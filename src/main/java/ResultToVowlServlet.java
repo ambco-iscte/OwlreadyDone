@@ -30,7 +30,7 @@ public class ResultToVowlServlet extends HttpServlet {
         }
         String ontoKbPath = req.getSession().getAttribute("uploadedFilePath").toString();
         try {
-            File f = resultToOntology(result, getServletContext(), ontoKbPath, true, DirectoryHelper.getFileName(ontoKbPath));
+            File f = resultToOntology(result, getServletContext(), ontoKbPath);
             if (f != null && !f.exists()) {
                 req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
                 resp.sendRedirect(req.getContextPath() + "/result.jsp");

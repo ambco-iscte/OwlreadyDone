@@ -19,20 +19,17 @@ import java.util.Map;
 public class OWLOntologyCreator {
 
     /**
-     * TODO
-     * @param result
-     * @param context
-     * @param ontoKbPath
-     * @param saveFile
-     * @param fileName
-     * @return
+     * Considering the query results, creates a new ontology, and saves it. To create this new ontology it may query the
+     * original ontology to add additional information to this ontology, besides the results.
+     * @param result Result from the query, used to create new ontology of result.
+     * @param context Servlet context, used to obtain the path where results are to be stored.
+     * @param ontoKbPath The path to the original ontology's knowledge base file.
+     * @return The file containing the query result with additional relevant information.
      * @throws OWLOntologyCreationException
      * @throws ClassNotFoundException
      */
-    public static File resultToOntology(SQWRLResult result, ServletContext context, String ontoKbPath, Boolean saveFile, String fileName)
+    public static File resultToOntology(SQWRLResult result, ServletContext context, String ontoKbPath)
             throws OWLOntologyCreationException, ClassNotFoundException {
-        //TODO
-
 
         OWLOntology originalOntology = OWLMaster.getOntologyFromFile(ontoKbPath);
         if (originalOntology == null)
@@ -78,15 +75,13 @@ public class OWLOntologyCreator {
             }
 
             File file = null;
-            if (saveFile) {
-                try {
-                    Timestamp ts = new Timestamp(System.currentTimeMillis());
-                    file = new File(DirectoryHelper.getDirectory(context, "result-dir")
-                            + File.separator + "result_" + ts.getTime() + "_" + fileName);
-                    manager.saveOntology(ontology, format, IRI.create(file.toURI()));
-                } catch (OWLOntologyStorageException e) {
-                    throw new RuntimeException(e);
-                }
+            try {
+                Timestamp ts = new Timestamp(System.currentTimeMillis());
+                file = new File(DirectoryHelper.getDirectory(context, "result-dir")
+                        + File.separator + "result_" + ts.getTime() + "_" + DirectoryHelper.getFileName(ontoKbPath));
+                manager.saveOntology(ontology, format, IRI.create(file.toURI()));
+            } catch (OWLOntologyStorageException e) {
+                throw new RuntimeException(e);
             }
 
             manager.removeOntology(ontology);
@@ -119,13 +114,13 @@ public class OWLOntologyCreator {
     }
 
     /**
-     * TODO
-     * @param result
-     * @param manager
-     * @param factory
-     * @param originalOntology
-     * @param ontology
-     * @param pm
+     * Method that adds all query results and additional information to the new ontology
+     * @param result Result from the query, used to create new ontology of result.
+     * @param manager Ontology manager used to correctly add ontology axioms.
+     * @param factory OWL data factory that is used to create ontology axioms.
+     * @param originalOntology The original ontology's knowledge base.
+     * @param ontology The new ontology to which information is added.
+     * @param pm Prefix manager that supplies correct prefixes when creating elements of OWL ontologies.
      * @throws SQWRLException
      */
     private static void addResultsToOntology(SQWRLResult result, OWLOntologyManager manager, OWLDataFactory factory,
@@ -179,14 +174,14 @@ public class OWLOntologyCreator {
     }
 
     /**
-     * TODO
-     * @param manager
-     * @param factory
-     * @param originalOntology
-     * @param ontology
-     * @param pm
-     * @param individual
-     * @param xindividual
+     * Auxiliary method that, for a given individual, discovers its classes and adds them to the ontology.
+     * @param manager Ontology manager used to correctly add ontology axioms.
+     * @param factory OWL data factory that is used to create ontology axioms.
+     * @param originalOntology The original ontology's knowledge base.
+     * @param ontology The new ontology to which information is added.
+     * @param pm Prefix manager that supplies correct prefixes when creating elements of OWL ontologies.
+     * @param individual Individual result value from the query result.
+     * @param xindividual Named individual object corresponding to the individual in the results.
      * @throws SWRLParseException
      * @throws SQWRLException
      */
@@ -209,14 +204,14 @@ public class OWLOntologyCreator {
     }
 
     /**
-     * TODO
-     * @param manager
-     * @param factory
-     * @param originalOntology
-     * @param ontology
-     * @param pm
-     * @param individual
-     * @param xindividual
+     * Auxiliary method that, for a given individual, discovers its data properties and adds them to the ontology.
+     * @param manager Ontology manager used to correctly add ontology axioms.
+     * @param factory OWL data factory that is used to create ontology axioms.
+     * @param originalOntology The original ontology's knowledge base.
+     * @param ontology The new ontology to which information is added.
+     * @param pm Prefix manager that supplies correct prefixes when creating elements of OWL ontologies.
+     * @param individual Individual result value from the query result.
+     * @param xindividual Named individual object corresponding to the individual in the results.
      * @throws SWRLParseException
      * @throws SQWRLException
      */
@@ -238,14 +233,14 @@ public class OWLOntologyCreator {
     }
 
     /**
-     * TODO
-     * @param manager
-     * @param factory
-     * @param originalOntology
-     * @param ontology
-     * @param pm
-     * @param individual
-     * @param xindividual
+     * Auxiliary method that, for a given individual, discovers its object properties and adds them to the ontology.
+     * @param manager Ontology manager used to correctly add ontology axioms.
+     * @param factory OWL data factory that is used to create ontology axioms.
+     * @param originalOntology The original ontology's knowledge base.
+     * @param ontology The new ontology to which information is added.
+     * @param pm Prefix manager that supplies correct prefixes when creating elements of OWL ontologies.
+     * @param individual Individual result value from the query result.
+     * @param xindividual Named individual object corresponding to the individual in the results.
      * @throws SWRLParseException
      * @throws SQWRLException
      */
@@ -285,14 +280,14 @@ public class OWLOntologyCreator {
     */
 
     /**
-     * TODO
-     * @param manager
-     * @param factory
-     * @param originalOntology
-     * @param ontology
-     * @param pm
-     * @param classr
-     * @param xclassr
+     * Auxiliary method that, for a given class, discovers its super/subclasses and adds them to the ontology.
+     * @param manager Ontology manager used to correctly add ontology axioms.
+     * @param factory OWL data factory that is used to create ontology axioms.
+     * @param originalOntology The original ontology's knowledge base.
+     * @param ontology The new ontology to which information is added.
+     * @param pm Prefix manager that supplies correct prefixes when creating elements of OWL ontologies.
+     * @param classr Class result value from the query result.
+     * @param xclassr Class object corresponding to the class in the results.
      * @throws SWRLParseException
      * @throws SQWRLException
      */
