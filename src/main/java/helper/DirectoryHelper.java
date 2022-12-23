@@ -1,6 +1,7 @@
 package helper;
 
 import jakarta.servlet.ServletContext;
+import ordering.FileComparator;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import java.io.File;
@@ -70,10 +71,7 @@ public class DirectoryHelper {
      * @return The number of files in the directory, if applicable; 0 otherwise.
      */
     public static int getDirectoryFileCount(ServletContext context, String dirInitParameter) {
-        Set<File> files = getFiles(context, dirInitParameter);
-        if (files != null)
-            return files.size();
-        return 0;
+        return getFiles(context, dirInitParameter).size();
     }
 
     /**
@@ -81,11 +79,14 @@ public class DirectoryHelper {
      * @param dirInitParameter The init parameter for the directory, as specified in web.xml.
      * @return A set containing all non-marked (see {@link #deleteOnExit DirectoryHelper.deleteOnExit}) files in the given directory.
      */
-    public static Set<File> getFiles(ServletContext context, String dirInitParameter) {
+    public static SortedSet<File> getFiles(ServletContext context, String dirInitParameter) {
         File dir = getDirectory(context, dirInitParameter);
-        if (dir.exists() && dir.isDirectory())
-            return Arrays.stream(dir.listFiles()).filter(x -> !isDeleteOnExit(x)).collect(Collectors.toSet());
-        return new HashSet<>();
+        if (dir.exists() && dir.isDirectory()) {
+            Set<File> files = Arrays.stream(dir.listFiles()).filter(x -> !isDeleteOnExit(x)).collect(Collectors.toSet());
+            return Helper.collectionToSortedSet(files, new FileComparator());
+
+        }
+        return new TreeSet<>();
     }
 
     /**
@@ -108,8 +109,6 @@ public class DirectoryHelper {
      */
     private static File getOldestStoredFile(ServletContext context, String dirInitParameter) {
         Set<File> files = getFiles(context, dirInitParameter);
-        if (files == null)
-            return null;
 
         Optional<File> oldestOptional = files.stream().findFirst();
         if (oldestOptional.isPresent()) {
@@ -178,9 +177,10 @@ public class DirectoryHelper {
         if (ontology == null)
             return null;
 
+        File historyDir = getDirectory(context, "query-history-dir");
         return getFiles(context, "query-history-dir").stream()
                 .filter(file -> isMatchingHistoryFile(ontology, file))
                 .findFirst()
-                .orElse(new File(getDirectory(context, "query-history-dir"), OWLMaster.getEncodedOntologyID(ontology)));
+                .orElse(new File(historyDir, OWLMaster.getEncodedOntologyID(ontology)));
     }
 }

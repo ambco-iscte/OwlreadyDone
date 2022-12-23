@@ -59,7 +59,7 @@ public class SubmitFileServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Set<File> files = DirectoryHelper.getFiles(getServletContext(), "upload-dir");
-        if (files == null) {
+        if (files.isEmpty()) {
             req.getSession().setAttribute("errorMessage", "There are no recent files!");
             resp.sendRedirect(req.getContextPath() + "/index.jsp");
             return;

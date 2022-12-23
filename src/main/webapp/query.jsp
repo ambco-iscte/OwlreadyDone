@@ -34,7 +34,7 @@
                     Set<String> classNames = OWLMaster.getOntologyClassNames(kbPath);
                     Set<String> individualNames = OWLMaster.getOntologyIndividualNames(kbPath);
                     Set<String> relationNames = OWLMaster.getAllRelationNames(kbPath);
-                    Set<String> builtInNames = OWLMaster.getPrefixedBuiltInNames("sqwrl");
+                    Set<String> sqwrlBuiltInNames = OWLMaster.getPrefixedBuiltInNames("sqwrl");
                 %>
                 <h1 class="oxanium-white">You provided this knowledge base:
                     <%= session.getAttribute("uploadFileOriginalName").toString()%>
@@ -63,7 +63,7 @@
                                     <input class="query-builder-input-text" type="text"
                                            id="antecedentTerm1-var1" name="antecedentTerm1-var1" placeholder="?var1" required>
 
-                                    <select class="query-builder-input-select" name="antecedentTerm1-rel"
+                                    <select class="query-builder-input-select--antecedent" name="antecedentTerm1-rel"
                                             id="antecedentTerm1-rel">
                                         <% for (String relName : relationNames) {%>
                                         <option class="query-builder-input-select-option" value="<%=relName%>"><%=relName%>
@@ -101,7 +101,7 @@
                             <section class="query-builder-term">
                                 <section class="query-builder-term-input-fields">
                                     <select class="query-builder-input-select" name="consequentTerm1-rel" id="consequentTerm1-rel">
-                                        <% for (String builtInName : builtInNames) {%>
+                                        <% for (String builtInName : sqwrlBuiltInNames) {%>
                                         <option class="query-builder-input-select-option"
                                                 value="<%=builtInName%>"><%=builtInName%>
                                         </option>
@@ -116,7 +116,7 @@
 
                                 <h3 id="queryBuilderConsequentAddTermButton-1"
                                     class="oxanium-purple no-bottom-margin highlight-on-hover unselectable"
-                                    onclick="consequentAddNewTermClicked(this.id, <%=Helper.toJSStringList(builtInNames)%>)"><b>+</b>
+                                    onclick="consequentAddNewTermClicked(this.id, <%=Helper.toJSStringList(sqwrlBuiltInNames)%>)"><b>+</b>
                                 </h3>
                             </section>
 

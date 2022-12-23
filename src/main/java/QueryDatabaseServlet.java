@@ -14,6 +14,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 
 /**
  * @author Afonso Caniço
@@ -62,13 +65,37 @@ public class QueryDatabaseServlet extends HttpServlet {
      */
     private void writeQueryToFile(ServletContext context, String ontologyKbPath, String query) {
         try {
+            int limit = Integer.parseInt(context.getInitParameter("stored-query-limit"));
             File history = DirectoryHelper.getMatchingHistoryFile(context, ontologyKbPath);
+
             if (history != null) {
                 BufferedWriter queryHistoryWriter = new BufferedWriter(new FileWriter(history, true));
+
+                String[] lines = Files.readAllLines(history.toPath()).toArray(new String[0]);
+                clearFileContent(history);
+
                 queryHistoryWriter.write(query);
                 queryHistoryWriter.newLine();
+
+                for (int i = 0; i < Math.min(limit - 1, lines.length); i++) {
+                    queryHistoryWriter.write(lines[i]);
+                    queryHistoryWriter.newLine();
+                }
+
                 queryHistoryWriter.close();
             }
+        } catch (IOException ex) {
+            ex.printStackTrace(System.err);
+        }
+    }
+
+    private void clearFileContent(File file) {
+        if (file == null)
+            return;
+        try {
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file, false));
+            bufferedWriter.flush();
+            bufferedWriter.close();
         } catch (IOException ex) {
             ex.printStackTrace(System.err);
         }

@@ -132,6 +132,16 @@
 
 .query-builder-input-select {
     margin-left: 0.5rem;
+    background-color: transparent;
+    border: none;
+    color: white;
+    border-bottom: 2px solid #C2A3F9;
+    font-family: 'Oxanium', cursive;
+    min-height: 1.75rem;
+}
+
+.query-builder-input-select--antecedent {
+    margin-left: 0.5rem;
     max-width: 30%;
     background-color: transparent;
     border: none;

@@ -1,8 +1,10 @@
 package helper;
 
+import ordering.OntologyEntityComparator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.swrlapi.builtins.AbstractSWRLBuiltInLibrary;
+import org.swrlapi.builtins.SWRLBuiltInLibraryManager;
 import org.swrlapi.factory.SWRLAPIFactory;
 import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLQueryEngine;
@@ -14,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Contains helper methods for interacting with OWL knowledge bases.
@@ -70,10 +73,10 @@ public class OWLMaster {
      * @param ontology The OWL ontology you want to get the signature from.
      * @return The signature (set of entities) of the given ontology.
      */
-    public static Set<OWLEntity> getOntologySignature(OWLOntology ontology) {
+    public static SortedSet<OWLEntity> getOntologySignature(OWLOntology ontology) {
         if (ontology == null)
             return null;
-        return ontology.getSignature();
+        return Helper.collectionToSortedSet(ontology.getSignature(), new OntologyEntityComparator());
     }
 
     /**
@@ -81,11 +84,11 @@ public class OWLMaster {
      * @param kbPath The path to the OWL knowledge base file.
      * @return The signature (set of entities) of the loaded ontology.
      */
-    public static Set<OWLEntity> getOntologySignature(String kbPath) {
+    public static SortedSet<OWLEntity> getOntologySignature(String kbPath) {
         OWLOntology ontology = getOntologyFromFile(kbPath);
         if (ontology != null)
             return getOntologySignature(ontology);
-        return new HashSet<>();
+        return new TreeSet<>();
     }
 
     /**
@@ -104,7 +107,7 @@ public class OWLMaster {
      * @param kbPath The path to the ontology's knowledge base.
      * @return A set of strings corresponding to the names of every OWLClass in the given ontology's signature.
      */
-    public static Set<String> getOntologyClassNames(String kbPath) {
+    public static SortedSet<String> getOntologyClassNames(String kbPath) {
         return getOntologyClassNames(getOntologyFromFile(kbPath));
     }
 
@@ -112,7 +115,7 @@ public class OWLMaster {
      * @param kbPath The path to the ontology's knowledge base.
      * @return A set of strings corresponding to the names of every OWL Object Property in the given ontology's signature.
      */
-    public static Set<String> getOntologyObjectPropertyNames(String kbPath) {
+    public static SortedSet<String> getOntologyObjectPropertyNames(String kbPath) {
         return getOntologyObjectPropertyNames(getOntologyFromFile(kbPath));
     }
 
@@ -120,7 +123,7 @@ public class OWLMaster {
      * @param kbPath The path to the ontology's knowledge base.
      * @return A set of strings corresponding to the names of every OWL Data Property in the given ontology's signature.
      */
-    public static Set<String> getOntologyDataPropertyNames(String kbPath) {
+    public static SortedSet<String> getOntologyDataPropertyNames(String kbPath) {
         return getOntologyDataPropertyNames(getOntologyFromFile(kbPath));
     }
 
@@ -129,7 +132,7 @@ public class OWLMaster {
      * @return A set of strings corresponding to the names of every relation (object/data property, built-in, etc.)
      * in the given ontology.
      */
-    public static Set<String> getAllRelationNames(String kbPath) {
+    public static SortedSet<String> getAllRelationNames(String kbPath) {
         return getAllRelationNames(getOntologyFromFile(kbPath));
     }
 
@@ -137,81 +140,112 @@ public class OWLMaster {
      * @param kbPath The path to the ontology's knowledge base.
      * @return A set of strings corresponding to the names of every OWL Individual in the given ontology's signature.
      */
-    public static Set<String> getOntologyIndividualNames(String kbPath) {
+    public static SortedSet<String> getOntologyIndividualNames(String kbPath) {
         return getOntologyIndividualNames(getOntologyFromFile(kbPath));
     }
 
     /**
      * @return A set of strings corresponding to the names of every OWLClass in the given ontology's signature.
      */
-    private static Set<String> getOntologyClassNames(OWLOntology ontology) {
+    private static SortedSet<String> getOntologyClassNames(OWLOntology ontology) {
         if (ontology == null)
             return null;
-        return Helper.map(ontology.getClassesInSignature(), OWLMaster::getEntityReadableName);
+        SortedSet<String> classes = getOrderedEntityNames(ontology.getClassesInSignature());
+
+        // TODO: this a quick fix. Tackle the underlying problem: getEntityReadableName potentially removes prefixes?
+        classes.remove("Thing");
+        classes.add("owl:Thing");
+
+        return classes;
     }
 
     /**
      * @return A set of strings corresponding to the names of every OWL Data Property in the given ontology's signature.
      */
-    private static Set<String> getOntologyDataPropertyNames(OWLOntology ontology) {
+    private static SortedSet<String> getOntologyDataPropertyNames(OWLOntology ontology) {
         if (ontology == null)
             return null;
-        return Helper.map(ontology.getDataPropertiesInSignature(), OWLMaster::getEntityReadableName);
+        return getOrderedEntityNames(ontology.getDataPropertiesInSignature());
     }
 
     /**
      * @return A set of strings corresponding to the names of every OWL Object Property in the given ontology's signature.
      */
-    private static Set<String> getOntologyObjectPropertyNames(OWLOntology ontology) {
+    private static SortedSet<String> getOntologyObjectPropertyNames(OWLOntology ontology) {
         if (ontology == null)
             return null;
-        return Helper.map(ontology.getObjectPropertiesInSignature(), OWLMaster::getEntityReadableName);
+        return getOrderedEntityNames(ontology.getObjectPropertiesInSignature());
     }
 
     /**
      * @return A set of strings corresponding to the names of every OWL Individual in the given ontology's signature.
      */
-    private static Set<String> getOntologyIndividualNames(OWLOntology ontology) {
+    private static SortedSet<String> getOntologyIndividualNames(OWLOntology ontology) {
         if (ontology == null)
             return null;
-        return Helper.map(ontology.getIndividualsInSignature(), OWLMaster::getEntityReadableName);
+        return getOrderedEntityNames(ontology.getIndividualsInSignature());
+    }
+
+    /**
+     * Constructs an ordered set of the OWL entities in the given collection.
+     * @param collection A collection of {@link OWLEntity OWL entities}.
+     * @return A {@link SortedSet sorted set} of the human-readable names of all the OWL entities in the collection.
+     */
+    private static SortedSet<String> getOrderedEntityNames(Collection<? extends OWLEntity> collection) {
+        return Helper.mapSorted(collection, OWLMaster::getEntityReadableName, String.CASE_INSENSITIVE_ORDER);
     }
 
     /**
      * @return A set of strings corresponding to the names of every relation (object/data property, built-in, etc.)
      * in the given ontology.
      */
-    private static Set<String> getAllRelationNames(OWLOntology ontology) {
-        Set<String> relations = new HashSet<>();
+    private static SortedSet<String> getAllRelationNames(OWLOntology ontology) {
+        SortedSet<String> relations = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         relations.add("is a");
         relations.add("sameAs");
         relations.add("differentFrom");
         relations.addAll(getOntologyObjectPropertyNames(ontology));
         relations.addAll(getOntologyDataPropertyNames(ontology));
-        relations.addAll(getPrefixedBuiltInNames("abox"));
-        relations.addAll(getPrefixedBuiltInNames("rbox"));
-        relations.addAll(getPrefixedBuiltInNames("tbox"));
-        relations.addAll(getPrefixedBuiltInNames("swrlb"));
-        relations.addAll(getPrefixedBuiltInNames("swrlm"));
-        relations.addAll(getPrefixedBuiltInNames("swrlx"));
+        relations.addAll(getAllValidAntecedentPrefixedNames());
         return relations;
+    }
+
+    /**
+     * Gets all the prefixed operator names defined by SWRLAPI that can be used in the antecedent of a SQWRL query.
+     * See {@link OWLMaster#getAllSWRLAPIPrefixedNames}.
+     * @return A set of Strings corresponding to the prefixed operator names, excluding those with prefix "sqwrl:".
+     */
+    private static Set<String> getAllValidAntecedentPrefixedNames() {
+        return getAllSWRLAPIPrefixedNames().stream().filter(name -> !Objects.equals(name.split(":")[0], "sqwrl"))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Gets all the prefixed operator names defined by
+     * <a href="https://github.com/protegeproject/swrlapi/wiki/SWRLAPIBuiltInLibraries">SWRLAPI</a>.
+     * @return A set of Strings corresponding to the prefixed operator names.
+     */
+    private static Set<String> getAllSWRLAPIPrefixedNames() {
+        SWRLBuiltInLibraryManager manager = new SWRLBuiltInLibraryManager();
+        return manager.getSWRLBuiltInIRIs().stream().map(x -> manager.swrlBuiltInIRI2PrefixedName(x).orElse(""))
+                .collect(Collectors.toSet());
     }
 
     /**
      * @param prefix The built-in prefix. E.g: 'swrlb', 'sqwrl', etc.
      * @return The set of all (prefixed) names of the built-ins associated with the given prefix.
      */
-    public static Set<String> getPrefixedBuiltInNames(String prefix) {
+    public static SortedSet<String> getPrefixedBuiltInNames(String prefix) {
         try {
             Class<?> library = Class.forName("org.swrlapi.builtins." + prefix + ".SWRLBuiltInLibraryImpl");
             if (AbstractSWRLBuiltInLibrary.class.isAssignableFrom(library)) {
                 Set<String> names = ((AbstractSWRLBuiltInLibrary) library.getConstructor().newInstance()).getBuiltInNames();
-                return Helper.map(names, x -> prefix + ":" + x);
+                return Helper.mapSorted(names, x -> prefix + ":" + x, String.CASE_INSENSITIVE_ORDER);
             }
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException ex) {
             ex.printStackTrace(System.err);
         }
-        return new HashSet<>();
+        return new TreeSet<>();
     }
 
     /**
