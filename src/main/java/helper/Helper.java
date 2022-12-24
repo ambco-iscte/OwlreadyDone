@@ -1,5 +1,7 @@
 package helper;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -52,5 +54,22 @@ public class Helper {
         TreeSet<T> tree = new TreeSet<>(comparator);
         tree.addAll(collection);
         return tree;
+    }
+
+    /**
+     * Gets the value of a given field on an instance of the defining objects, and casts it to a specified type.
+     * @param field The field
+     * @param obj The object defining the field. Null, for static fields.
+     * @param type The class to cast the value of the field to.
+     * @param <T> A generic type.
+     * @return The value of the given field, on the defining object, cast to type T.
+     */
+    public static <T> T getFieldValue(Field field, Object obj, Class<T> type) {
+        try {
+            return type.cast(field.get(obj));
+        } catch (IllegalAccessException ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 }

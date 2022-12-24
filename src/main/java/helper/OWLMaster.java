@@ -3,6 +3,7 @@ package helper;
 import ordering.OntologyEntityComparator;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
+import org.semarglproject.vocab.OWL;
 import org.swrlapi.builtins.AbstractSWRLBuiltInLibrary;
 import org.swrlapi.builtins.SWRLBuiltInLibraryManager;
 import org.swrlapi.factory.SWRLAPIFactory;
@@ -29,6 +30,15 @@ public class OWLMaster {
 
     private static final Map<String, OWLOntology> ontologies = new HashMap<>();
     private static final Map<OWLOntology, SQWRLQueryEngine> queryEngines = new HashMap<>();
+    private static final Set<String> swrlApiPrefixes = getAllSWRLAPIPrefixedNames(); // Pre-built for optimization.
+    private static final Set<IRI> owlVocabularyIRIs; // IRIs of OWL vocabulary-reserved classes, properties, etc.
+
+    static { // Initialise list of OWL vocabulary-reserved IRIs from org.semarglproject.vocab.OWL static attributes.
+        owlVocabularyIRIs = Arrays.stream(OWL.class.getDeclaredFields())
+                .filter(x -> x.getType().equals(String.class))
+                .map(x -> IRI.create(Objects.requireNonNull(Helper.getFieldValue(x, null, String.class))))
+                .collect(Collectors.toSet());
+    }
 
     /**
      * Deletes a mapping from the stored ontology map.
@@ -150,13 +160,7 @@ public class OWLMaster {
     private static SortedSet<String> getOntologyClassNames(OWLOntology ontology) {
         if (ontology == null)
             return null;
-        SortedSet<String> classes = getOrderedEntityNames(ontology.getClassesInSignature());
-
-        // TODO: this a quick fix. Tackle the underlying problem: getEntityReadableName potentially removes prefixes?
-        classes.remove("Thing");
-        classes.add("owl:Thing");
-
-        return classes;
+        return getOrderedEntityNames(ontology.getClassesInSignature());
     }
 
     /**
@@ -192,7 +196,12 @@ public class OWLMaster {
      * @return A {@link SortedSet sorted set} of the human-readable names of all the OWL entities in the collection.
      */
     private static SortedSet<String> getOrderedEntityNames(Collection<? extends OWLEntity> collection) {
-        return Helper.mapSorted(collection, OWLMaster::getEntityReadableName, String.CASE_INSENSITIVE_ORDER);
+        return Helper.mapSorted(collection, x -> {
+            String readableName = getEntityReadableName(x);
+            if (owlVocabularyIRIs != null && owlVocabularyIRIs.contains(x.getIRI()))
+                readableName = "owl:" + readableName;
+            return readableName;
+        }, String.CASE_INSENSITIVE_ORDER);
     }
 
     /**
@@ -216,7 +225,7 @@ public class OWLMaster {
      * @return A set of Strings corresponding to the prefixed operator names, excluding those with prefix "sqwrl:".
      */
     private static Set<String> getAllValidAntecedentPrefixedNames() {
-        return getAllSWRLAPIPrefixedNames().stream().filter(name -> !Objects.equals(name.split(":")[0], "sqwrl"))
+        return swrlApiPrefixes.stream().filter(name -> !Objects.equals(name.split(":")[0], "sqwrl"))
                 .collect(Collectors.toSet());
     }
 
