@@ -29,7 +29,7 @@ even for users who lack explicit knowledge about the structure of OWL knowledge 
 Before attempting to install or run our application, we recommend you familiarise yourself with [Docker Containers](https://www.docker.com/resources/what-container/).
 
 ### Installation
-1. Download (pull) the image Docker image from [our Docker Hub repository](https://hub.docker.com/r/ambco/owlreadydone) and create a container for it;
+1. Download (pull) the  image from [our Docker Hub repository](https://hub.docker.com/r/ambco/owlreadydone) and create a container for it;
 2. After running the container, access the app by going to `localhost:8080/OwlreadyDone` (replace 8080 with the port you configured when you ran the container) on your browser.
 
 ### Usage
