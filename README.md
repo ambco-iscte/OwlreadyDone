@@ -1,6 +1,7 @@
-![header](resources/header.png)
+![header](resources/header-purple.png)
 
 ![who_are_we](resources/who_are_we.png)
+\
 We are a group of Computer Engineering master's students at Iscte-IUL.
 - Afonso Caniço
 - Afonso Sampaio
@@ -11,10 +12,11 @@ This project was developed as part of our **Software Design and Architecture** c
 - **Professor**: [Vitor Manuel Basto-Fernandes](https://ciencia.iscte-iul.pt/authors/vitor-manuel-basto-fernandes/cv)
 - **University**: [Iscte - Instituto Universitário de Lisboa](https://www.iscte-iul.pt/)
 - **Programme**: Master's of Science (MSc) in Computer Engineering
-- **School year**: 2022/23
+- **School year**: 2022/2023
 
 \
 ![what_is_this](resources/what_is_this.png)
+\
 The aim of **owl**ready.done is to provide a simple, intuitive way for end users to interact with
 web ontologies, namely those compliant with the Web Ontology Language framework, OWL.
 
@@ -23,18 +25,34 @@ even for users who lack explicit knowledge about the structure of OWL knowledge 
 
 \
 ![how_to_use](resources/how_to_use.png)
+\
 You merely need to have your ontology file(s), and our intuitive interface will guide you through the steps of 
 interacting with it through the power of SQWRL queries (a fancy name for something that extracts knowledge from the 
 rules defined in your ontology.)
 
 \
 ![for_devs](resources/for_devs.png)
+\
 This project is written in Java, and compiled using OpenJDK version 18.
 
 The project uses the following libraries:
 - [OWLAPI](https://github.com/owlcs/owlapi)
-- [SWRLAPI ](https://github.com/protegeproject/swrlapi)
+- [SWRLAPI](https://github.com/protegeproject/swrlapi)
 
 You can run the project locally by downloading this repository and setting up the project in your IDE of choice.
-When developing the project, Apache Tomcat 10.1.1 was used to run the web application. We cannot guarantee that there 
-won't be any issues when trying to run the project using another hosting solution.
+When developing the project, Apache Tomcat 10.1.1 was used to run the web application.
+
+\
+![for_iscte_students](resources/for-iscte-students.png)
+\
+Hello, potential curious Iscte-IUL students! You might've come here looking for some help on your Software Design & 
+Architecture class. If so, you're in luck! We're totally okay with you using our software or taking inspiration from
+our source code when developing your project. The only thing we ask if you do so is that you cite
+our work in your report using the following citation (APA format):
+> Caniço, A., Sampaio, A., Ferreira, G., Correia, S. (January 2023). 
+*OwlReadyDone: Java web application for the interrogation and visualisation of OWL ontologies.* [Computer software] 
+> Retrieved `date when you accessed this repository` from https://github.com/ambco-iscte/OwlreadyDone.
+
+(Or don't. We can't tell you what to do.)
+
+P.S.: This applies to anyone else too. And thanks for being interested in our project! :)

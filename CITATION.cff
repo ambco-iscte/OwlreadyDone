@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software or its source code in your work, we'd love it if you cited us as below!"
+authors:
+- family-names: "Caniço"
+  given-names: "Afonso"
+- family-names: "Sampaio"
+  given-names: "Afonso"
+- family-names: "Ferreira"
+  given-names: "Gustavo"
+- family-names: "Correia"
+  given-names: "Samuel"
+title: "OwlReadyDone: Java web application for the interrogation and visualisation of OWL ontologies"
+version: 1.0.0
+date-released: 2023-01
+url: "https://github.com/ambco-iscte/OwlreadyDone"

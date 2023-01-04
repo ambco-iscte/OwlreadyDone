@@ -1,13 +1,11 @@
 import helper.DirectoryHelper;
 import helper.OWLMaster;
-
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.swrlapi.sqwrl.SQWRLResult;
 
 import java.io.BufferedWriter;
@@ -15,8 +13,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 
 /**
  * @author Afonso Caniço
