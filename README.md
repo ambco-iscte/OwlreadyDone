@@ -26,6 +26,13 @@ even for users who lack explicit knowledge about the structure of OWL knowledge 
 \
 ![how_to_use](resources/how_to_use.png)
 \
+Before attempting to install or run our application, we recommend you familiarise yourself with [Docker Containers](https://www.docker.com/resources/what-container/).
+
+### Installation
+1. Download (pull) the image Docker image from [our Docker Hub repository](https://hub.docker.com/r/ambco/owlreadydone) and create a container for it;
+2. After running the container, access the app by going to `localhost:8080/OwlreadyDone` (replace 8080 with the port you configured when you ran the container) on your browser.
+
+### Usage
 You merely need to have your ontology file(s), and our intuitive interface will guide you through the steps of 
 interacting with it through the power of SQWRL queries (a fancy name for something that extracts knowledge from the 
 rules defined in your ontology.)
