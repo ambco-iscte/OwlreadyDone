@@ -31,7 +31,7 @@ even for users who lack explicit knowledge about the structure of OWL knowledge 
 2. The project stores query results in a GitHub repository for later accessing. As such, we need to create a file to hold the parameters to identify this repository and allow access. Create a new `config.properties` file at `src/main/webapp/WEB-INF`. This file follows the usual Java `Properties` file structure and holds the configuration parameters of the server:
    1. `GITHUB_AUTH_TOKEN` - Your GitHub authorization token;
    2. `GITHUB_API_URL` - The GitHub API link to your repository;
-   3. `WEB_VOWL_URL` - `http://vowl.visualdataweb.org/webvowl-old/webvowl-old.html#iri=https://github.com/<your_GitHub_account>/<repo_name>/blob/main/`. Replace `<your_GitHub_account` and `repo_name` with your GitHub username and repository name, respectively.
+   3. `WEB_VOWL_URL` - `http://vowl.visualdataweb.org/webvowl-old/webvowl-old.html#iri=https://github.com/<your_GitHub_account>/<repo_name>/blob/main/`. Replace `<your_GitHub_account>` and `<repo_name>` with your GitHub username and repository name, respectively.
 3. Package the web application to a WAR file using Maven's `package` goal;
 4. Pass the packaged WAR file to Tomcat and run the application.
 ### Usage
