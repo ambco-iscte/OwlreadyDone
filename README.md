@@ -1,3 +1,4 @@
+\
 ![header](resources/header-purple.png)
 
 ![who_are_we](resources/who_are_we.png)
