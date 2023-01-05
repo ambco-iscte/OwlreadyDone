@@ -26,13 +26,14 @@ even for users who lack explicit knowledge about the structure of OWL knowledge 
 
 \
 ![how_to_use](resources/how_to_use.png)
-\
-Before attempting to install or run our application, we recommend you familiarise yourself with [Docker Containers](https://www.docker.com/resources/what-container/).
-
 ### Installation
-1. Download (pull) the  image from [our Docker Hub repository](https://hub.docker.com/r/ambco/owlreadydone) and create a container for it;
-2. After running the container, access the app by going to `localhost:8080/OwlreadyDone` (replace 8080 with the port you configured when you ran the container) on your browser.
-
+1. Download this GitHub repository and set up the project in your favourite Java IDE;
+2. The project stores query results in a GitHub repository for later accessing. As such, we need to create a file to hold the parameters to identify this repository and allow access. Create a new `config.properties` file at `src/main/webapp/WEB-INF`. This file follows the usual Java `Properties` file structure and holds the configuration parameters of the server:
+   1. `GITHUB_AUTH_TOKEN` - Your GitHub authorization token;
+   2. `GITHUB_API_URL` - The GitHub API link to your repository;
+   3. `WEB_VOWL_URL` - `http://vowl.visualdataweb.org/webvowl-old/webvowl-old.html#iri=https://github.com/<your_GitHub_account>/<repo_name>/blob/main/`. Replace `<your_GitHub_account` and `repo_name` with your GitHub username and repository name, respectively.
+3. Package the web application to a WAR file using Maven's `package` goal;
+4. Pass the packaged WAR file to Tomcat and run the application.
 ### Usage
 You merely need to have your ontology file(s), and our intuitive interface will guide you through the steps of 
 interacting with it through the power of SQWRL queries (a fancy name for something that extracts knowledge from the 

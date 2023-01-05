@@ -14,7 +14,7 @@ RUN java -version
 
 # Copy the deployed WAR file to Tomcat's webapps folder.
 WORKDIR /opt/tomcat/webapps
-COPY OwlreadyDone.war .
+COPY target/OwlreadyDone.war .
 
 # Expose the 8080 port to clients.
 EXPOSE 8080
