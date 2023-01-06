@@ -42,6 +42,8 @@ rules defined in your ontology.)
 \
 ![for_devs](resources/for_devs.png)
 \
+If you're interested in **owl**ready.done for its API, check out the documentation [here](https://ambco-iscte.github.io/OwlreadyDone/).
+
 This project is written in Java, and compiled using OpenJDK version 18.
 
 The project uses the following libraries:
