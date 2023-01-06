@@ -71,7 +71,6 @@ public class SubmitToGitHub {
         var encodedContent = encodeFileToBase64(f);
         var createMap = Map.of("message", "New file added", "content", encodedContent);
         String filepath = "/contents/" + f.getName();
-        //System.out.println(filepath);
         var requestBody = objectMapper.writeValueAsString(createMap);
         return put(filepath, requestBody);
     }

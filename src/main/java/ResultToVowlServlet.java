@@ -1,5 +1,4 @@
-import helper.DirectoryHelper;
-
+import configuration.Configuration;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,10 +10,13 @@ import org.swrlapi.sqwrl.SQWRLResult;
 
 import java.io.File;
 import java.io.IOException;
+
 import static helper.OWLOntologyCreator.resultToOntology;
 import static helper.SubmitToGitHub.createFile;
-import configuration.Configuration;
 
+/**
+ * Servlet for handling the redirect to WebVOWL's page for visualisation of the results of a SQWRL query.
+ */
 @WebServlet("/resultToVowlServlet")
 @MultipartConfig
 public class ResultToVowlServlet extends HttpServlet {
@@ -55,7 +57,7 @@ public class ResultToVowlServlet extends HttpServlet {
             req.getSession().setAttribute("errorMessage", "There was an error visualizing your query!");
             resp.sendRedirect(req.getContextPath() + "/result.jsp");
             e.printStackTrace();
-        } catch (ClassNotFoundException | InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

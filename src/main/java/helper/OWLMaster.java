@@ -28,9 +28,24 @@ import java.util.stream.Collectors;
  */
 public class OWLMaster {
 
+    /**
+     * Pairings of ontologies and the paths to their knowledge bases.
+     */
     private static final Map<String, OWLOntology> ontologies = new HashMap<>();
+
+    /**
+     * Previously created query engines.
+     */
     private static final Map<OWLOntology, SQWRLQueryEngine> queryEngines = new HashMap<>();
+
+    /**
+     * Set of all SWRLAPI built-in prefixes.
+     */
     private static final Set<String> swrlApiPrefixes = getAllSWRLAPIPrefixedNames(); // Pre-built for optimization.
+
+    /**
+     * Set of OWL reserved vocabulary IRIs.
+     */
     private static final Set<IRI> owlVocabularyIRIs; // IRIs of OWL vocabulary-reserved classes, properties, etc.
 
     static { // Initialise list of OWL vocabulary-reserved IRIs from org.semarglproject.vocab.OWL static attributes.
@@ -80,6 +95,7 @@ public class OWLMaster {
     }
 
     /**
+     * Gets the signature of an ontology, i.e. the set of all entities in that ontology.
      * @param ontology The OWL ontology you want to get the signature from.
      * @return The signature (set of entities) of the given ontology.
      */
@@ -102,6 +118,8 @@ public class OWLMaster {
     }
 
     /**
+     * Converts an ontology's ID to a human-readable ontology name.
+     * @param entity An OWL entity (class, individual, property, etc.)
      * @return The readable name of the OWL entity.
      */
     private static String getEntityReadableName(OWLEntity entity) {
@@ -114,6 +132,7 @@ public class OWLMaster {
     }
 
     /**
+     * Gets the set of the names of all OWL Classes in the ontology in alphabetical order.
      * @param kbPath The path to the ontology's knowledge base.
      * @return A set of strings corresponding to the names of every OWLClass in the given ontology's signature.
      */
@@ -122,6 +141,7 @@ public class OWLMaster {
     }
 
     /**
+     * Gets the set of the names of all OWL Object Properties in the ontology in alphabetical order.
      * @param kbPath The path to the ontology's knowledge base.
      * @return A set of strings corresponding to the names of every OWL Object Property in the given ontology's signature.
      */
@@ -130,6 +150,7 @@ public class OWLMaster {
     }
 
     /**
+     * Gets the set of the names of all OWL Data Properties in the ontology in alphabetical order.
      * @param kbPath The path to the ontology's knowledge base.
      * @return A set of strings corresponding to the names of every OWL Data Property in the given ontology's signature.
      */
@@ -138,6 +159,7 @@ public class OWLMaster {
     }
 
     /**
+     * Gets the set of the names of all OWL relations (object and data properties, built-ins, etc.) in the ontology in alphabetical order.
      * @param kbPath The path to the ontology's knowledge base.
      * @return A set of strings corresponding to the names of every relation (object/data property, built-in, etc.)
      * in the given ontology.
@@ -147,6 +169,7 @@ public class OWLMaster {
     }
 
     /**
+     * Gets the set of the names of all OWL Inidividuals in the ontology in alphabetical order.
      * @param kbPath The path to the ontology's knowledge base.
      * @return A set of strings corresponding to the names of every OWL Individual in the given ontology's signature.
      */
@@ -155,6 +178,8 @@ public class OWLMaster {
     }
 
     /**
+     * Gets the set of the names of all OWL Classes in the ontology in alphabetical order.
+     * @param ontology An OWL ontology.
      * @return A set of strings corresponding to the names of every OWLClass in the given ontology's signature.
      */
     private static SortedSet<String> getOntologyClassNames(OWLOntology ontology) {
@@ -164,6 +189,8 @@ public class OWLMaster {
     }
 
     /**
+     * Gets the set of the names of all OWL Data Properties in the ontology in alphabetical order.
+     * @param ontology An OWL ontology.
      * @return A set of strings corresponding to the names of every OWL Data Property in the given ontology's signature.
      */
     private static SortedSet<String> getOntologyDataPropertyNames(OWLOntology ontology) {
@@ -173,6 +200,8 @@ public class OWLMaster {
     }
 
     /**
+     * Gets the set of the names of all OWL Object Properties in the ontology in alphabetical order.
+     * @param ontology An OWL ontology.
      * @return A set of strings corresponding to the names of every OWL Object Property in the given ontology's signature.
      */
     private static SortedSet<String> getOntologyObjectPropertyNames(OWLOntology ontology) {
@@ -182,6 +211,8 @@ public class OWLMaster {
     }
 
     /**
+     * Gets the set of the names of all OWL Individuals in the ontology in alphabetical order.
+     * @param ontology An OWL ontology.
      * @return A set of strings corresponding to the names of every OWL Individual in the given ontology's signature.
      */
     private static SortedSet<String> getOntologyIndividualNames(OWLOntology ontology) {
@@ -205,6 +236,8 @@ public class OWLMaster {
     }
 
     /**
+     * Gets the set of the names of all OWL relations (object and data properties, built-ins, etc.) in the ontology in alphabetical order.
+     * @param ontology An OWL ontology.
      * @return A set of strings corresponding to the names of every relation (object/data property, built-in, etc.)
      * in the given ontology.
      */
@@ -221,7 +254,7 @@ public class OWLMaster {
 
     /**
      * Gets all the prefixed operator names defined by SWRLAPI that can be used in the antecedent of a SQWRL query.
-     * See {@link OWLMaster#getAllSWRLAPIPrefixedNames}.
+     * @see OWLMaster#getAllSWRLAPIPrefixedNames
      * @return A set of Strings corresponding to the prefixed operator names, excluding those with prefix "sqwrl:".
      */
     private static Set<String> getAllValidAntecedentPrefixedNames() {
@@ -241,6 +274,7 @@ public class OWLMaster {
     }
 
     /**
+     * Gets every SWRLAPI built-in with the specified prefix.
      * @param prefix The built-in prefix. E.g: 'swrlb', 'sqwrl', etc.
      * @return The set of all (prefixed) names of the built-ins associated with the given prefix.
      */
@@ -298,6 +332,7 @@ public class OWLMaster {
 
     /**
      * Is the specified file a valid OWL document?
+     * @param file The file to check.
      * @return True if the file is a valid, well-formed OWL file; False, otherwise.
      */
     public static boolean isValidOntologyFile(File file) {
@@ -305,6 +340,8 @@ public class OWLMaster {
     }
 
     /**
+     * Gets the encoded ID of an OWL ontology.
+     * @param ontology An OWL ontology instance.
      * @return A filename-ready version of the given ontology's ID.
      */
     public static String getEncodedOntologyID(OWLOntology ontology) {

@@ -1,7 +1,6 @@
 package helper;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -13,6 +12,8 @@ public class Helper {
 
     /**
      * Converts a collection of Strings to a JS/HTML-valid list of strings.
+     * @param collection A collection of strings.
+     * @return A string, compatible with HTML/JS, representing the original collection.
      */
     public static String toJSStringList(Collection<String> collection) {
         return "[" + collection.stream().collect(Collectors.joining("','", "'", "'")) + "]";
@@ -24,6 +25,8 @@ public class Helper {
      * @param mapper a <a href="package-summary.html#NonInterference">non-interfering</a>,
      *               <a href="package-summary.html#Statelessness">stateless</a>
      *               function to apply to each element.
+     * @param <T> The type of the original elements in the collection.
+     * @param <R> The target type of the elements to include in the set.
      * @return A new set given by applying the specified mapper function to the elements of the set.
      */
     public static <T, R> Set<R> map(Collection<T> collection, Function<? super T, ? extends R> mapper) {
@@ -37,6 +40,8 @@ public class Helper {
      *               <a href="package-summary.html#Statelessness">stateless</a>
      *               function to apply to each element.
      * @param comparator A comparator of elements of type R.
+     * @param <T> The type of the original elements in the collection.
+     * @param <R> The target type of the elements to include in the sorted set.
      * @return A sorted set containing the sorted, unique elements of the original collection.
      */
     public static <T, R> SortedSet<R> mapSorted(Collection<T> collection, Function<? super T, ? extends R> mapper, Comparator<R> comparator) {

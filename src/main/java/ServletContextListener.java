@@ -4,6 +4,7 @@ import jakarta.servlet.ServletContextEvent;
 import java.io.IOException;
 
 /**
+ * Listens to the initialisation and destruction of servlet contexts. Used for initialising configuration parameters.
  * @author Afonso Caniço
  * @author Afonso Sampaio
  * @author Gustavo Ferreira
@@ -11,6 +12,9 @@ import java.io.IOException;
  */
 public class ServletContextListener implements jakarta.servlet.ServletContextListener {
 
+    /**
+     * The path, relative to the web app's folder, to the server configuration file.
+     */
     private static final String CONFIGURATION_FILE = "/WEB-INF/config.properties";
 
     public void contextInitialized(ServletContextEvent e) {

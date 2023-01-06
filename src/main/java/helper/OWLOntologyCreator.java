@@ -3,7 +3,6 @@ package helper;
 import jakarta.servlet.ServletContext;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
-import org.swrlapi.parser.SWRLParseException;
 import org.swrlapi.sqwrl.SQWRLResult;
 import org.swrlapi.sqwrl.exceptions.SQWRLException;
 import org.swrlapi.sqwrl.values.*;
@@ -25,11 +24,10 @@ public class OWLOntologyCreator {
      * @param context Servlet context, used to obtain the path where results are to be stored.
      * @param ontoKbPath The path to the original ontology's knowledge base file.
      * @return The file containing the query result with additional relevant information.
-     * @throws OWLOntologyCreationException
-     * @throws ClassNotFoundException
+     * @throws OWLOntologyCreationException If there was an error when creating the ontology.
      */
     public static File resultToOntology(SQWRLResult result, ServletContext context, String ontoKbPath)
-            throws OWLOntologyCreationException, ClassNotFoundException {
+            throws OWLOntologyCreationException {
 
         OWLOntology originalOntology = OWLMaster.getOntologyFromFile(ontoKbPath);
         if (originalOntology == null)
@@ -74,7 +72,7 @@ public class OWLOntologyCreator {
                 addResultsToOntology(result, manager, factory, originalOntology, ontology, pm);
             }
 
-            File file = null;
+            File file;
             try {
                 Timestamp ts = new Timestamp(System.currentTimeMillis());
                 file = new File(DirectoryHelper.getDirectory(context, "result-dir")
@@ -121,7 +119,7 @@ public class OWLOntologyCreator {
      * @param originalOntology The original ontology's knowledge base.
      * @param ontology The new ontology to which information is added.
      * @param pm Prefix manager that supplies correct prefixes when creating elements of OWL ontologies.
-     * @throws SQWRLException
+     * @throws SQWRLException If there were errors when accessing the SQWRL Result.
      */
     private static void addResultsToOntology(SQWRLResult result, OWLOntologyManager manager, OWLDataFactory factory,
                                              OWLOntology originalOntology, OWLOntology ontology, DefaultPrefixManager pm) throws SQWRLException {
@@ -143,7 +141,7 @@ public class OWLOntologyCreator {
                     // com cada pesquisa destas demora mais tempo a criação da ontologia final
                     getAndAddDataProperties(manager, factory, originalOntology, ontology, pm, individual, xindividual);
                     getAndAddObjectProperties(manager, factory, originalOntology, ontology, pm, individual, xindividual);
-                } catch (SQWRLException | SWRLParseException | OWLRuntimeException e) {
+                } catch (SQWRLException | OWLRuntimeException e) {
                     e.printStackTrace();
                 }
 
@@ -164,11 +162,7 @@ public class OWLOntologyCreator {
                 System.out.println(classr);
                 OWLClass xclassr = factory.getOWLClass(classr.toString(), pm);
                 manager.addAxiom(ontology, factory.getOWLDeclarationAxiom(xclassr));
-                try {
-                    getAndAddSuperclassesAndSubclasses(manager, factory, originalOntology, ontology, pm, classr, xclassr);
-                } catch (SWRLParseException e) {
-                    e.printStackTrace();
-                }
+                getAndAddSuperclassesAndSubclasses(manager, factory, originalOntology, ontology, pm, classr, xclassr);
             }
         }
     }
@@ -182,12 +176,11 @@ public class OWLOntologyCreator {
      * @param pm Prefix manager that supplies correct prefixes when creating elements of OWL ontologies.
      * @param individual Individual result value from the query result.
      * @param xindividual Named individual object corresponding to the individual in the results.
-     * @throws SWRLParseException
-     * @throws SQWRLException
+     * @throws SQWRLException If there was an error when getting the OWL Classes from the result.
      */
     private static void getAndAddClasses(OWLOntologyManager manager, OWLDataFactory factory, OWLOntology originalOntology,
                                          OWLOntology ontology, DefaultPrefixManager pm, SQWRLNamedIndividualResultValue individual,
-                                         OWLNamedIndividual xindividual) throws SWRLParseException, SQWRLException {
+                                         OWLNamedIndividual xindividual) throws SQWRLException {
 
         SQWRLResult classResults = OWLMaster.query(originalOntology, "abox:caa(?x, " + individual + ") -> sqwrl:select(?x)");
         while (classResults.next()) {
@@ -212,12 +205,11 @@ public class OWLOntologyCreator {
      * @param pm Prefix manager that supplies correct prefixes when creating elements of OWL ontologies.
      * @param individual Individual result value from the query result.
      * @param xindividual Named individual object corresponding to the individual in the results.
-     * @throws SWRLParseException
-     * @throws SQWRLException
+     * @throws SQWRLException If there was an error when getting the OWL Data Properties from the result.
      */
     private static void getAndAddDataProperties(OWLOntologyManager manager, OWLDataFactory factory, OWLOntology originalOntology,
                                                 OWLOntology ontology, DefaultPrefixManager pm, SQWRLNamedIndividualResultValue individual,
-                                                OWLNamedIndividual xindividual) throws SWRLParseException, SQWRLException {
+                                                OWLNamedIndividual xindividual) throws SQWRLException {
         SQWRLResult dataPropertyResults = OWLMaster.query(originalOntology, "abox:dpaa(" + individual + ", ?p, ?v) -> sqwrl:select(?p, ?v)");
 
         while (dataPropertyResults.next()) {
@@ -241,13 +233,12 @@ public class OWLOntologyCreator {
      * @param pm Prefix manager that supplies correct prefixes when creating elements of OWL ontologies.
      * @param individual Individual result value from the query result.
      * @param xindividual Named individual object corresponding to the individual in the results.
-     * @throws SWRLParseException
-     * @throws SQWRLException
+     * @throws SQWRLException If there was an error when getting the OWL Object Properties from the result.
      */
     //esta função pode ser problemática quando adiciona referências a objetos que não estão declarados por si só.
     private static void getAndAddObjectProperties(OWLOntologyManager manager, OWLDataFactory factory, OWLOntology originalOntology,
                                                   OWLOntology ontology, DefaultPrefixManager pm, SQWRLNamedIndividualResultValue individual,
-                                                  OWLNamedIndividual xindividual) throws SWRLParseException, SQWRLException {
+                                                  OWLNamedIndividual xindividual) throws SQWRLException {
         SQWRLResult objectPropertyResults = OWLMaster.query(originalOntology, "abox:opaa(" + individual + ", ?p, ?o) -> sqwrl:select(?p, ?o)");
 
         while (objectPropertyResults.next()) {
@@ -288,12 +279,11 @@ public class OWLOntologyCreator {
      * @param pm Prefix manager that supplies correct prefixes when creating elements of OWL ontologies.
      * @param classr Class result value from the query result.
      * @param xclassr Class object corresponding to the class in the results.
-     * @throws SWRLParseException
-     * @throws SQWRLException
+     * @throws SQWRLException If there was an error when getting the OWL superclasses from the result.
      */
     private static void getAndAddSuperclassesAndSubclasses(OWLOntologyManager manager, OWLDataFactory factory, OWLOntology originalOntology,
                                                            OWLOntology ontology, DefaultPrefixManager pm, SQWRLClassResultValue classr,
-                                                           OWLClass xclassr) throws SWRLParseException, SQWRLException {
+                                                           OWLClass xclassr) throws SQWRLException {
         String[] args = {"?x, " + classr, classr + ", ?x",};
         for (int i = 0; i < args.length; i++) {
             SQWRLResult superclassResults = OWLMaster.query(originalOntology, "tbox:sca(" + args[i] + ") -> sqwrl:select(?x)");

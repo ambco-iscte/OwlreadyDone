@@ -38,6 +38,7 @@ public class Configuration {
     }
 
     /**
+     * Gets the API URL of the GitHub repository used to store query result files.
      * @return The base GitHub repository URL, to be used in {@link helper.SubmitToGitHub}.
      */
     public static String getGitHubAPIURL() {
@@ -45,6 +46,8 @@ public class Configuration {
     }
 
     /**
+     * Gets the GitHub authorization token for the repository used to story query result files.
+     * @see Configuration#getGitHubAPIURL
      * @return The GitHub authorization token, to be used in {@link helper.SubmitToGitHub}.
      */
     public static String getGitHubAuthorizationToken() {
@@ -52,6 +55,7 @@ public class Configuration {
     }
 
     /**
+     * Gets the WebVOWL URL for visualising query results.
      * @return The WebVowl website URL, to be used in {@link ResultToVowlServlet}.
      */
     public static String getWebVowlURL() {

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 /**
+ * Java servlet that receives a SQWRL query string from the user and redirects to the results page for that query.
  * @author Afonso Caniço
  * @author Afonso Sampaio
  * @author Gustavo Ferreira
@@ -85,6 +86,10 @@ public class QueryDatabaseServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Deletes the contents of a text file.
+     * @param file The file to clear.
+     */
     private void clearFileContent(File file) {
         if (file == null)
             return;

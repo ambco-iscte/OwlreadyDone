@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
  */
 public class DirectoryHelper {
 
+    /**
+     * A list of files which have been marked for deletion.
+     */
     private static final List<File> markedForDeletion = new ArrayList<>();
 
     /**
@@ -33,6 +36,7 @@ public class DirectoryHelper {
 
     /**
      * Is the specified file scheduled to be deleted when the virtual machine closes?
+     * @param file The file to check.
      * @return True if the file has been marked for deletion on exit; False, otherwise.
      */
     public static boolean isDeleteOnExit(File file) {
@@ -40,6 +44,7 @@ public class DirectoryHelper {
     }
 
     /**
+     * Gets the given context's directory specified in an init parameter.
      * @param context The current servlet context.
      * @param dirInitParameter The init parameter for the directory, as specified in web.xml.
      * @return The full path of the directory given by the init parameter, as defined in web.xml
@@ -55,6 +60,7 @@ public class DirectoryHelper {
     }
 
     /**
+     * Gets the name of the file located at a given path.
      * @param path The path to the file.
      * @return The name of the file stored at the given path.
      */
@@ -75,6 +81,7 @@ public class DirectoryHelper {
     }
 
     /**
+     * Gets a sorted (by last modification timestamp) set of all files in a given directory.
      * @param context The current servlet context.
      * @param dirInitParameter The init parameter for the directory, as specified in web.xml.
      * @return A set containing all non-marked (see {@link #deleteOnExit DirectoryHelper.deleteOnExit}) files in the given directory.
@@ -102,6 +109,7 @@ public class DirectoryHelper {
     }
 
     /**
+     * Finds the oldest file in the given context's directory.
      * @param context The current servlet context.
      * @param dirInitParameter The init parameter for the directory, as specified in web.xml.
      * @return The file with the oldest "last modified" timestamp in the given context's directory, if
@@ -160,6 +168,8 @@ public class DirectoryHelper {
 
     /**
      * Is the specified File the given ontology's query history file?
+     * @param ontology An OWL ontology.
+     * @param file A file.
      * @return True if the filename is equal to the ontology's ID; False, otherwise.
      */
     private static boolean isMatchingHistoryFile(OWLOntology ontology, File file) {
@@ -169,7 +179,9 @@ public class DirectoryHelper {
     }
 
     /**
+     * Finds the history file of a given ontology, if it is present. Otherwise, creates a history file for that ontology.
      * @param context The current servlet context.
+     * @param ontologyKbPath The path to the ontology's knowledge base.
      * @return The ontology's query history file, if present; Creates the file and returns it, otherwise.
      */
     public static File getMatchingHistoryFile(ServletContext context, String ontologyKbPath) {

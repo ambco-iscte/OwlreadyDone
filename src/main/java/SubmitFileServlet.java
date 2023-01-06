@@ -3,7 +3,10 @@ import helper.OWLMaster;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
@@ -17,6 +20,7 @@ import java.nio.file.Paths;
 import java.util.Set;
 
 /**
+ * Java servlet handling the uploading of ontology files by the user.
  * @author Afonso Caniço
  * @author Afonso Sampaio
  * @author Gustavo Ferreira
@@ -48,6 +52,8 @@ public class SubmitFileServlet extends HttpServlet {
     }
 
     /**
+     * Gets the absolute file path of a given file.
+     * @param file A file.
      * @return The absolute path of the given File instance, if it is non-null; Null, otherwise.
      */
     private String getAbsoluteFilepath(File file) {
@@ -135,6 +141,7 @@ public class SubmitFileServlet extends HttpServlet {
      * Downloads a file from a URL and writes it to the upload folder.
      * @param urlStr The URL where the file is located.
      * @return The File instance corresponding to the file where the downloaded file was written.
+     * @throws IOException If there was an exception reading the file from the link or writing to a local file.
      */
     private File getFileFromURL(String urlStr) throws IOException {
         URL url = new URL(urlStr);
@@ -153,6 +160,7 @@ public class SubmitFileServlet extends HttpServlet {
 
     /**
      * Is the given file a valid OWL file? If not, schedule it for deletion (see {@link DirectoryHelper#deleteOnExit}).
+     * @param file A file.
      * @return The given file, if it is a valid OWL document; Null, otherwise.
      */
     private File validateOrDelete(File file) {
@@ -168,6 +176,7 @@ public class SubmitFileServlet extends HttpServlet {
 
     /**
      * Does the given string constitute a valid URL?
+     * @param url A string of a valid or invalid URL.
      * @return True if the URL is correctly formed; False otherwise.
      */
     private boolean isValidURL(String url) {
